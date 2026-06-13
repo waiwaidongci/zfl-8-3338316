@@ -23,6 +23,7 @@ const server = http.createServer(async (req, res) => {
           "POST /cylinders/:id/actions",
           "POST /cylinders/:id/fills",
           "GET /reports/alerts",
+          "GET /reports/dashboard",
           "GET /customers",
           "POST /customers",
           "GET /customers/:id",

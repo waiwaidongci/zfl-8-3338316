@@ -223,3 +223,102 @@ GET /customers/CU-001/deposits
   }
 }
 ```
+
+## 运营看板端点
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /reports/dashboard | 运营看板汇总统计 |
+
+### 看板统计
+
+基于现有 `cylinders`、`fills` 和 `events` 数据计算，不额外引入数据库。统计计算逻辑拆分在 `store/dashboard.js` 中，与 HTTP 路由层解耦。
+
+**请求参数（可选）：**
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `inspectionDays` | 45 | 即将到检的提前天数阈值 |
+| `longRentDays` | 30 | 长期租借的天数阈值 |
+
+```json
+GET /reports/dashboard
+```
+
+返回结果：
+
+```json
+{
+  "total": 2,
+  "byStatus": {
+    "rented": 2
+  },
+  "byGasType": {
+    "高纯氩": 1,
+    "混合标准气": 1
+  },
+  "inspectionDueSoon": {
+    "count": 2,
+    "thresholdDays": 45,
+    "items": [
+      {
+        "cylinderId": "CY-88001",
+        "gasType": "高纯氩",
+        "due": "2026-07-20",
+        "daysLeft": 36
+      },
+      {
+        "cylinderId": "CY-88002",
+        "gasType": "混合标准气",
+        "due": "2026-06-28",
+        "daysLeft": 14
+      }
+    ]
+  },
+  "longRent": {
+    "count": 2,
+    "thresholdDays": 30,
+    "items": [
+      {
+        "cylinderId": "CY-88001",
+        "gasType": "高纯氩",
+        "customer": "CU-001",
+        "since": "2026-06-13T21:43:54.597Z",
+        "rentDays": 1
+      },
+      {
+        "cylinderId": "CY-88002",
+        "gasType": "混合标准气",
+        "customer": "CU-001",
+        "since": "2026-05-10T10:00:00.000Z",
+        "rentDays": 35
+      }
+    ]
+  },
+  "fills": {
+    "totalFills": 1,
+    "fillsByOperator": {
+      "陈起": 1
+    }
+  },
+  "events": {
+    "inbound": 1,
+    "outbound": 2,
+    "create": 1
+  }
+}
+```
+
+**响应字段说明：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `total` | number | 钢瓶库存总数 |
+| `byStatus` | object | 按状态分组的数量统计，key 为状态名（`in_stock`/`rented`/`returned`/`inspection`/`scrapped`） |
+| `byGasType` | object | 按气体类型分组的数量统计，key 为气体类型名称 |
+| `inspectionDueSoon` | object | 即将到检汇总，含 `count`（数量）、`thresholdDays`（阈值天数）、`items`（明细列表） |
+| `inspectionDueSoon.items[].daysLeft` | number | 距离检验到期的剩余天数，负数表示已逾期 |
+| `longRent` | object | 长期租借汇总，含 `count`（数量）、`thresholdDays`（阈值天数）、`items`（明细列表） |
+| `longRent.items[].rentDays` | number | 已租借天数 |
+| `fills` | object | 充装统计，含 `totalFills`（总充装次数）和 `fillsByOperator`（按操作员分组） |
+| `events` | object | 事件统计，按事件类型分组计数 |
