@@ -3,10 +3,11 @@ import { send } from "./store/common.js";
 import { handleCylinders } from "./routes/cylinders.js";
 import { handleCustomers } from "./routes/customers.js";
 import { handleReports } from "./routes/reports.js";
+import { handleRentalOrders } from "./routes/rentalOrders.js";
 
 const port = Number(process.env.PORT || 3008);
 
-const handlers = [handleCustomers, handleCylinders, handleReports];
+const handlers = [handleCustomers, handleCylinders, handleReports, handleRentalOrders];
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -28,7 +29,11 @@ const server = http.createServer(async (req, res) => {
           "POST /customers",
           "GET /customers/:id",
           "GET /customers/:id/cylinders",
-          "GET /customers/:id/deposits"
+          "GET /customers/:id/deposits",
+          "GET /customers/:id/orders",
+          "GET /rental-orders",
+          "POST /rental-orders",
+          "GET /rental-orders/:id"
         ]
       });
     }
