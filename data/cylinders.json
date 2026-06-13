@@ -5,10 +5,10 @@
       "gasType": "高纯氩",
       "capacity": "40L",
       "inspectionDue": "2026-07-20",
-      "location": "一号仓",
-      "status": "in_stock",
-      "customer": null,
-      "depositStatus": "none",
+      "location": "宁川检测",
+      "status": "rented",
+      "customer": "CU-001",
+      "depositStatus": "paid",
       "fills": [
         {
           "id": "fill-1",
@@ -23,6 +23,12 @@
           "type": "inbound",
           "at": "2026-06-02T08:20:00.000Z",
           "note": "初始入库"
+        },
+        {
+          "id": "evt-1781387034597-a024ac",
+          "type": "outbound",
+          "at": "2026-06-13T21:43:54.597Z",
+          "note": "outbound"
         }
       ]
     },
@@ -33,7 +39,7 @@
       "inspectionDue": "2026-06-28",
       "location": "宁川检测",
       "status": "rented",
-      "customer": "宁川检测",
+      "customer": "CU-001",
       "depositStatus": "paid",
       "fills": [],
       "events": [

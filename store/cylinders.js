@@ -1,0 +1,44 @@
+import { loadJson, saveJson } from "./common.js";
+
+const FILE = "cylinders.json";
+const SEED = {
+  cylinders: [
+    {
+      id: "CY-88001",
+      gasType: "高纯氩",
+      capacity: "40L",
+      inspectionDue: "2026-07-20",
+      location: "一号仓",
+      status: "in_stock",
+      customer: null,
+      depositStatus: "none",
+      fills: [{ id: "fill-1", filledAt: "2026-06-02", pressure: "13.5MPa", operator: "陈起" }],
+      events: [{ id: "evt-1", type: "inbound", at: "2026-06-02T08:20:00.000Z", note: "初始入库" }]
+    },
+    {
+      id: "CY-88002",
+      gasType: "混合标准气",
+      capacity: "8L",
+      inspectionDue: "2026-06-28",
+      location: "宁川检测",
+      status: "rented",
+      customer: "CU-001",
+      depositStatus: "paid",
+      fills: [],
+      events: [{ id: "evt-2", type: "outbound", at: "2026-05-10T10:00:00.000Z", note: "客户租借" }]
+    }
+  ]
+};
+
+export async function loadCylinders() {
+  const db = await loadJson(FILE, SEED);
+  return db.cylinders;
+}
+
+export async function saveCylinders(cylinders) {
+  await saveJson(FILE, { cylinders });
+}
+
+export function findCylinder(cylinders, id) {
+  return cylinders.find((c) => c.id === id) || null;
+}
