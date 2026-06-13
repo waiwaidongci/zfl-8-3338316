@@ -245,7 +245,7 @@ GET /customers/CU-001/deposits
 GET /reports/dashboard
 ```
 
-返回结果：
+返回结果（以下为当前示例数据的响应结构，`daysLeft` 和 `rentDays` 会随运行日期变化）：
 
 ```json
 {
@@ -265,33 +265,26 @@ GET /reports/dashboard
         "cylinderId": "CY-88001",
         "gasType": "高纯氩",
         "due": "2026-07-20",
-        "daysLeft": 36
+        "daysLeft": 37
       },
       {
         "cylinderId": "CY-88002",
         "gasType": "混合标准气",
         "due": "2026-06-28",
-        "daysLeft": 14
+        "daysLeft": 15
       }
     ]
   },
   "longRent": {
-    "count": 2,
+    "count": 1,
     "thresholdDays": 30,
     "items": [
-      {
-        "cylinderId": "CY-88001",
-        "gasType": "高纯氩",
-        "customer": "CU-001",
-        "since": "2026-06-13T21:43:54.597Z",
-        "rentDays": 1
-      },
       {
         "cylinderId": "CY-88002",
         "gasType": "混合标准气",
         "customer": "CU-001",
         "since": "2026-05-10T10:00:00.000Z",
-        "rentDays": 35
+        "rentDays": 34
       }
     ]
   },
@@ -303,8 +296,7 @@ GET /reports/dashboard
   },
   "events": {
     "inbound": 1,
-    "outbound": 2,
-    "create": 1
+    "outbound": 2
   }
 }
 ```
