@@ -15,7 +15,8 @@ npm start
 ├── store/                 # 数据读写层
 │   ├── common.js          # 公共工具（send、body、loadJson、saveJson）
 │   ├── cylinders.js       # 钢瓶数据 CRUD
-│   └── customers.js       # 客户数据 CRUD
+│   ├── customers.js       # 客户数据 CRUD
+│   └── bulkImport.js      # 批量导入校验逻辑
 ├── routes/                # 路由处理层
 │   ├── cylinders.js       # 钢瓶流转路由
 │   ├── customers.js       # 客户档案路由
@@ -31,6 +32,8 @@ npm start
 |------|------|------|
 | GET | /cylinders | 查询钢瓶列表，支持 `?status=` `?gasType=` 筛选 |
 | POST | /cylinders | 新建钢瓶，需传 `id`、`gasType` |
+| POST | /cylinders/bulk/preview | 批量导入预览校验，返回错误摘要 |
+| POST | /cylinders/bulk/confirm | 批量导入确认写入，只写入校验通过的数据 |
 | POST | /cylinders/:id/actions | 钢瓶动作，`type` 可选 `inbound`/`outbound`/`return`/`inspect`/`scrap` |
 | POST | /cylinders/:id/fills | 记录充装 |
 | GET | /reports/alerts | 报警列表，支持 `?inspectionDays=` `?longRentDays=` |

@@ -1,6 +1,7 @@
 import { send, body, makeEvent, genId } from "../store/common.js";
 import { loadCylinders, saveCylinders, findCylinder } from "../store/cylinders.js";
 import { loadCustomers, findCustomer } from "../store/customers.js";
+import { validateCylinderBatch } from "../store/bulkImport.js";
 
 function daysUntil(dateText) {
   return Math.ceil((new Date(dateText).getTime() - Date.now()) / 86400000);
@@ -44,6 +45,45 @@ const transitions = {
 };
 
 export async function handleCylinders(req, res, url) {
+  if (req.method === "POST" && url.pathname === "/cylinders/bulk/preview") {
+    const input = await body(req);
+    if (!Array.isArray(input)) {
+      return send(res, 400, { error: "batch_must_be_array" });
+    }
+    const existingCylinders = await loadCylinders();
+    const result = validateCylinderBatch(input, existingCylinders);
+    return send(res, 200, {
+      totalCount: result.totalCount,
+      validCount: result.validCount,
+      errorCount: result.errorCount,
+      preview: result.valid,
+      errors: result.errors,
+      summary: result.summary
+    });
+  }
+
+  if (req.method === "POST" && url.pathname === "/cylinders/bulk/confirm") {
+    const input = await body(req);
+    if (!Array.isArray(input)) {
+      return send(res, 400, { error: "batch_must_be_array" });
+    }
+    const existingCylinders = await loadCylinders();
+    const result = validateCylinderBatch(input, existingCylinders);
+    if (result.errorCount > 0) {
+      return send(res, 422, {
+        error: "validation_failed",
+        message: "存在未通过校验的数据，请先修正后再确认",
+        summary: result.summary
+      });
+    }
+    const updated = [...existingCylinders, ...result.valid];
+    await saveCylinders(updated);
+    return send(res, 201, {
+      created: result.validCount,
+      cylinders: result.valid
+    });
+  }
+
   if (req.method === "GET" && url.pathname === "/cylinders") {
     const status = url.searchParams.get("status");
     const gasType = url.searchParams.get("gasType");

@@ -18,6 +18,8 @@ const server = http.createServer(async (req, res) => {
         endpoints: [
           "GET /cylinders",
           "POST /cylinders",
+          "POST /cylinders/bulk/preview",
+          "POST /cylinders/bulk/confirm",
           "POST /cylinders/:id/actions",
           "POST /cylinders/:id/fills",
           "GET /reports/alerts",
