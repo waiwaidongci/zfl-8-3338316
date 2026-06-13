@@ -1,27 +1,3 @@
 {
-  "orders": [
-    {
-      "id": "RO-1781392190208-31d09f",
-      "customerId": "CU-001",
-      "customerName": "宁川检测",
-      "cylinderCount": 2,
-      "cylinders": [
-        {
-          "id": "CY-99001",
-          "gasType": "液氮",
-          "capacity": "50L",
-          "depositStatus": "paid"
-        },
-        {
-          "id": "CY-99002",
-          "gasType": "液氧",
-          "capacity": "40L",
-          "depositStatus": "unpaid"
-        }
-      ],
-      "note": "6月月度租借",
-      "status": "completed",
-      "createdAt": "2026-06-13T23:09:50.208Z"
-    }
-  ]
+  "orders": []
 }
