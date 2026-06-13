@@ -69,18 +69,18 @@ export async function handleCylinders(req, res, url) {
     }
     const existingCylinders = await loadCylinders();
     const result = validateCylinderBatch(input, existingCylinders);
-    if (result.errorCount > 0) {
-      return send(res, 422, {
-        error: "validation_failed",
-        message: "存在未通过校验的数据，请先修正后再确认",
-        summary: result.summary
-      });
-    }
     const updated = [...existingCylinders, ...result.valid];
-    await saveCylinders(updated);
-    return send(res, 201, {
+    if (result.validCount > 0) {
+      await saveCylinders(updated);
+    }
+    const statusCode = result.validCount > 0 ? 201 : 422;
+    return send(res, statusCode, {
+      totalCount: result.totalCount,
       created: result.validCount,
-      cylinders: result.valid
+      rejected: result.errorCount,
+      cylinders: result.valid,
+      errors: result.errors,
+      summary: result.summary
     });
   }
 
