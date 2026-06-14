@@ -365,41 +365,14 @@ POST /inspection-tasks/generate
 
 ```json
 {
-  "generated": 2,
-  "skipped": 0,
+  "generated": 0,
+  "skipped": 2,
   "breakdown": {
-    "byStatus": 0,
+    "byStatus": 2,
     "byExistingTask": 0,
     "byDueDate": 0
   },
-  "tasks": [
-    {
-      "id": "IT-1718389234567-a1b2c3",
-      "cylinderId": "CY-88001",
-      "gasType": "高纯氩",
-      "capacity": "40L",
-      "inspectionDue": "2026-07-20",
-      "status": "pending",
-      "result": null,
-      "createdAt": "2026-06-14T10:00:00.000Z",
-      "sentAt": null,
-      "inspectedAt": null,
-      "restockedAt": null
-    },
-    {
-      "id": "IT-1718389234568-d4e5f6",
-      "cylinderId": "CY-88002",
-      "gasType": "混合标准气",
-      "capacity": "8L",
-      "inspectionDue": "2026-06-28",
-      "status": "pending",
-      "result": null,
-      "createdAt": "2026-06-14T10:00:00.000Z",
-      "sentAt": null,
-      "inspectedAt": null,
-      "restockedAt": null
-    }
-  ]
+  "tasks": []
 }
 ```
 
