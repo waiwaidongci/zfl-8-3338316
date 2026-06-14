@@ -488,3 +488,162 @@ POST /inspection-tasks/IT-1718389234567-a1b2c3/restock
 | `cylinder_rented` | 422 | 钢瓶已租出，操作被拒绝 |
 | `cylinder_scrapped_cannot_restock` | 422 | 已报废钢瓶不能恢复入库 |
 | `cylinder_rented_cannot_restock` | 422 | 已租出钢瓶不能恢复入库 |
+
+## 事件审计端点
+
+事件审计模块提供跨钢瓶的事件聚合查询能力，所有事件数据均来自 `data/cylinders.json` 中各钢瓶的 `events` 数组，采用**查询时动态聚合**的方式，不破坏现有数据结构。
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /events | 分页查询事件列表，支持多维度筛选 |
+| GET | /events/types | 获取系统中出现过的所有事件类型 |
+| GET | /cylinders/:id/timeline | 单个钢瓶的完整事件时间线 |
+
+### 分页查询事件
+
+支持按钢瓶编号、事件类型、时间范围、客户和操作备注进行筛选，默认按事件时间倒序排列，时间相同则按事件 ID 排序以保证稳定性。
+
+**请求参数（全部可选）：**
+
+| 参数 | 类型 | 默认值 | 说明 |
+|------|------|--------|------|
+| `cylinderId` | string | - | 钢瓶编号模糊匹配（大小写不敏感） |
+| `type` | string | - | 事件类型，多个用英文逗号分隔，如 `inbound,outbound` |
+| `startAt` | string | - | 事件起始时间（含），ISO 格式，如 `2026-01-01T00:00:00.000Z` |
+| `endAt` | string | - | 事件结束时间（含），ISO 格式 |
+| `customer` | string | - | 客户ID或客户名称模糊匹配 |
+| `note` | string | - | 操作备注模糊匹配（大小写不敏感） |
+| `sortBy` | string | `at` | 排序字段：`at` / `type` / `cylinderId` |
+| `order` | string | `desc` | 排序方向：`asc` / `desc` |
+| `page` | number | 1 | 页码，从 1 开始 |
+| `pageSize` | number | 20 | 每页条数，最大 100 |
+
+**示例：**
+
+```json
+GET /events?type=outbound&customer=宁川&page=1&pageSize=10
+```
+
+**返回结果：**
+
+```json
+{
+  "items": [
+    {
+      "id": "evt-2",
+      "type": "outbound",
+      "at": "2026-05-10T10:00:00.000Z",
+      "note": "客户租借",
+      "cylinderId": "CY-88002",
+      "gasType": "混合标准气",
+      "capacity": "8L",
+      "customerId": "CU-001",
+      "customerName": "宁川检测"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 10,
+    "totalCount": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+**响应字段说明：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `items[].id` | string | 事件唯一ID |
+| `items[].type` | string | 事件类型（inbound/outbound/return/inspect/scrap/create/fill 等） |
+| `items[].at` | string | 事件发生时间，ISO 格式 |
+| `items[].note` | string | 操作备注 |
+| `items[].cylinderId` | string | 所属钢瓶编号 |
+| `items[].gasType` | string | 钢瓶气体类型 |
+| `items[].capacity` | string | 钢瓶容积 |
+| `items[].customerId` | string | 关联客户ID，可能为 null |
+| `items[].customerName` | string | 关联客户名称，可能为 null |
+| `pagination.page` | number | 当前页码 |
+| `pagination.pageSize` | number | 每页条数 |
+| `pagination.totalCount` | number | 总记录数 |
+| `pagination.totalPages` | number | 总页数 |
+| `pagination.hasNext` | boolean | 是否有下一页 |
+| `pagination.hasPrev` | boolean | 是否有上一页 |
+
+### 获取事件类型列表
+
+返回系统中所有出现过的事件类型，可用于前端筛选下拉框。
+
+```json
+GET /events/types
+```
+
+返回结果：
+
+```json
+{
+  "types": ["inbound", "outbound", "fill"]
+}
+```
+
+### 钢瓶事件时间线
+
+查询单个钢瓶的完整事件时间线，按时间升序排列（从最早到最新），支持按事件类型、时间范围、备注筛选。
+
+**路径参数：**
+
+| 参数 | 说明 |
+|------|------|
+| `id` | 钢瓶编号 |
+
+**查询参数（可选）：**
+
+| 参数 | 说明 |
+|------|------|
+| `type` | 事件类型，多个用逗号分隔 |
+| `startAt` | 起始时间（含） |
+| `endAt` | 结束时间（含） |
+| `note` | 备注模糊匹配 |
+
+**示例：**
+
+```json
+GET /cylinders/CY-88001/timeline
+```
+
+**返回结果：**
+
+```json
+{
+  "cylinderId": "CY-88001",
+  "gasType": "高纯氩",
+  "capacity": "40L",
+  "status": "in_stock",
+  "location": "一号仓",
+  "events": [
+    {
+      "id": "evt-1",
+      "type": "inbound",
+      "at": "2026-06-02T08:20:00.000Z",
+      "note": "初始入库",
+      "cylinderId": "CY-88001",
+      "gasType": "高纯氩",
+      "capacity": "40L",
+      "customerId": null,
+      "customerName": null
+    }
+  ]
+}
+```
+
+如果钢瓶不存在，返回 `404 cylinder_not_found`。
+
+### 设计说明
+
+- **不破坏原有结构**：事件数据仍存储在各钢瓶的 `events` 数组内，`data/cylinders.json` 结构完全不变
+- **查询时聚合**：每次查询从钢瓶数据中动态扁平化所有事件，适用于中小规模数据
+- **稳定排序**：主排序字段相同时，按事件 ID 二次排序，保证分页结果稳定
+- **分页元信息**：包含总数、总页数、是否有上下页等完整分页信息
+

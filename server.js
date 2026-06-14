@@ -6,10 +6,11 @@ import { handleCustomers } from "./routes/customers.js";
 import { handleReports } from "./routes/reports.js";
 import { handleRentalOrders } from "./routes/rentalOrders.js";
 import { handleInspectionTasks } from "./routes/inspectionTasks.js";
+import { handleEventAudit } from "./routes/eventAudit.js";
 
 const port = Number(process.env.PORT || 3008);
 
-const handlers = [handleAuth, handleCustomers, handleCylinders, handleReports, handleRentalOrders, handleInspectionTasks];
+const handlers = [handleAuth, handleCustomers, handleCylinders, handleReports, handleRentalOrders, handleInspectionTasks, handleEventAudit];
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -55,7 +56,10 @@ const server = http.createServer(async (req, res) => {
           "GET /inspection-tasks/:id",
           "POST /inspection-tasks/:id/send",
           "POST /inspection-tasks/:id/inspect",
-          "POST /inspection-tasks/:id/restock"
+          "POST /inspection-tasks/:id/restock",
+          "GET /events",
+          "GET /events/types",
+          "GET /cylinders/:id/timeline"
         ]
       });
     }
