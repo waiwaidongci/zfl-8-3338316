@@ -144,7 +144,7 @@ export async function createIdempotencyRecord(key, { method, path, body, operato
   const waitLock = acquireInMemoryLock(key);
   if (waitLock) {
     await waitLock;
-    return findIdempotencyRecord(key);
+    return { record: await findIdempotencyRecord(key), created: false };
   }
 
   const fileLock = await acquireFileLock(key);
@@ -152,7 +152,7 @@ export async function createIdempotencyRecord(key, { method, path, body, operato
     const existing = await findIdempotencyRecord(key);
     if (existing) {
       releaseInMemoryLock(key);
-      return existing;
+      return { record: existing, created: false };
     }
 
     const db = await loadRecords();
@@ -171,7 +171,7 @@ export async function createIdempotencyRecord(key, { method, path, body, operato
     db.records[key] = record;
     await persistRecords();
     releaseInMemoryLock(key);
-    return record;
+    return { record, created: true };
   } finally {
     await fileLock();
   }

@@ -726,6 +726,189 @@
           "note": "同键并发"
         }
       ]
+    },
+    {
+      "id": "CY-IDEM-FIX-1781450092958",
+      "gasType": "幂等修复验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "CUS-001",
+      "status": "rented",
+      "customer": "CUS-001",
+      "depositStatus": "paid",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450092961-345c1c",
+          "type": "create",
+          "at": "2026-06-14T15:14:52.961Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781450092968-3ee37d",
+          "type": "outbound",
+          "at": "2026-06-14T15:14:52.968Z",
+          "note": "同键并发修复验证"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781450256751-0",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256780-06b5a8",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.780Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781450256751-3",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256788-1d4656",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.788Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781450256751-4",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256798-9a0ab9",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.798Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781450256751-1",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256803-437acd",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.803Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781450256751-2",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256808-7cf443",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.808Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-ACTION-1781450256751",
+      "gasType": "流转测试",
+      "capacity": "40L",
+      "inspectionDue": "2027-06-01",
+      "location": "CUS-001",
+      "status": "rented",
+      "customer": "CUS-001",
+      "depositStatus": "paid",
+      "fills": [
+        {
+          "id": "fill-1781450256924-328d52",
+          "filledAt": "2026-06-14",
+          "pressure": "13.5MPa",
+          "operator": "测试员"
+        }
+      ],
+      "events": [
+        {
+          "id": "evt-1781450256890-528206",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.890Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781450256920-2ba89a",
+          "type": "outbound",
+          "at": "2026-06-14T15:17:36.920Z",
+          "note": "出库"
+        },
+        {
+          "id": "evt-1781450256924-9b095f",
+          "type": "fill",
+          "at": "2026-06-14T15:17:36.924Z",
+          "note": "充装13.5MPa"
+        }
+      ]
+    },
+    {
+      "id": "CY-IDEM-FIX2-1781450256938",
+      "gasType": "幂等修复二次验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "CUS-001",
+      "status": "rented",
+      "customer": "CUS-001",
+      "depositStatus": "paid",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781450256959-04c694",
+          "type": "create",
+          "at": "2026-06-14T15:17:36.959Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781450256974-248fe2",
+          "type": "outbound",
+          "at": "2026-06-14T15:17:36.974Z",
+          "note": "同键并发二次验证"
+        }
+      ]
     }
   ]
 }

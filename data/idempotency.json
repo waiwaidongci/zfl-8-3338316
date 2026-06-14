@@ -1920,6 +1920,407 @@
       "operationLogId": "op-1781449586114-89848f",
       "createdAt": "2026-06-14T15:06:25.965Z",
       "completedAt": "2026-06-14T15:06:26.118Z"
+    },
+    "idem-fix-create-1781450092958": {
+      "key": "idem-fix-create-1781450092958",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "34b4f7ff3da367f121828259ab059b4e1ec54c1ae9119890eddd4f75d5b029e0",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-IDEM-FIX-1781450092958",
+          "gasType": "幂等修复验证气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450092961-345c1c",
+              "type": "create",
+              "at": "2026-06-14T15:14:52.961Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450092963-c46762",
+      "createdAt": "2026-06-14T15:14:52.960Z",
+      "completedAt": "2026-06-14T15:14:52.964Z"
+    },
+    "same-key-fix-1781450092958": {
+      "key": "same-key-fix-1781450092958",
+      "method": "POST",
+      "path": "/cylinders/:id/actions",
+      "bodyHash": "2ebc7ed4ff5aab095c51910dc3d574a186ea5b22f04e472b5429c6eb194ad261",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "id": "CY-IDEM-FIX-1781450092958",
+          "gasType": "幂等修复验证气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "CUS-001",
+          "status": "rented",
+          "customer": "CUS-001",
+          "depositStatus": "paid",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450092961-345c1c",
+              "type": "create",
+              "at": "2026-06-14T15:14:52.961Z",
+              "note": "新建钢瓶"
+            },
+            {
+              "id": "evt-1781450092968-3ee37d",
+              "type": "outbound",
+              "at": "2026-06-14T15:14:52.968Z",
+              "note": "同键并发修复验证"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450092969-bbdd3f",
+      "createdAt": "2026-06-14T15:14:52.967Z",
+      "completedAt": "2026-06-14T15:14:52.969Z"
+    },
+    "create-1781450256751-0": {
+      "key": "create-1781450256751-0",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "0a18f2deaccfa756687cfd1b47ef5be78873aeedf759a8c0bcfdc0cd12c09b58",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-CON-1781450256751-0",
+          "gasType": "并发测试气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256780-06b5a8",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.780Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256792-e69ecf",
+      "createdAt": "2026-06-14T15:17:36.770Z",
+      "completedAt": "2026-06-14T15:17:36.804Z"
+    },
+    "create-1781450256751-1": {
+      "key": "create-1781450256751-1",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "c9d91662c05122016b6221d50e5e86950daac0da52a085670ccf7b2d05054aa8",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-CON-1781450256751-1",
+          "gasType": "并发测试气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256803-437acd",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.803Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256823-3fc87b",
+      "createdAt": "2026-06-14T15:17:36.771Z",
+      "completedAt": "2026-06-14T15:17:36.829Z"
+    },
+    "create-1781450256751-2": {
+      "key": "create-1781450256751-2",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "5ac3d5d7c6900ebe81d0d7f1cc42f0c7d741602cac7d04c1c35ab6ac6e076ace",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-CON-1781450256751-2",
+          "gasType": "并发测试气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256808-7cf443",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.808Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256828-8b4e06",
+      "createdAt": "2026-06-14T15:17:36.772Z",
+      "completedAt": "2026-06-14T15:17:36.832Z"
+    },
+    "create-1781450256751-3": {
+      "key": "create-1781450256751-3",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "a1d0d873c87f88914e5ba871f3f1aa40ec3982f4e992d49f79be223142afc88d",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-CON-1781450256751-3",
+          "gasType": "并发测试气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256788-1d4656",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.788Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256805-061655",
+      "createdAt": "2026-06-14T15:17:36.775Z",
+      "completedAt": "2026-06-14T15:17:36.811Z"
+    },
+    "create-1781450256751-4": {
+      "key": "create-1781450256751-4",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "db08c8f0009a196e3a54f1a8fd8f0971239e87d44b6dfa7d7cfcde1e1c13501a",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-CON-1781450256751-4",
+          "gasType": "并发测试气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256798-9a0ab9",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.798Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256810-87dffe",
+      "createdAt": "2026-06-14T15:17:36.776Z",
+      "completedAt": "2026-06-14T15:17:36.824Z"
+    },
+    "create-1781450256751": {
+      "key": "create-1781450256751",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "5f58ad239fb0f845098eae3e8a116a4d61f1f0d5501ea3bd2789252a71f8a661",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-ACTION-1781450256751",
+          "gasType": "流转测试",
+          "capacity": "40L",
+          "inspectionDue": "2027-06-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256890-528206",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.890Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256900-c59ee9",
+      "createdAt": "2026-06-14T15:17:36.851Z",
+      "completedAt": "2026-06-14T15:17:36.908Z"
+    },
+    "out-1781450256751": {
+      "key": "out-1781450256751",
+      "method": "POST",
+      "path": "/cylinders/:id/actions",
+      "bodyHash": "da0eeda298ee4d692db0c587e0715b25e8595dafc0d8db0c7aa4b2965eeb28dc",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "id": "CY-ACTION-1781450256751",
+          "gasType": "流转测试",
+          "capacity": "40L",
+          "inspectionDue": "2027-06-01",
+          "location": "CUS-001",
+          "status": "rented",
+          "customer": "CUS-001",
+          "depositStatus": "paid",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256890-528206",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.890Z",
+              "note": "新建钢瓶"
+            },
+            {
+              "id": "evt-1781450256920-2ba89a",
+              "type": "outbound",
+              "at": "2026-06-14T15:17:36.920Z",
+              "note": "出库"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256925-e6f9e7",
+      "createdAt": "2026-06-14T15:17:36.915Z",
+      "completedAt": "2026-06-14T15:17:36.930Z"
+    },
+    "fill-1781450256751": {
+      "key": "fill-1781450256751",
+      "method": "POST",
+      "path": "/cylinders/:id/fills",
+      "bodyHash": "95739939ca2e397130708d33e05495feb04996d370529f850dcf8dd7b19614c9",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "fill-1781450256924-328d52",
+          "filledAt": "2026-06-14",
+          "pressure": "13.5MPa",
+          "operator": "测试员"
+        }
+      },
+      "operationLogId": "op-1781450256929-26c9a9",
+      "createdAt": "2026-06-14T15:17:36.916Z",
+      "completedAt": "2026-06-14T15:17:36.939Z"
+    },
+    "idem-fix2-create-1781450256938": {
+      "key": "idem-fix2-create-1781450256938",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "0fcb9bbe32f11e6bf9e5fdf5151dedb204e4b639ea36dea4b82cdb218aa9df14",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "CY-IDEM-FIX2-1781450256938",
+          "gasType": "幂等修复二次验证气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "仓库",
+          "status": "in_stock",
+          "customer": null,
+          "depositStatus": "none",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256959-04c694",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.959Z",
+              "note": "新建钢瓶"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256962-9605b8",
+      "createdAt": "2026-06-14T15:17:36.949Z",
+      "completedAt": "2026-06-14T15:17:36.965Z"
+    },
+    "same-key-fix2-1781450256938": {
+      "key": "same-key-fix2-1781450256938",
+      "method": "POST",
+      "path": "/cylinders/:id/actions",
+      "bodyHash": "504a7c420a2b59c6027a00c8a69429932a45a7e9d32026f2ac2a771e92fb32d1",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "id": "CY-IDEM-FIX2-1781450256938",
+          "gasType": "幂等修复二次验证气",
+          "capacity": "10L",
+          "inspectionDue": "2027-01-01",
+          "location": "CUS-001",
+          "status": "rented",
+          "customer": "CUS-001",
+          "depositStatus": "paid",
+          "fills": [],
+          "events": [
+            {
+              "id": "evt-1781450256959-04c694",
+              "type": "create",
+              "at": "2026-06-14T15:17:36.959Z",
+              "note": "新建钢瓶"
+            },
+            {
+              "id": "evt-1781450256974-248fe2",
+              "type": "outbound",
+              "at": "2026-06-14T15:17:36.974Z",
+              "note": "同键并发二次验证"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781450256975-567589",
+      "createdAt": "2026-06-14T15:17:36.972Z",
+      "completedAt": "2026-06-14T15:17:36.978Z"
     }
   },
   "version": 1
