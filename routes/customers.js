@@ -1,9 +1,13 @@
 import { send, body } from "../store/common.js";
 import { loadCustomers, saveCustomers, findCustomer, createCustomer } from "../store/customers.js";
 import { loadCylinders } from "../store/cylinders.js";
+import { checkQueryAuth, checkActionAuth } from "./auth.js";
+import { PERMISSIONS } from "../auth/users.js";
 
 export async function handleCustomers(req, res, url) {
   if (req.method === "POST" && url.pathname === "/customers") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.CUSTOMER_CREATE);
+    if (!auth.authorized) return true;
     const input = await body(req);
     if (!input.name) return send(res, 400, { error: "name_required" });
     const customers = await loadCustomers();
@@ -16,12 +20,16 @@ export async function handleCustomers(req, res, url) {
   }
 
   if (req.method === "GET" && url.pathname === "/customers") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const customers = await loadCustomers();
     return send(res, 200, customers);
   }
 
   const detailMatch = url.pathname.match(/^\/customers\/([^/]+)$/);
   if (detailMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, id] = detailMatch;
     const customers = await loadCustomers();
     const customer = findCustomer(customers, id);
@@ -31,6 +39,8 @@ export async function handleCustomers(req, res, url) {
 
   const cylinderMatch = url.pathname.match(/^\/customers\/([^/]+)\/cylinders$/);
   if (cylinderMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, id] = cylinderMatch;
     const customers = await loadCustomers();
     const customer = findCustomer(customers, id);
@@ -42,6 +52,8 @@ export async function handleCustomers(req, res, url) {
 
   const depositMatch = url.pathname.match(/^\/customers\/([^/]+)\/deposits$/);
   if (depositMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, id] = depositMatch;
     const customers = await loadCustomers();
     const customer = findCustomer(customers, id);

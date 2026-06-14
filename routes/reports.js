@@ -2,6 +2,7 @@ import { send } from "../store/common.js";
 import { loadCylinders } from "../store/cylinders.js";
 import { getDashboard } from "../store/dashboard.js";
 import { loadTasks, findActiveTaskByCylinderId } from "../store/inspectionTasks.js";
+import { checkQueryAuth } from "./auth.js";
 
 const MS_PER_DAY = 86400000;
 
@@ -11,6 +12,8 @@ function daysUntil(dateText) {
 
 export async function handleReports(req, res, url) {
   if (req.method === "GET" && url.pathname === "/reports/dashboard") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const options = {
       inspectionDays: Number(url.searchParams.get("inspectionDays") || 45),
       longRentDays: Number(url.searchParams.get("longRentDays") || 30)
@@ -20,6 +23,8 @@ export async function handleReports(req, res, url) {
   }
 
   if (req.method === "GET" && url.pathname === "/reports/alerts") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const inspectionDays = Number(url.searchParams.get("inspectionDays") || 45);
     const longRentDays = Number(url.searchParams.get("longRentDays") || 30);
     const cylinders = await loadCylinders();

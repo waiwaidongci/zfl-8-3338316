@@ -8,6 +8,8 @@ import {
   findOrdersByCustomer,
   createOrder
 } from "../store/rentalOrders.js";
+import { checkQueryAuth, checkActionAuth } from "./auth.js";
+import { PERMISSIONS } from "../auth/users.js";
 
 function validateCreateOrderInput(input) {
   if (!input.customerId) {
@@ -31,6 +33,8 @@ function validateCreateOrderInput(input) {
 
 export async function handleRentalOrders(req, res, url) {
   if (req.method === "POST" && url.pathname === "/rental-orders") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.ORDER_CREATE);
+    if (!auth.authorized) return true;
     const input = await body(req);
 
     const validation = validateCreateOrderInput(input);
@@ -111,6 +115,8 @@ export async function handleRentalOrders(req, res, url) {
 
   const detailMatch = url.pathname.match(/^\/rental-orders\/([^/]+)$/);
   if (detailMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, id] = detailMatch;
     const orders = await loadOrders();
     const order = findOrder(orders, id);
@@ -120,6 +126,8 @@ export async function handleRentalOrders(req, res, url) {
 
   const customerOrdersMatch = url.pathname.match(/^\/customers\/([^/]+)\/orders$/);
   if (customerOrdersMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, customerId] = customerOrdersMatch;
     const customers = await loadCustomers();
     const customer = findCustomer(customers, customerId);
@@ -131,6 +139,8 @@ export async function handleRentalOrders(req, res, url) {
 
   const listMatch = url.pathname === "/rental-orders";
   if (listMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const orders = await loadOrders();
     return send(res, 200, orders);
   }

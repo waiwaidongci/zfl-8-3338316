@@ -9,9 +9,13 @@ import {
   applyInspectResult,
   applyRestock
 } from "../store/inspectionTasks.js";
+import { checkQueryAuth, checkActionAuth } from "./auth.js";
+import { PERMISSIONS } from "../auth/users.js";
 
 export async function handleInspectionTasks(req, res, url) {
   if (req.method === "GET" && url.pathname === "/inspection-tasks") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const status = url.searchParams.get("status");
     const cylinderId = url.searchParams.get("cylinderId");
     let tasks = await loadTasks();
@@ -21,6 +25,8 @@ export async function handleInspectionTasks(req, res, url) {
   }
 
   if (req.method === "POST" && url.pathname === "/inspection-tasks/generate") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.INSPECTION_GENERATE);
+    if (!auth.authorized) return true;
     const input = await body(req);
     const cylinders = await loadCylinders();
     const existingTasks = await loadTasks();
@@ -39,6 +45,8 @@ export async function handleInspectionTasks(req, res, url) {
 
   const detailMatch = url.pathname.match(/^\/inspection-tasks\/([^/]+)$/);
   if (detailMatch && req.method === "GET") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const [, id] = detailMatch;
     const tasks = await loadTasks();
     const task = findTask(tasks, id);
@@ -48,6 +56,8 @@ export async function handleInspectionTasks(req, res, url) {
 
   const sendMatch = url.pathname.match(/^\/inspection-tasks\/([^/]+)\/send$/);
   if (sendMatch && req.method === "POST") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.INSPECTION_SEND);
+    if (!auth.authorized) return true;
     const [, id] = sendMatch;
     const input = await body(req);
     const tasks = await loadTasks();
@@ -69,6 +79,8 @@ export async function handleInspectionTasks(req, res, url) {
 
   const inspectMatch = url.pathname.match(/^\/inspection-tasks\/([^/]+)\/inspect$/);
   if (inspectMatch && req.method === "POST") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.INSPECTION_INSPECT);
+    if (!auth.authorized) return true;
     const [, id] = inspectMatch;
     const input = await body(req);
     const tasks = await loadTasks();
@@ -90,6 +102,8 @@ export async function handleInspectionTasks(req, res, url) {
 
   const restockMatch = url.pathname.match(/^\/inspection-tasks\/([^/]+)\/restock$/);
   if (restockMatch && req.method === "POST") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.INSPECTION_RESTOCK);
+    if (!auth.authorized) return true;
     const [, id] = restockMatch;
     const input = await body(req);
     const tasks = await loadTasks();

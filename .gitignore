@@ -16,3 +16,10 @@ coverage/
 .DS_Store
 .idea/
 .vscode/
+
+data/users.json
+data/tokens.json
+data/cylinders.json
+data/customers.json
+data/rentalOrders.json
+data/inspectionTasks.json

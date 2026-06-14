@@ -1,5 +1,6 @@
 import http from "node:http";
 import { send } from "./store/common.js";
+import { handleAuth } from "./routes/auth.js";
 import { handleCylinders } from "./routes/cylinders.js";
 import { handleCustomers } from "./routes/customers.js";
 import { handleReports } from "./routes/reports.js";
@@ -8,7 +9,7 @@ import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 
 const port = Number(process.env.PORT || 3008);
 
-const handlers = [handleCustomers, handleCylinders, handleReports, handleRentalOrders, handleInspectionTasks];
+const handlers = [handleAuth, handleCustomers, handleCylinders, handleReports, handleRentalOrders, handleInspectionTasks];
 
 const server = http.createServer(async (req, res) => {
   try {
@@ -17,6 +18,20 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && url.pathname === "/") {
       return send(res, 200, {
         service: "特种气体钢瓶流转API",
+        auth: {
+          endpoints: [
+            "POST /auth/login",
+            "POST /auth/logout",
+            "GET /auth/me",
+            "GET /auth/roles"
+          ],
+          defaultAccounts: [
+            { username: "admin", password: "admin123", role: "管理员" },
+            { username: "warehouse", password: "warehouse123", role: "仓库" },
+            { username: "sales", password: "sales123", role: "销售" },
+            { username: "qc", password: "qc123", role: "质检" }
+          ]
+        },
         endpoints: [
           "GET /cylinders",
           "POST /cylinders",

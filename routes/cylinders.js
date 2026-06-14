@@ -2,6 +2,8 @@ import { send, body, makeEvent, genId } from "../store/common.js";
 import { loadCylinders, saveCylinders, findCylinder } from "../store/cylinders.js";
 import { loadCustomers, findCustomer } from "../store/customers.js";
 import { validateCylinderBatch } from "../store/bulkImport.js";
+import { checkQueryAuth, checkActionAuth } from "./auth.js";
+import { PERMISSIONS } from "../auth/users.js";
 
 function daysUntil(dateText) {
   return Math.ceil((new Date(dateText).getTime() - Date.now()) / 86400000);
@@ -46,6 +48,8 @@ const transitions = {
 
 export async function handleCylinders(req, res, url) {
   if (req.method === "POST" && url.pathname === "/cylinders/bulk/preview") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.CYLINDER_BULK);
+    if (!auth.authorized) return true;
     const input = await body(req);
     if (!Array.isArray(input)) {
       return send(res, 400, { error: "batch_must_be_array" });
@@ -63,6 +67,8 @@ export async function handleCylinders(req, res, url) {
   }
 
   if (req.method === "POST" && url.pathname === "/cylinders/bulk/confirm") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.CYLINDER_BULK);
+    if (!auth.authorized) return true;
     const input = await body(req);
     if (!Array.isArray(input)) {
       return send(res, 400, { error: "batch_must_be_array" });
@@ -85,6 +91,8 @@ export async function handleCylinders(req, res, url) {
   }
 
   if (req.method === "GET" && url.pathname === "/cylinders") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
     const status = url.searchParams.get("status");
     const gasType = url.searchParams.get("gasType");
     let cylinders = await loadCylinders();
@@ -94,6 +102,8 @@ export async function handleCylinders(req, res, url) {
   }
 
   if (req.method === "POST" && url.pathname === "/cylinders") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.CYLINDER_CREATE);
+    if (!auth.authorized) return true;
     const input = await body(req);
     const cylinders = await loadCylinders();
     const cylinder = {
@@ -117,26 +127,13 @@ export async function handleCylinders(req, res, url) {
   const match = url.pathname.match(/^\/cylinders\/([^/]+)\/([^/]+)$/);
   if (match) {
     const [, id, action] = match;
-    const cylinders = await loadCylinders();
-    const cylinder = findCylinder(cylinders, id);
-    if (!cylinder) return send(res, 404, { error: "cylinder_not_found" });
-
-    if (req.method === "POST" && action === "actions") {
-      const input = await body(req);
-      const transition = transitions[input.type];
-      if (!transition) return send(res, 400, { error: "unknown_action" });
-      try {
-        await transition(cylinder, input);
-      } catch (err) {
-        if (err.statusCode) return send(res, err.statusCode, { error: err.message });
-        throw err;
-      }
-      cylinder.events.push(makeEvent(input.type, input.note || input.type));
-      await saveCylinders(cylinders);
-      return send(res, 200, cylinder);
-    }
 
     if (req.method === "POST" && action === "fills") {
+      const auth = await checkActionAuth(req, res, PERMISSIONS.CYLINDER_FILL);
+      if (!auth.authorized) return true;
+      const cylinders = await loadCylinders();
+      const cylinder = findCylinder(cylinders, id);
+      if (!cylinder) return send(res, 404, { error: "cylinder_not_found" });
       const input = await body(req);
       const fill = {
         id: genId("fill"),
@@ -148,6 +145,38 @@ export async function handleCylinders(req, res, url) {
       cylinder.events.push(makeEvent("fill", `充装${input.pressure || ""}`));
       await saveCylinders(cylinders);
       return send(res, 201, fill);
+    }
+
+    if (req.method === "POST" && action === "actions") {
+      const loginAuth = await checkQueryAuth(req, res);
+      if (!loginAuth.authorized) return true;
+      const input = await body(req);
+      const transition = transitions[input.type];
+      if (!transition) return send(res, 400, { error: "unknown_action" });
+      const permMap = {
+        inbound: PERMISSIONS.CYLINDER_INBOUND,
+        outbound: PERMISSIONS.CYLINDER_OUTBOUND,
+        return: PERMISSIONS.CYLINDER_RETURN,
+        inspect: PERMISSIONS.CYLINDER_INSPECT,
+        scrap: PERMISSIONS.CYLINDER_SCRAP
+      };
+      const requiredPerm = permMap[input.type];
+      if (requiredPerm) {
+        const permAuth = await checkActionAuth(req, res, requiredPerm);
+        if (!permAuth.authorized) return true;
+      }
+      const cylinders = await loadCylinders();
+      const cylinder = findCylinder(cylinders, id);
+      if (!cylinder) return send(res, 404, { error: "cylinder_not_found" });
+      try {
+        await transition(cylinder, input);
+      } catch (err) {
+        if (err.statusCode) return send(res, err.statusCode, { error: err.message });
+        throw err;
+      }
+      cylinder.events.push(makeEvent(input.type, input.note || input.type));
+      await saveCylinders(cylinders);
+      return send(res, 200, cylinder);
     }
   }
 
