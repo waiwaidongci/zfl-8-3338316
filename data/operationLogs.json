@@ -1,0 +1,456 @@
+{
+  "logs": [
+    {
+      "id": "op-1781423597816-a84d96",
+      "idempotencyKey": "test-fill-idem-1781423597814",
+      "operationType": "cylinder.fill",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-1781423597795",
+      "operator": "admin",
+      "beforeState": {
+        "id": "CY-IDEM-1781423597795",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "CUS-001",
+        "status": "rented",
+        "customer": "CUS-001",
+        "depositStatus": "paid",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781423597797-0f4fd2",
+            "type": "create",
+            "at": "2026-06-14T07:53:17.797Z",
+            "note": "新建钢瓶"
+          },
+          {
+            "id": "evt-1781423597810-9fa69b",
+            "type": "outbound",
+            "at": "2026-06-14T07:53:17.810Z",
+            "note": "测试租借出库"
+          }
+        ]
+      },
+      "afterState": {
+        "id": "fill-1781423597816-265b56",
+        "filledAt": "2026-06-14",
+        "pressure": "15MPa",
+        "operator": "测试员"
+      },
+      "requestBody": {
+        "pressure": "15MPa",
+        "operator": "测试员",
+        "filledAt": "2026-06-14"
+      },
+      "eventIds": [
+        "evt-1781423597816-1ac06e"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:53:17.816Z"
+    },
+    {
+      "id": "op-1781423597811-3bb46d",
+      "idempotencyKey": "test-action-idem-1781423597808",
+      "operationType": "cylinder.action",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-1781423597795",
+      "operator": "admin",
+      "beforeState": {
+        "id": "CY-IDEM-1781423597795",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781423597797-0f4fd2",
+            "type": "create",
+            "at": "2026-06-14T07:53:17.797Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "afterState": {
+        "id": "CY-IDEM-1781423597795",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "CUS-001",
+        "status": "rented",
+        "customer": "CUS-001",
+        "depositStatus": "paid",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781423597797-0f4fd2",
+            "type": "create",
+            "at": "2026-06-14T07:53:17.797Z",
+            "note": "新建钢瓶"
+          },
+          {
+            "id": "evt-1781423597810-9fa69b",
+            "type": "outbound",
+            "at": "2026-06-14T07:53:17.810Z",
+            "note": "测试租借出库"
+          }
+        ]
+      },
+      "requestBody": {
+        "type": "outbound",
+        "customer": "CUS-001",
+        "note": "测试租借出库"
+      },
+      "eventIds": [
+        "evt-1781423597810-9fa69b"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:53:17.811Z"
+    },
+    {
+      "id": "op-1781423597805-46894f",
+      "idempotencyKey": "auto-5b5e526f67bef7be4229cc321f1f1e1c",
+      "operationType": "customer.create",
+      "targetType": "customer",
+      "targetId": "CUS-1781423597805-8abd4d",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CUS-1781423597805-8abd4d",
+        "name": "兼容测试客户-1781423597803",
+        "contact": "测试员A",
+        "phone": "13896784826",
+        "address": null,
+        "createdAt": "2026-06-14T07:53:17.805Z"
+      },
+      "requestBody": {
+        "name": "兼容测试客户-1781423597803",
+        "contact": "测试员A",
+        "phone": "13896784826"
+      },
+      "eventIds": [],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:53:17.805Z"
+    },
+    {
+      "id": "op-1781423597797-4cde45",
+      "idempotencyKey": "test-idem-1781423597795",
+      "operationType": "cylinder.create",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-1781423597795",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CY-IDEM-1781423597795",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781423597797-0f4fd2",
+            "type": "create",
+            "at": "2026-06-14T07:53:17.797Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "requestBody": {
+        "id": "CY-IDEM-1781423597795",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01"
+      },
+      "eventIds": [
+        "evt-1781423597797-0f4fd2"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:53:17.797Z"
+    },
+    {
+      "id": "op-1781423329151-1281d2",
+      "idempotencyKey": "test-fill-idem-1781423329149",
+      "operationType": "cylinder.fill",
+      "targetType": "cylinder",
+      "targetId": "CID",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "error": "cylinder_not_found"
+      },
+      "requestBody": {
+        "pressure": "15MPa",
+        "operator": "测试员",
+        "filledAt": "2026-06-14"
+      },
+      "eventIds": [],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:48:49.151Z"
+    },
+    {
+      "id": "op-1781423329147-eebd88",
+      "idempotencyKey": "test-action-idem-1781423329145",
+      "operationType": "cylinder.action",
+      "targetType": "cylinder",
+      "targetId": "CID",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "error": "cylinder_not_found"
+      },
+      "requestBody": {
+        "type": "outbound",
+        "customer": "CUS-001",
+        "note": "测试租借出库"
+      },
+      "eventIds": [],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:48:49.147Z"
+    },
+    {
+      "id": "op-1781423329144-bb3175",
+      "idempotencyKey": "auto-094543c9b893571c234501c5f2834a10",
+      "operationType": "customer.create",
+      "targetType": "customer",
+      "targetId": "CUS-1781423329143-4f2aec",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CUS-1781423329143-4f2aec",
+        "name": "兼容测试客户-1781423329142",
+        "contact": "测试员A",
+        "phone": "13889878065",
+        "address": null,
+        "createdAt": "2026-06-14T07:48:49.143Z"
+      },
+      "requestBody": {
+        "name": "兼容测试客户-1781423329142",
+        "contact": "测试员A",
+        "phone": "13889878065"
+      },
+      "eventIds": [],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:48:49.144Z"
+    },
+    {
+      "id": "op-1781423329136-96e902",
+      "idempotencyKey": "test-idem-1781423329133",
+      "operationType": "cylinder.create",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-1781423329133",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CY-IDEM-1781423329133",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781423329136-b1d85c",
+            "type": "create",
+            "at": "2026-06-14T07:48:49.136Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "requestBody": {
+        "id": "CY-IDEM-1781423329133",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01"
+      },
+      "eventIds": [
+        "evt-1781423329136-b1d85c"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:48:49.136Z"
+    },
+    {
+      "id": "op-1781422507355-6e62f2",
+      "idempotencyKey": "test-action-idem-1781422507",
+      "operationType": "cylinder.action",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-TEST",
+      "operator": "admin",
+      "beforeState": {
+        "id": "CY-IDEM-TEST",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781422506838-29c51d",
+            "type": "create",
+            "at": "2026-06-14T07:35:06.838Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "afterState": {
+        "id": "CY-IDEM-TEST",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "CUS-001",
+        "status": "rented",
+        "customer": "CUS-001",
+        "depositStatus": "paid",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781422506838-29c51d",
+            "type": "create",
+            "at": "2026-06-14T07:35:06.838Z",
+            "note": "新建钢瓶"
+          },
+          {
+            "id": "evt-1781422507354-83e673",
+            "type": "outbound",
+            "at": "2026-06-14T07:35:07.354Z",
+            "note": "测试租借"
+          }
+        ]
+      },
+      "requestBody": {
+        "type": "outbound",
+        "customer": "CUS-001",
+        "note": "测试租借"
+      },
+      "eventIds": [
+        "evt-1781422507354-83e673"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:35:07.355Z"
+    },
+    {
+      "id": "op-1781422507224-ef90d8",
+      "idempotencyKey": "auto-f9d11ffab205768001d1c7f3853788a8",
+      "operationType": "customer.create",
+      "targetType": "customer",
+      "targetId": "CUS-1781422507223-839c14",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CUS-1781422507223-839c14",
+        "name": "自动幂等测试客户",
+        "contact": "测试",
+        "phone": "13900000001",
+        "address": null,
+        "createdAt": "2026-06-14T07:35:07.223Z"
+      },
+      "requestBody": {
+        "name": "自动幂等测试客户",
+        "contact": "测试",
+        "phone": "13900000001"
+      },
+      "eventIds": [],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:35:07.224Z"
+    },
+    {
+      "id": "op-1781422506839-e13561",
+      "idempotencyKey": "test-idem-1781422506-65180",
+      "operationType": "cylinder.create",
+      "targetType": "cylinder",
+      "targetId": "CY-IDEM-TEST",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CY-IDEM-TEST",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781422506838-29c51d",
+            "type": "create",
+            "at": "2026-06-14T07:35:06.838Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "requestBody": {
+        "id": "CY-IDEM-TEST",
+        "gasType": "测试氧气",
+        "capacity": "10L",
+        "inspectionDue": "2027-01-01"
+      },
+      "eventIds": [
+        "evt-1781422506838-29c51d"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T07:35:06.839Z"
+    },
+    {
+      "id": "op-1781418077486-0ba9fa",
+      "idempotencyKey": "restart-test-key-001",
+      "operationType": "cylinder.create",
+      "targetType": "cylinder",
+      "targetId": "CY-RESTART-001",
+      "operator": "admin",
+      "beforeState": null,
+      "afterState": {
+        "id": "CY-RESTART-001",
+        "gasType": "氦气",
+        "capacity": "25L",
+        "inspectionDue": "2027-03-15",
+        "location": "仓库",
+        "status": "in_stock",
+        "customer": null,
+        "depositStatus": "none",
+        "fills": [],
+        "events": [
+          {
+            "id": "evt-1781418077484-4755bb",
+            "type": "create",
+            "at": "2026-06-14T06:21:17.484Z",
+            "note": "新建钢瓶"
+          }
+        ]
+      },
+      "requestBody": "{\"id\":\"CY-RESTART-001\",\"gasType\":\"氦气\",\"capacity\":\"25L\",\"inspectionDue\":\"2027-03-15\"}",
+      "eventIds": [
+        "evt-1781418077484-4755bb"
+      ],
+      "status": "success",
+      "error": null,
+      "createdAt": "2026-06-14T06:21:17.486Z"
+    }
+  ],
+  "version": 1
+}

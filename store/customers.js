@@ -4,12 +4,20 @@ const FILE = "customers.json";
 const SEED = {
   customers: [
     {
-      id: "CU-001",
+      id: "CUS-001",
       name: "宁川检测",
-      contact: "李明",
-      phone: "13800001111",
-      address: "宁川市高新区检测路88号",
-      createdAt: "2026-05-01T09:00:00.000Z"
+      contact: "张经理",
+      phone: "13800000001",
+      address: "宁川市工业园区12号",
+      createdAt: "2026-01-15T09:00:00.000Z"
+    },
+    {
+      id: "CUS-002",
+      name: "恒远焊接",
+      contact: "李主管",
+      phone: "13800000002",
+      address: "宁川市东路88号",
+      createdAt: "2026-02-20T10:00:00.000Z"
     }
   ]
 };
@@ -31,15 +39,13 @@ export function findCustomerByName(customers, name) {
   return customers.find((c) => c.name === name) || null;
 }
 
-export function createCustomer(customers, input) {
-  const customer = {
-    id: input.id || genId("CU"),
+export function createCustomer(input) {
+  return {
+    id: input.id || genId("CUS"),
     name: input.name,
-    contact: input.contact || "",
-    phone: input.phone || "",
-    address: input.address || "",
+    contact: input.contact || null,
+    phone: input.phone || null,
+    address: input.address || null,
     createdAt: new Date().toISOString()
   };
-  customers.push(customer);
-  return customer;
 }
