@@ -130,8 +130,8 @@ export async function getCylinderTimeline(cylinderId, filters = {}) {
   const cylinder = cylinders.find((c) => c.id === cylinderId);
   if (!cylinder) return null;
 
-  const allEvents = flattenEvents(cylinders, customerMap);
-  const filtered = filterEvents(allEvents, { ...filters, cylinderId });
+  const cylinderEvents = flattenEvents([cylinder], customerMap);
+  const filtered = filterEvents(cylinderEvents, filters);
   const sorted = sortEvents(filtered, "at", "asc");
 
   return {
