@@ -8,6 +8,14 @@ import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 import { handleEventAudit } from "./routes/eventAudit.js";
 import { recoverStaleProcessing } from "./store/idempotency.js";
 
+process.on("unhandledRejection", (err) => {
+  console.error("[unhandledRejection]", err?.stack || err);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("[uncaughtException]", err?.stack || err);
+});
+
 const port = Number(process.env.PORT || 3008);
 
 const ROOT_ENDPOINTS = [
@@ -19,6 +27,7 @@ const ROOT_ENDPOINTS = [
   "POST /cylinders/:id/fills",
   "GET /cylinders/:id/timeline",
   "GET /reports/alerts",
+  "GET /reports/dashboard",
   "GET /customers",
   "POST /customers",
   "GET /customers/:id",

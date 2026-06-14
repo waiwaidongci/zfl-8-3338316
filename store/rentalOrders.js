@@ -1,7 +1,7 @@
-import { loadJson, saveJson, genId } from "./common.js";
+import { loadJson, saveJson, genId, withJsonTx } from "./common.js";
 
 const FILE = "rentalOrders.json";
-const SEED = { orders: [] };
+export const SEED = { orders: [] };
 
 export async function loadOrders() {
   const db = await loadJson(FILE, SEED);
@@ -10,6 +10,12 @@ export async function loadOrders() {
 
 export async function saveOrders(orders) {
   await saveJson(FILE, { orders });
+}
+
+export async function withOrdersTx(mutator) {
+  return withJsonTx(FILE, SEED, async (db) => {
+    return mutator(db.orders);
+  });
 }
 
 export function findOrder(orders, id) {

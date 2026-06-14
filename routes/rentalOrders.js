@@ -1,17 +1,16 @@
-import { send, body, makeEvent } from "../store/common.js";
-import { loadCylinders, saveCylinders, findCylinder } from "../store/cylinders.js";
-import { loadCustomers, findCustomer } from "../store/customers.js";
-import {
-  loadOrders,
-  saveOrders,
-  findOrder,
-  findOrdersByCustomer,
-  createOrder
-} from "../store/rentalOrders.js";
+import { send, body, makeEvent, withMultiJsonTx } from "../store/common.js";
+import { SEED as CYLINDERS_SEED } from "../store/cylinders.js";
+import { SEED as ORDERS_SEED } from "../store/rentalOrders.js";
+import { findCylinder } from "../store/cylinders.js";
+import { findCustomer } from "../store/customers.js";
+import { findOrder, findOrdersByCustomer, createOrder } from "../store/rentalOrders.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
 import { PERMISSIONS } from "../auth/users.js";
 import { executeWithIdempotency } from "../store/idempotencyExecutor.js";
 import { OPERATION_TYPES, TARGET_TYPES, snapshotEntity } from "../store/operationLog.js";
+
+const CYLINDERS_FILE = "cylinders.json";
+const ORDERS_FILE = "rentalOrders.json";
 
 function validateCreateOrderInput(input) {
   if (!input.customerId) {
@@ -50,84 +49,86 @@ export async function handleRentalOrders(req, res, url) {
           return { statusCode: validation.status, body: { error: validation.error } };
         }
 
-        const customers = await loadCustomers();
-        const customer = findCustomer(customers, input.customerId);
+        const customer = await (async () => {
+          const { loadCustomers } = await import("../store/customers.js");
+          const customers = await loadCustomers();
+          return findCustomer(customers, input.customerId);
+        })();
         if (!customer) {
           return { statusCode: 404, body: { error: "customer_not_found" } };
         }
 
-        const cylinders = await loadCylinders();
-        const errors = [];
+        return withMultiJsonTx(
+          [
+            { filename: CYLINDERS_FILE, fallback: CYLINDERS_SEED },
+            { filename: ORDERS_FILE, fallback: ORDERS_SEED }
+          ],
+          async (dbs) => {
+            const cylinders = dbs[CYLINDERS_FILE].cylinders;
+            const orders = dbs[ORDERS_FILE].orders;
 
-        const cylinderInfos = [];
-        const eventIds = [];
-        for (const item of input.cylinders) {
-          const cylinder = findCylinder(cylinders, item.id);
-          if (!cylinder) {
-            errors.push({ cylinderId: item.id, error: "cylinder_not_found" });
-            continue;
-          }
-          if (cylinder.status === "rented") {
-            errors.push({ cylinderId: item.id, error: "cylinder_already_rented", currentCustomer: cylinder.customer });
-            continue;
-          }
-          cylinderInfos.push({
-            cylinder,
-            depositStatus: item.depositStatus || "paid",
-            note: item.note || ""
-          });
-        }
-
-        if (errors.length > 0) {
-          return {
-            statusCode: 422,
-            body: {
-              error: "order_validation_failed",
-              message: "部分钢瓶校验失败，订单未创建，所有钢瓶状态保持不变",
-              errors
+            const errors = [];
+            const cylinderInfos = [];
+            const eventIds = [];
+            for (const item of input.cylinders) {
+              const cylinder = findCylinder(cylinders, item.id);
+              if (!cylinder) {
+                errors.push({ cylinderId: item.id, error: "cylinder_not_found" });
+                continue;
+              }
+              if (cylinder.status === "rented") {
+                errors.push({ cylinderId: item.id, error: "cylinder_already_rented", currentCustomer: cylinder.customer });
+                continue;
+              }
+              cylinderInfos.push({
+                cylinder,
+                depositStatus: item.depositStatus || "paid",
+                note: item.note || ""
+              });
             }
-          };
-        }
+            if (errors.length > 0) {
+              return {
+                statusCode: 422,
+                body: {
+                  error: "order_validation_failed",
+                  message: "部分钢瓶校验失败，订单未创建，所有钢瓶状态保持不变",
+                  errors
+                }
+              };
+            }
 
-        const orders = await loadOrders();
-        const cylinderSnapshotsBefore = cylinderInfos.map((info) => snapshotEntity(info.cylinder));
-        ctx.setBeforeState({ cylinders: cylinderSnapshotsBefore });
+            const cylinderSnapshotsBefore = cylinderInfos.map((info) => snapshotEntity(info.cylinder));
+            for (const info of cylinderInfos) {
+              const c = info.cylinder;
+              c.status = "rented";
+              c.customer = customer.id;
+              c.location = customer.name;
+              c.depositStatus = info.depositStatus;
+              const evt = makeEvent("outbound", `订单出库${info.note ? " - " + info.note : ""}`);
+              c.events.push(evt);
+              eventIds.push(evt.id);
+            }
 
-        for (const info of cylinderInfos) {
-          const c = info.cylinder;
-          c.status = "rented";
-          c.customer = customer.id;
-          c.location = customer.name;
-          c.depositStatus = info.depositStatus;
-          const evt = makeEvent("outbound", `订单出库${info.note ? " - " + info.note : ""}`);
-          c.events.push(evt);
-          eventIds.push(evt.id);
-        }
+            ctx.setBeforeState({ cylinders: cylinderSnapshotsBefore });
+            ctx.captureEventIds(eventIds);
 
-        const orderSnapshot = cylinderInfos.map((info) => ({
-          id: info.cylinder.id,
-          gasType: info.cylinder.gasType,
-          capacity: info.cylinder.capacity,
-          depositStatus: info.depositStatus
-        }));
+            const orderSnapshot = cylinderInfos.map((info) => ({
+              id: info.cylinder.id,
+              gasType: info.cylinder.gasType,
+              capacity: info.cylinder.capacity,
+              depositStatus: info.depositStatus
+            }));
 
-        const order = createOrder({
-          customer,
-          cylinders: orderSnapshot,
-          note: input.note
-        });
+            const created = createOrder({
+              customer,
+              cylinders: orderSnapshot,
+              note: input.note
+            });
+            orders.push(created);
 
-        const updatedCylinders = cylinders.map((c) => {
-          const matched = cylinderInfos.find((info) => info.cylinder.id === c.id);
-          return matched ? matched.cylinder : c;
-        });
-
-        orders.push(order);
-        await saveCylinders(updatedCylinders);
-        await saveOrders(orders);
-
-        ctx.captureEventIds(eventIds);
-        return { statusCode: 201, body: order };
+            return { statusCode: 201, body: created };
+          }
+        );
       }
     });
   }
@@ -137,6 +138,7 @@ export async function handleRentalOrders(req, res, url) {
     const auth = await checkQueryAuth(req, res);
     if (!auth.authorized) return true;
     const [, id] = detailMatch;
+    const { loadOrders } = await import("../store/rentalOrders.js");
     const orders = await loadOrders();
     const order = findOrder(orders, id);
     if (!order) return send(res, 404, { error: "order_not_found" });
@@ -148,9 +150,11 @@ export async function handleRentalOrders(req, res, url) {
     const auth = await checkQueryAuth(req, res);
     if (!auth.authorized) return true;
     const [, customerId] = customerOrdersMatch;
+    const { loadCustomers } = await import("../store/customers.js");
     const customers = await loadCustomers();
     const customer = findCustomer(customers, customerId);
     if (!customer) return send(res, 404, { error: "customer_not_found" });
+    const { loadOrders } = await import("../store/rentalOrders.js");
     const orders = await loadOrders();
     const customerOrders = findOrdersByCustomer(orders, customerId);
     return send(res, 200, customerOrders);
@@ -160,6 +164,7 @@ export async function handleRentalOrders(req, res, url) {
   if (listMatch && req.method === "GET") {
     const auth = await checkQueryAuth(req, res);
     if (!auth.authorized) return true;
+    const { loadOrders } = await import("../store/rentalOrders.js");
     const orders = await loadOrders();
     return send(res, 200, orders);
   }

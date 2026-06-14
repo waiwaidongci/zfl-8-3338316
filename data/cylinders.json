@@ -126,6 +126,606 @@
           "note": "充装15MPa"
         }
       ]
+    },
+    {
+      "id": "CY-CONCUR-1781429924637-0",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781429924652-6dd0bd",
+          "type": "create",
+          "at": "2026-06-14T09:38:44.652Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-SMOKE-1781433343",
+      "gasType": "t",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781433343860-4b2168",
+          "type": "create",
+          "at": "2026-06-14T10:35:43.860Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-SMOKE-1781434162",
+      "gasType": "test",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781434163011-db39ed",
+          "type": "create",
+          "at": "2026-06-14T10:49:23.011Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781434651415-0",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781434651447-a684f8",
+          "type": "create",
+          "at": "2026-06-14T10:57:31.447Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CON-1781435831491-0",
+      "gasType": "并发测试气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781435831919-d35e99",
+          "type": "create",
+          "at": "2026-06-14T11:17:11.919Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-0",
+      "gasType": "测试气0",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "待检区",
+      "status": "returned",
+      "customer": null,
+      "depositStatus": "refundable",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118277-bbed62",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.279Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781449118456-158b3b",
+          "type": "outbound",
+          "at": "2026-06-14T14:58:38.456Z",
+          "note": "出库测试"
+        },
+        {
+          "id": "evt-1781449118481-5dd5ef",
+          "type": "return",
+          "at": "2026-06-14T14:58:38.481Z",
+          "note": "归还测试"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-5",
+      "gasType": "测试气5",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118325-36118b",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.325Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-2",
+      "gasType": "测试气2",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118337-2a4524",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.337Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-1",
+      "gasType": "测试气1",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118343-3c09e9",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.343Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-4",
+      "gasType": "测试气4",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118362-c5c31b",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.362Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-6",
+      "gasType": "测试气6",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118376-24f3b7",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.377Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-9",
+      "gasType": "测试气9",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118388-096539",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.388Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-7",
+      "gasType": "测试气7",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118394-80b3a6",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.394Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-8",
+      "gasType": "测试气8",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118411-b2c906",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.411Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-CONC-1781449117519-3",
+      "gasType": "测试气3",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449118418-ba9dcc",
+          "type": "create",
+          "at": "2026-06-14T14:58:38.418Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-0",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445239-7ff5ee",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.239Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-7",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445244-ecf763",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.244Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-8",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445246-fe9595",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.246Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-6",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445247-61df83",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.247Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-5",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445249-f04949",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.249Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-1",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445252-139c98",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.252Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-4",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445253-c5c884",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.253Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-2",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445255-744e0e",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.255Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-9",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445256-3fa611",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.256Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-3",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445257-b63388",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.257Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-10",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445261-caaf64",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.261Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-1781449445211-11",
+      "gasType": "验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "仓库",
+      "status": "in_stock",
+      "customer": null,
+      "depositStatus": "none",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449445263-8fa222",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.263Z",
+          "note": "新建钢瓶"
+        }
+      ]
+    },
+    {
+      "id": "CY-VERIFY-ACTION-1781449445211",
+      "gasType": "动作验证气",
+      "capacity": "40L",
+      "inspectionDue": "2027-06-01",
+      "location": "CUS-001",
+      "status": "rented",
+      "customer": "CUS-001",
+      "depositStatus": "paid",
+      "fills": [
+        {
+          "id": "fill-1781449445281-75b428",
+          "filledAt": "2026-06-14",
+          "pressure": "13MPa",
+          "operator": "Verifier"
+        }
+      ],
+      "events": [
+        {
+          "id": "evt-1781449445273-155f34",
+          "type": "create",
+          "at": "2026-06-14T15:04:05.273Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781449445279-56e194",
+          "type": "outbound",
+          "at": "2026-06-14T15:04:05.279Z",
+          "note": "验证出库"
+        },
+        {
+          "id": "evt-1781449445280-77bba5",
+          "type": "outbound",
+          "at": "2026-06-14T15:04:05.280Z",
+          "note": "验证出库"
+        },
+        {
+          "id": "evt-1781449445281-b50a13",
+          "type": "fill",
+          "at": "2026-06-14T15:04:05.281Z",
+          "note": "充装13MPa"
+        }
+      ]
+    },
+    {
+      "id": "CY-IDEM-CHECK-1781449533704",
+      "gasType": "幂等验证气",
+      "capacity": "10L",
+      "inspectionDue": "2027-01-01",
+      "location": "CUS-001",
+      "status": "rented",
+      "customer": "CUS-001",
+      "depositStatus": "paid",
+      "fills": [],
+      "events": [
+        {
+          "id": "evt-1781449533706-0e5d81",
+          "type": "create",
+          "at": "2026-06-14T15:05:33.706Z",
+          "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781449533710-05612e",
+          "type": "outbound",
+          "at": "2026-06-14T15:05:33.710Z",
+          "note": "同键并发"
+        },
+        {
+          "id": "evt-1781449533711-16c52d",
+          "type": "outbound",
+          "at": "2026-06-14T15:05:33.711Z",
+          "note": "同键并发"
+        }
+      ]
     }
   ]
 }

@@ -1,10 +1,11 @@
 import { send, body, getParsedBody } from "../store/common.js";
-import { loadCylinders, saveCylinders, findCylinder, createCylinder, applyAction, addFill, buildAlerts } from "../store/cylinders.js";
+import { loadCylinders, withCylindersTx, findCylinder, createCylinder, applyAction, addFill, buildAlerts } from "../store/cylinders.js";
 import { validateCylinderBatch } from "../store/bulkImport.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
 import { PERMISSIONS, ROLE_LABELS } from "../auth/users.js";
 import { executeWithIdempotency } from "../store/idempotencyExecutor.js";
 import { OPERATION_TYPES, TARGET_TYPES, snapshotEntity } from "../store/operationLog.js";
+import { getDashboard } from "../store/dashboard.js";
 
 const ACTION_PERMISSION_MAP = {
   inbound: PERMISSIONS.CYLINDER_INBOUND,
@@ -42,6 +43,15 @@ export async function handleCylinders(req, res, url) {
     return send(res, 200, alerts);
   }
 
+  if (req.method === "GET" && url.pathname === "/reports/dashboard") {
+    const auth = await checkQueryAuth(req, res);
+    if (!auth.authorized) return true;
+    const inspectionDays = Number(url.searchParams.get("inspectionDays") || 45);
+    const longRentDays = Number(url.searchParams.get("longRentDays") || 30);
+    const dashboard = await getDashboard({ inspectionDays, longRentDays });
+    return send(res, 200, dashboard);
+  }
+
   if (req.method === "POST" && url.pathname === "/cylinders") {
     const auth = await checkActionAuth(req, res, PERMISSIONS.CYLINDER_CREATE);
     if (!auth.authorized) return true;
@@ -52,20 +62,20 @@ export async function handleCylinders(req, res, url) {
       targetType: TARGET_TYPES.CYLINDER,
       operation: async (ctx) => {
         const input = await body(req);
-        const cylinders = await loadCylinders();
         if (!input.id || !input.gasType) {
           return { statusCode: 400, body: { error: "id_and_gasType_required" } };
         }
-        const existing = findCylinder(cylinders, input.id);
-        if (existing) {
-          return { statusCode: 409, body: { error: "cylinder_id_exists" } };
-        }
-        const cylinder = createCylinder(input);
-        const eventIds = cylinder.events.map((e) => e.id);
-        ctx.captureEventIds(eventIds);
-        cylinders.push(cylinder);
-        await saveCylinders(cylinders);
-        return { statusCode: 201, body: cylinder };
+        return withCylindersTx(async (cylinders) => {
+          const existing = findCylinder(cylinders, input.id);
+          if (existing) {
+            return { statusCode: 409, body: { error: "cylinder_id_exists" } };
+          }
+          const cylinder = createCylinder(input);
+          const eventIds = cylinder.events.map((e) => e.id);
+          ctx.captureEventIds(eventIds);
+          cylinders.push(cylinder);
+          return { statusCode: 201, body: cylinder };
+        });
       }
     });
   }
@@ -81,39 +91,39 @@ export async function handleCylinders(req, res, url) {
       operation: async (ctx) => {
         const input = await body(req);
         const inputBatch = Array.isArray(input) ? input : input.items || [];
-        const cylinders = await loadCylinders();
-        const result = validateCylinderBatch(inputBatch, cylinders);
-        if (result.validCount === 0) {
+        return withCylindersTx(async (cylinders) => {
+          const result = validateCylinderBatch(inputBatch, cylinders);
+          if (result.validCount === 0) {
+            return {
+              statusCode: 422,
+              body: {
+                error: "batch_validation_failed",
+                totalCount: result.totalCount,
+                validCount: 0,
+                errors: result.errors,
+                summary: result.summary
+              }
+            };
+          }
+          const allEventIds = [];
+          for (const c of result.valid) {
+            c.events.forEach((e) => allEventIds.push(e.id));
+            cylinders.push(c);
+          }
+          ctx.captureEventIds(allEventIds);
           return {
-            statusCode: 422,
+            statusCode: 201,
             body: {
-              error: "batch_validation_failed",
               totalCount: result.totalCount,
-              validCount: 0,
+              validCount: result.validCount,
+              errorCount: result.errorCount,
+              inserted: result.validCount,
+              cylinders: result.valid,
               errors: result.errors,
               summary: result.summary
             }
           };
-        }
-        const allEventIds = [];
-        for (const c of result.valid) {
-          c.events.forEach((e) => allEventIds.push(e.id));
-          cylinders.push(c);
-        }
-        ctx.captureEventIds(allEventIds);
-        await saveCylinders(cylinders);
-        return {
-          statusCode: 201,
-          body: {
-            totalCount: result.totalCount,
-            validCount: result.validCount,
-            errorCount: result.errorCount,
-            inserted: result.validCount,
-            cylinders: result.valid,
-            errors: result.errors,
-            summary: result.summary
-          }
-        };
+        });
       }
     });
   }
@@ -150,24 +160,24 @@ export async function handleCylinders(req, res, url) {
         targetIdExtractor: () => id,
         operation: async (ctx) => {
           const actionInput = await body(req);
-          const cylinders = await loadCylinders();
-          const cylinder = findCylinder(cylinders, id);
-          if (!cylinder) {
-            return { statusCode: 404, body: { error: "cylinder_not_found" } };
-          }
-          ctx.setBeforeState(snapshotEntity(cylinder));
-          let evt;
-          try {
-            evt = applyAction(cylinder, actionInput);
-          } catch (err) {
-            if (err.statusCode) {
-              return { statusCode: err.statusCode, body: { error: err.message } };
+          return withCylindersTx(async (cylinders) => {
+            const cylinder = findCylinder(cylinders, id);
+            if (!cylinder) {
+              return { statusCode: 404, body: { error: "cylinder_not_found" } };
             }
-            throw err;
-          }
-          ctx.captureEventId(evt.id);
-          await saveCylinders(cylinders);
-          return { statusCode: 200, body: cylinder };
+            ctx.setBeforeState(snapshotEntity(cylinder));
+            let evt;
+            try {
+              evt = applyAction(cylinder, actionInput);
+            } catch (err) {
+              if (err.statusCode) {
+                return { statusCode: err.statusCode, body: { error: err.message } };
+              }
+              throw err;
+            }
+            ctx.captureEventId(evt.id);
+            return { statusCode: 200, body: cylinder };
+          });
         }
       });
     }
@@ -183,16 +193,16 @@ export async function handleCylinders(req, res, url) {
         targetIdExtractor: () => id,
         operation: async (ctx) => {
           const input = await body(req);
-          const cylinders = await loadCylinders();
-          const cylinder = findCylinder(cylinders, id);
-          if (!cylinder) {
-            return { statusCode: 404, body: { error: "cylinder_not_found" } };
-          }
-          ctx.setBeforeState(snapshotEntity(cylinder));
-          const { fill, event: evt } = addFill(cylinder, input);
-          ctx.captureEventId(evt.id);
-          await saveCylinders(cylinders);
-          return { statusCode: 201, body: fill };
+          return withCylindersTx(async (cylinders) => {
+            const cylinder = findCylinder(cylinders, id);
+            if (!cylinder) {
+              return { statusCode: 404, body: { error: "cylinder_not_found" } };
+            }
+            ctx.setBeforeState(snapshotEntity(cylinder));
+            const { fill, event: evt } = addFill(cylinder, input);
+            ctx.captureEventId(evt.id);
+            return { statusCode: 201, body: fill };
+          });
         }
       });
     }

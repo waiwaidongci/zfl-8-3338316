@@ -1,7 +1,7 @@
-import { loadJson, saveJson, makeEvent } from "./common.js";
+import { loadJson, saveJson, makeEvent, withJsonTx } from "./common.js";
 
 const FILE = "cylinders.json";
-const SEED = {
+export const SEED = {
   cylinders: [
     {
       id: "CY-88001",
@@ -37,6 +37,12 @@ export async function loadCylinders() {
 
 export async function saveCylinders(cylinders) {
   await saveJson(FILE, { cylinders });
+}
+
+export async function withCylindersTx(mutator) {
+  return withJsonTx(FILE, SEED, async (db) => {
+    return mutator(db.cylinders);
+  });
 }
 
 export function findCylinder(cylinders, id) {

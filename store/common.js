@@ -8,6 +8,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const dataDir = join(__dirname, "..", "data");
 
 const writeLocks = new Map();
+const txQueues = new Map();
+const jsonCache = new Map();
 
 function acquireWriteLock(filePath) {
   if (writeLocks.has(filePath)) {
@@ -26,6 +28,61 @@ function releaseWriteLock(filePath) {
   if (lock) {
     writeLocks.delete(filePath);
     lock.resolve();
+  }
+}
+
+function acquireTxLock(key) {
+  if (!txQueues.has(key)) {
+    txQueues.set(key, []);
+    return null;
+  }
+  let resolve;
+  const promise = new Promise((r) => {
+    resolve = r;
+  });
+  txQueues.get(key).push(resolve);
+  return promise;
+}
+
+function releaseTxLock(key) {
+  const queue = txQueues.get(key);
+  if (!queue) return;
+  if (queue.length === 0) {
+    txQueues.delete(key);
+    return;
+  }
+  const next = queue.shift();
+  next();
+}
+
+function sortFilenames(filenames) {
+  return [...filenames].sort();
+}
+
+async function acquireSortedTxLocks(filenames) {
+  const sorted = sortFilenames(filenames);
+  const acquired = [];
+  try {
+    for (const name of sorted) {
+      const wait = acquireTxLock(name);
+      if (wait) {
+        await wait;
+      }
+      acquired.push(name);
+    }
+  } catch (err) {
+    for (let i = acquired.length - 1; i >= 0; i--) {
+      releaseTxLock(acquired[i]);
+    }
+    throw err;
+  }
+  return acquired;
+}
+
+function releaseSortedTxLocks(filenames) {
+  const sorted = sortFilenames(filenames);
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    releaseTxLock(sorted[i]);
   }
 }
 
@@ -66,16 +123,23 @@ async function ensureDir(dirPath) {
   }
 }
 
-export async function loadJson(filename, fallback) {
+export async function loadJson(filename, fallback, { skipCache = false } = {}) {
   const filePath = join(dataDir, filename);
   await ensureDir(dirname(filePath));
+  if (!skipCache && jsonCache.has(filename)) {
+    return jsonCache.get(filename);
+  }
   if (!existsSync(filePath)) {
+    const fallbackClone = JSON.parse(JSON.stringify(fallback));
     await atomicWriteFile(filePath, JSON.stringify(fallback, null, 2));
-    return fallback;
+    jsonCache.set(filename, fallbackClone);
+    return fallbackClone;
   }
   try {
     const content = await readFile(filePath, "utf8");
-    return JSON.parse(content);
+    const parsed = JSON.parse(content);
+    jsonCache.set(filename, parsed);
+    return parsed;
   } catch (err) {
     const backupPath = filePath + ".bak";
     if (existsSync(backupPath)) {
@@ -83,11 +147,52 @@ export async function loadJson(filename, fallback) {
         const backupContent = await readFile(backupPath, "utf8");
         const parsed = JSON.parse(backupContent);
         await atomicWriteFile(filePath, backupContent);
+        jsonCache.set(filename, parsed);
         return parsed;
       } catch {}
     }
+    const fallbackClone = JSON.parse(JSON.stringify(fallback));
     await atomicWriteFile(filePath, JSON.stringify(fallback, null, 2));
-    return fallback;
+    jsonCache.set(filename, fallbackClone);
+    return fallbackClone;
+  }
+}
+
+export function invalidateJsonCache(filename) {
+  jsonCache.delete(filename);
+}
+
+export async function withJsonTx(filename, fallback, mutator) {
+  const acquired = await acquireSortedTxLocks([filename]);
+  try {
+    const db = await loadJson(filename, fallback, { skipCache: true });
+    const result = await mutator(db);
+    const cloneForWrite = JSON.parse(JSON.stringify(db));
+    await saveJson(filename, cloneForWrite);
+    jsonCache.set(filename, db);
+    return result;
+  } finally {
+    releaseSortedTxLocks(acquired);
+  }
+}
+
+export async function withMultiJsonTx(fileEntries, mutator) {
+  const filenames = fileEntries.map((e) => e.filename);
+  const acquired = await acquireSortedTxLocks(filenames);
+  try {
+    const dbs = {};
+    for (const { filename, fallback } of fileEntries) {
+      dbs[filename] = await loadJson(filename, fallback, { skipCache: true });
+    }
+    const result = await mutator(dbs);
+    for (const { filename } of fileEntries) {
+      const cloneForWrite = JSON.parse(JSON.stringify(dbs[filename]));
+      await saveJson(filename, cloneForWrite);
+      jsonCache.set(filename, dbs[filename]);
+    }
+    return result;
+  } finally {
+    releaseSortedTxLocks(acquired);
   }
 }
 
@@ -95,7 +200,6 @@ async function atomicWriteFile(filePath, content) {
   const waitLock = acquireWriteLock(filePath);
   if (waitLock) {
     await waitLock;
-    return atomicWriteFile(filePath, content);
   }
 
   const tmpPath = filePath + ".tmp." + createHash("md5").update(String(Date.now() + Math.random())).digest("hex").slice(0, 8);

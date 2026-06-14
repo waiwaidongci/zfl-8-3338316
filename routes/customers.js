@@ -1,5 +1,5 @@
 import { send, body } from "../store/common.js";
-import { loadCustomers, saveCustomers, findCustomer, createCustomer } from "../store/customers.js";
+import { loadCustomers, withCustomersTx, findCustomer, createCustomer } from "../store/customers.js";
 import { loadCylinders, findCylinder } from "../store/cylinders.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
 import { PERMISSIONS } from "../auth/users.js";
@@ -27,21 +27,21 @@ export async function handleCustomers(req, res, url) {
         if (!input.name) {
           return { statusCode: 400, body: { error: "name_required" } };
         }
-        const customers = await loadCustomers();
-        const byName = customers.find((c) => c.name === input.name);
-        if (byName) {
-          return { statusCode: 409, body: { error: "customer_name_exists" } };
-        }
-        if (input.id) {
-          const byId = findCustomer(customers, input.id);
-          if (byId) {
-            return { statusCode: 409, body: { error: "customer_id_exists" } };
+        return withCustomersTx(async (customers) => {
+          const byName = customers.find((c) => c.name === input.name);
+          if (byName) {
+            return { statusCode: 409, body: { error: "customer_name_exists" } };
           }
-        }
-        const customer = createCustomer(input);
-        customers.push(customer);
-        await saveCustomers(customers);
-        return { statusCode: 201, body: customer };
+          if (input.id) {
+            const byId = findCustomer(customers, input.id);
+            if (byId) {
+              return { statusCode: 409, body: { error: "customer_id_exists" } };
+            }
+          }
+          const customer = createCustomer(input);
+          customers.push(customer);
+          return { statusCode: 201, body: customer };
+        });
       }
     });
   }

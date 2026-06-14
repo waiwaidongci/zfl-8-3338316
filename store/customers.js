@@ -1,7 +1,7 @@
-import { loadJson, saveJson, genId } from "./common.js";
+import { loadJson, saveJson, genId, withJsonTx } from "./common.js";
 
 const FILE = "customers.json";
-const SEED = {
+export const SEED = {
   customers: [
     {
       id: "CUS-001",
@@ -29,6 +29,12 @@ export async function loadCustomers() {
 
 export async function saveCustomers(customers) {
   await saveJson(FILE, { customers });
+}
+
+export async function withCustomersTx(mutator) {
+  return withJsonTx(FILE, SEED, async (db) => {
+    return mutator(db.customers);
+  });
 }
 
 export function findCustomer(customers, id) {

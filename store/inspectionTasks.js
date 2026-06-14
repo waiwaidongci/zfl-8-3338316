@@ -1,7 +1,7 @@
-import { loadJson, saveJson, genId, makeEvent } from "./common.js";
+import { loadJson, saveJson, genId, makeEvent, withJsonTx } from "./common.js";
 
 const FILE = "inspectionTasks.json";
-const SEED = { tasks: [] };
+export const SEED = { tasks: [] };
 const MS_PER_DAY = 86400000;
 
 const VALID_STATUSES = ["pending", "sent", "passed", "failed", "restocked"];
@@ -21,6 +21,12 @@ export async function loadTasks() {
 
 export async function saveTasks(tasks) {
   await saveJson(FILE, { tasks });
+}
+
+export async function withTasksTx(mutator) {
+  return withJsonTx(FILE, SEED, async (db) => {
+    return mutator(db.tasks);
+  });
 }
 
 export function findTask(tasks, id) {
