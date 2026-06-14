@@ -6,6 +6,7 @@ import { handleCustomers } from "./routes/customers.js";
 import { handleRentalOrders } from "./routes/rentalOrders.js";
 import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 import { handleEventAudit } from "./routes/eventAudit.js";
+import { handleInventoryChecks } from "./routes/inventoryChecks.js";
 import { recoverStaleProcessing } from "./store/idempotency.js";
 
 process.on("unhandledRejection", (err) => {
@@ -43,6 +44,17 @@ const ROOT_ENDPOINTS = [
   "POST /inspection-tasks/:id/send",
   "POST /inspection-tasks/:id/inspect",
   "POST /inspection-tasks/:id/restock",
+  "GET /inventory-checks",
+  "POST /inventory-checks",
+  "GET /inventory-checks/:id",
+  "POST /inventory-checks/:id/start",
+  "POST /inventory-checks/:id/scan",
+  "POST /inventory-checks/:id/complete",
+  "GET /inventory-checks/:id/differences",
+  "POST /inventory-checks/:id/confirm",
+  "GET /inventory-checks/:id/history",
+  "GET /cylinders/:id/inventory-history",
+  "GET /reports/inventory-summary",
   "GET /events",
   "GET /events/types",
   "GET /operation-logs",
@@ -60,6 +72,7 @@ const routeHandlers = [
   handleCustomers,
   handleRentalOrders,
   handleInspectionTasks,
+  handleInventoryChecks,
   handleEventAudit
 ];
 

@@ -91,14 +91,20 @@ export const OPERATION_TYPES = {
   INSPECTION_SEND: "inspection.send",
   INSPECTION_INSPECT: "inspection.inspect",
   INSPECTION_RESTOCK: "inspection.restock",
-  CUSTOMER_CREATE: "customer.create"
+  CUSTOMER_CREATE: "customer.create",
+  INVENTORY_CREATE: "inventory.create",
+  INVENTORY_START: "inventory.start",
+  INVENTORY_SCAN: "inventory.scan",
+  INVENTORY_COMPLETE: "inventory.complete",
+  INVENTORY_CONFIRM: "inventory.confirm"
 };
 
 export const TARGET_TYPES = {
   CYLINDER: "cylinder",
   ORDER: "order",
   INSPECTION_TASK: "inspection_task",
-  CUSTOMER: "customer"
+  CUSTOMER: "customer",
+  INVENTORY_CHECK: "inventory_check"
 };
 
 export function snapshotEntity(entity) {

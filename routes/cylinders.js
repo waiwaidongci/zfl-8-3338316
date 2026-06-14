@@ -12,7 +12,9 @@ const ACTION_PERMISSION_MAP = {
   outbound: PERMISSIONS.CYLINDER_OUTBOUND,
   return: PERMISSIONS.CYLINDER_RETURN,
   inspect: PERMISSIONS.CYLINDER_INSPECT,
-  scrap: PERMISSIONS.CYLINDER_SCRAP
+  scrap: PERMISSIONS.CYLINDER_SCRAP,
+  mark_pending_check: PERMISSIONS.CYLINDER_SCRAP,
+  clear_pending_check: PERMISSIONS.CYLINDER_INBOUND
 };
 
 async function dynamicActionAuth(req, res) {

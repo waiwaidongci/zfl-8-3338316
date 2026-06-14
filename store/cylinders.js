@@ -76,6 +76,14 @@ export const transitions = {
   scrap(cylinder, input) {
     cylinder.status = "scrapped";
     cylinder.location = input.location || "报废区";
+  },
+  mark_pending_check(cylinder, input) {
+    cylinder.status = "pending_check";
+    cylinder.location = input.location || "待核查区";
+  },
+  clear_pending_check(cylinder, input) {
+    cylinder.status = input.targetStatus || "in_stock";
+    cylinder.location = input.location || "仓库";
   }
 };
 

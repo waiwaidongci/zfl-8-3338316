@@ -2321,6 +2321,4120 @@
       "operationLogId": "op-1781450256975-567589",
       "createdAt": "2026-06-14T15:17:36.972Z",
       "completedAt": "2026-06-14T15:17:36.978Z"
+    },
+    "auto-668887bdbe52e2792a721217ef99cccb": {
+      "key": "auto-668887bdbe52e2792a721217ef99cccb",
+      "method": "POST",
+      "path": "/inventory-checks",
+      "bodyHash": "1afd9fba67c91f272744da445e680d34b572fafe947787a86e3b8e1fa535c1ae",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 201,
+        "body": {
+          "id": "IC-1781450998507-aa743c",
+          "title": "6月盘点",
+          "scope": {
+            "location": null,
+            "gasType": null,
+            "status": null
+          },
+          "expectedCount": 42,
+          "expectedCylinderIds": [
+            "CY-88001",
+            "CY-88002",
+            "CY-IDEM-TEST",
+            "CY-IDEM-1781423329133",
+            "CY-IDEM-1781423597795",
+            "CY-CONCUR-1781429924637-0",
+            "CY-SMOKE-1781433343",
+            "CY-SMOKE-1781434162",
+            "CY-CON-1781434651415-0",
+            "CY-CON-1781435831491-0",
+            "CY-CONC-1781449117519-0",
+            "CY-CONC-1781449117519-5",
+            "CY-CONC-1781449117519-2",
+            "CY-CONC-1781449117519-1",
+            "CY-CONC-1781449117519-4",
+            "CY-CONC-1781449117519-6",
+            "CY-CONC-1781449117519-9",
+            "CY-CONC-1781449117519-7",
+            "CY-CONC-1781449117519-8",
+            "CY-CONC-1781449117519-3",
+            "CY-VERIFY-1781449445211-0",
+            "CY-VERIFY-1781449445211-7",
+            "CY-VERIFY-1781449445211-8",
+            "CY-VERIFY-1781449445211-6",
+            "CY-VERIFY-1781449445211-5",
+            "CY-VERIFY-1781449445211-1",
+            "CY-VERIFY-1781449445211-4",
+            "CY-VERIFY-1781449445211-2",
+            "CY-VERIFY-1781449445211-9",
+            "CY-VERIFY-1781449445211-3",
+            "CY-VERIFY-1781449445211-10",
+            "CY-VERIFY-1781449445211-11",
+            "CY-VERIFY-ACTION-1781449445211",
+            "CY-IDEM-CHECK-1781449533704",
+            "CY-IDEM-FIX-1781450092958",
+            "CY-CON-1781450256751-0",
+            "CY-CON-1781450256751-3",
+            "CY-CON-1781450256751-4",
+            "CY-CON-1781450256751-1",
+            "CY-CON-1781450256751-2",
+            "CY-ACTION-1781450256751",
+            "CY-IDEM-FIX2-1781450256938"
+          ],
+          "expectedCylinderDetails": [
+            {
+              "id": "CY-88001",
+              "gasType": "高纯氩",
+              "capacity": "40L",
+              "status": "in_stock",
+              "location": "一号仓",
+              "customer": null
+            },
+            {
+              "id": "CY-88002",
+              "gasType": "混合标准气",
+              "capacity": "8L",
+              "status": "rented",
+              "location": "宁川检测",
+              "customer": "宁川检测"
+            },
+            {
+              "id": "CY-IDEM-TEST",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-1781423329133",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-IDEM-1781423597795",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CONCUR-1781429924637-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781433343",
+              "gasType": "t",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781434162",
+              "gasType": "test",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781434651415-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781435831491-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-0",
+              "gasType": "测试气0",
+              "capacity": "10L",
+              "status": "returned",
+              "location": "待检区",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-5",
+              "gasType": "测试气5",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-2",
+              "gasType": "测试气2",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-1",
+              "gasType": "测试气1",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-4",
+              "gasType": "测试气4",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-6",
+              "gasType": "测试气6",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-9",
+              "gasType": "测试气9",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-7",
+              "gasType": "测试气7",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-8",
+              "gasType": "测试气8",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-3",
+              "gasType": "测试气3",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-0",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-7",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-8",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-6",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-5",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-1",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-4",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-2",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-9",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-3",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-10",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-11",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-ACTION-1781449445211",
+              "gasType": "动作验证气",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-CHECK-1781449533704",
+              "gasType": "幂等验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX-1781450092958",
+              "gasType": "幂等修复验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CON-1781450256751-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-3",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-4",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-1",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-2",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-ACTION-1781450256751",
+              "gasType": "流转测试",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX2-1781450256938",
+              "gasType": "幂等修复二次验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            }
+          ],
+          "scannedEntries": [],
+          "scanIndexCounter": 0,
+          "differences": null,
+          "suggestions": null,
+          "status": "draft",
+          "createdAt": "2026-06-14T15:29:58.507Z",
+          "scanningStartedAt": null,
+          "completedAt": null,
+          "confirmedAt": null,
+          "confirmedBy": null,
+          "createdBy": null,
+          "note": null
+        }
+      },
+      "operationLogId": "op-1781450998510-207ac6",
+      "createdAt": "2026-06-14T15:29:58.505Z",
+      "completedAt": "2026-06-14T15:29:58.514Z"
+    },
+    "auto-65a565b52434fbdf593213f125eb9c08": {
+      "key": "auto-65a565b52434fbdf593213f125eb9c08",
+      "method": "POST",
+      "path": "/inventory-checks/:id/start",
+      "bodyHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "id": "IC-1781450998507-aa743c",
+          "title": "6月盘点",
+          "scope": {
+            "location": null,
+            "gasType": null,
+            "status": null
+          },
+          "expectedCount": 42,
+          "expectedCylinderIds": [
+            "CY-88001",
+            "CY-88002",
+            "CY-IDEM-TEST",
+            "CY-IDEM-1781423329133",
+            "CY-IDEM-1781423597795",
+            "CY-CONCUR-1781429924637-0",
+            "CY-SMOKE-1781433343",
+            "CY-SMOKE-1781434162",
+            "CY-CON-1781434651415-0",
+            "CY-CON-1781435831491-0",
+            "CY-CONC-1781449117519-0",
+            "CY-CONC-1781449117519-5",
+            "CY-CONC-1781449117519-2",
+            "CY-CONC-1781449117519-1",
+            "CY-CONC-1781449117519-4",
+            "CY-CONC-1781449117519-6",
+            "CY-CONC-1781449117519-9",
+            "CY-CONC-1781449117519-7",
+            "CY-CONC-1781449117519-8",
+            "CY-CONC-1781449117519-3",
+            "CY-VERIFY-1781449445211-0",
+            "CY-VERIFY-1781449445211-7",
+            "CY-VERIFY-1781449445211-8",
+            "CY-VERIFY-1781449445211-6",
+            "CY-VERIFY-1781449445211-5",
+            "CY-VERIFY-1781449445211-1",
+            "CY-VERIFY-1781449445211-4",
+            "CY-VERIFY-1781449445211-2",
+            "CY-VERIFY-1781449445211-9",
+            "CY-VERIFY-1781449445211-3",
+            "CY-VERIFY-1781449445211-10",
+            "CY-VERIFY-1781449445211-11",
+            "CY-VERIFY-ACTION-1781449445211",
+            "CY-IDEM-CHECK-1781449533704",
+            "CY-IDEM-FIX-1781450092958",
+            "CY-CON-1781450256751-0",
+            "CY-CON-1781450256751-3",
+            "CY-CON-1781450256751-4",
+            "CY-CON-1781450256751-1",
+            "CY-CON-1781450256751-2",
+            "CY-ACTION-1781450256751",
+            "CY-IDEM-FIX2-1781450256938"
+          ],
+          "expectedCylinderDetails": [
+            {
+              "id": "CY-88001",
+              "gasType": "高纯氩",
+              "capacity": "40L",
+              "status": "in_stock",
+              "location": "一号仓",
+              "customer": null
+            },
+            {
+              "id": "CY-88002",
+              "gasType": "混合标准气",
+              "capacity": "8L",
+              "status": "rented",
+              "location": "宁川检测",
+              "customer": "宁川检测"
+            },
+            {
+              "id": "CY-IDEM-TEST",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-1781423329133",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-IDEM-1781423597795",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CONCUR-1781429924637-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781433343",
+              "gasType": "t",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781434162",
+              "gasType": "test",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781434651415-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781435831491-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-0",
+              "gasType": "测试气0",
+              "capacity": "10L",
+              "status": "returned",
+              "location": "待检区",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-5",
+              "gasType": "测试气5",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-2",
+              "gasType": "测试气2",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-1",
+              "gasType": "测试气1",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-4",
+              "gasType": "测试气4",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-6",
+              "gasType": "测试气6",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-9",
+              "gasType": "测试气9",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-7",
+              "gasType": "测试气7",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-8",
+              "gasType": "测试气8",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-3",
+              "gasType": "测试气3",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-0",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-7",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-8",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-6",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-5",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-1",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-4",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-2",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-9",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-3",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-10",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-11",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-ACTION-1781449445211",
+              "gasType": "动作验证气",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-CHECK-1781449533704",
+              "gasType": "幂等验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX-1781450092958",
+              "gasType": "幂等修复验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CON-1781450256751-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-3",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-4",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-1",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-2",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-ACTION-1781450256751",
+              "gasType": "流转测试",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX2-1781450256938",
+              "gasType": "幂等修复二次验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            }
+          ],
+          "scannedEntries": [],
+          "scanIndexCounter": 0,
+          "differences": null,
+          "suggestions": null,
+          "status": "scanning",
+          "createdAt": "2026-06-14T15:29:58.507Z",
+          "scanningStartedAt": "2026-06-14T15:30:17.958Z",
+          "completedAt": null,
+          "confirmedAt": null,
+          "confirmedBy": null,
+          "createdBy": null,
+          "note": null
+        }
+      },
+      "operationLogId": "op-1781451017959-b49b8e",
+      "createdAt": "2026-06-14T15:30:17.955Z",
+      "completedAt": "2026-06-14T15:30:17.960Z"
+    },
+    "auto-0817c30ccef9ad6d4c9447743f037243": {
+      "key": "auto-0817c30ccef9ad6d4c9447743f037243",
+      "method": "POST",
+      "path": "/inventory-checks/:id/scan",
+      "bodyHash": "f6490aaafc49d9fb69a77c757a6eaae0ee9f6753fe47795382280df0472156df",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "check": {
+            "id": "IC-1781450998507-aa743c",
+            "title": "6月盘点",
+            "scope": {
+              "location": null,
+              "gasType": null,
+              "status": null
+            },
+            "expectedCount": 42,
+            "expectedCylinderIds": [
+              "CY-88001",
+              "CY-88002",
+              "CY-IDEM-TEST",
+              "CY-IDEM-1781423329133",
+              "CY-IDEM-1781423597795",
+              "CY-CONCUR-1781429924637-0",
+              "CY-SMOKE-1781433343",
+              "CY-SMOKE-1781434162",
+              "CY-CON-1781434651415-0",
+              "CY-CON-1781435831491-0",
+              "CY-CONC-1781449117519-0",
+              "CY-CONC-1781449117519-5",
+              "CY-CONC-1781449117519-2",
+              "CY-CONC-1781449117519-1",
+              "CY-CONC-1781449117519-4",
+              "CY-CONC-1781449117519-6",
+              "CY-CONC-1781449117519-9",
+              "CY-CONC-1781449117519-7",
+              "CY-CONC-1781449117519-8",
+              "CY-CONC-1781449117519-3",
+              "CY-VERIFY-1781449445211-0",
+              "CY-VERIFY-1781449445211-7",
+              "CY-VERIFY-1781449445211-8",
+              "CY-VERIFY-1781449445211-6",
+              "CY-VERIFY-1781449445211-5",
+              "CY-VERIFY-1781449445211-1",
+              "CY-VERIFY-1781449445211-4",
+              "CY-VERIFY-1781449445211-2",
+              "CY-VERIFY-1781449445211-9",
+              "CY-VERIFY-1781449445211-3",
+              "CY-VERIFY-1781449445211-10",
+              "CY-VERIFY-1781449445211-11",
+              "CY-VERIFY-ACTION-1781449445211",
+              "CY-IDEM-CHECK-1781449533704",
+              "CY-IDEM-FIX-1781450092958",
+              "CY-CON-1781450256751-0",
+              "CY-CON-1781450256751-3",
+              "CY-CON-1781450256751-4",
+              "CY-CON-1781450256751-1",
+              "CY-CON-1781450256751-2",
+              "CY-ACTION-1781450256751",
+              "CY-IDEM-FIX2-1781450256938"
+            ],
+            "expectedCylinderDetails": [
+              {
+                "id": "CY-88001",
+                "gasType": "高纯氩",
+                "capacity": "40L",
+                "status": "in_stock",
+                "location": "一号仓",
+                "customer": null
+              },
+              {
+                "id": "CY-88002",
+                "gasType": "混合标准气",
+                "capacity": "8L",
+                "status": "rented",
+                "location": "宁川检测",
+                "customer": "宁川检测"
+              },
+              {
+                "id": "CY-IDEM-TEST",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-1781423329133",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-IDEM-1781423597795",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CONCUR-1781429924637-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781433343",
+                "gasType": "t",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781434162",
+                "gasType": "test",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781434651415-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781435831491-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-0",
+                "gasType": "测试气0",
+                "capacity": "10L",
+                "status": "returned",
+                "location": "待检区",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-5",
+                "gasType": "测试气5",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-2",
+                "gasType": "测试气2",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-1",
+                "gasType": "测试气1",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-4",
+                "gasType": "测试气4",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-6",
+                "gasType": "测试气6",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-9",
+                "gasType": "测试气9",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-7",
+                "gasType": "测试气7",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-8",
+                "gasType": "测试气8",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-3",
+                "gasType": "测试气3",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-0",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-7",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-8",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-6",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-5",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-1",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-4",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-2",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-9",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-3",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-10",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-11",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-ACTION-1781449445211",
+                "gasType": "动作验证气",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-CHECK-1781449533704",
+                "gasType": "幂等验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX-1781450092958",
+                "gasType": "幂等修复验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CON-1781450256751-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-3",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-4",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-1",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-2",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-ACTION-1781450256751",
+                "gasType": "流转测试",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX2-1781450256938",
+                "gasType": "幂等修复二次验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              }
+            ],
+            "scannedEntries": [
+              {
+                "cylinderId": "CY-88001",
+                "scannedAt": "2026-06-14T15:30:17.983Z",
+                "operator": "admin",
+                "scanIndex": 1,
+                "duplicate": false
+              }
+            ],
+            "scanIndexCounter": 1,
+            "differences": null,
+            "suggestions": null,
+            "status": "scanning",
+            "createdAt": "2026-06-14T15:29:58.507Z",
+            "scanningStartedAt": "2026-06-14T15:30:17.958Z",
+            "completedAt": null,
+            "confirmedAt": null,
+            "confirmedBy": null,
+            "createdBy": null,
+            "note": null
+          },
+          "entry": {
+            "cylinderId": "CY-88001",
+            "scannedAt": "2026-06-14T15:30:17.983Z",
+            "operator": "admin",
+            "scanIndex": 1,
+            "duplicate": false
+          }
+        }
+      },
+      "operationLogId": "op-1781451017984-32d6f0",
+      "createdAt": "2026-06-14T15:30:17.982Z",
+      "completedAt": "2026-06-14T15:30:17.985Z"
+    },
+    "auto-46a1ff2ac2cccc7d416bf125c464b085": {
+      "key": "auto-46a1ff2ac2cccc7d416bf125c464b085",
+      "method": "POST",
+      "path": "/inventory-checks/:id/scan",
+      "bodyHash": "f6490aaafc49d9fb69a77c757a6eaae0ee9f6753fe47795382280df0472156df",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "check": {
+            "id": "IC-1781450998507-aa743c",
+            "title": "6月盘点",
+            "scope": {
+              "location": null,
+              "gasType": null,
+              "status": null
+            },
+            "expectedCount": 42,
+            "expectedCylinderIds": [
+              "CY-88001",
+              "CY-88002",
+              "CY-IDEM-TEST",
+              "CY-IDEM-1781423329133",
+              "CY-IDEM-1781423597795",
+              "CY-CONCUR-1781429924637-0",
+              "CY-SMOKE-1781433343",
+              "CY-SMOKE-1781434162",
+              "CY-CON-1781434651415-0",
+              "CY-CON-1781435831491-0",
+              "CY-CONC-1781449117519-0",
+              "CY-CONC-1781449117519-5",
+              "CY-CONC-1781449117519-2",
+              "CY-CONC-1781449117519-1",
+              "CY-CONC-1781449117519-4",
+              "CY-CONC-1781449117519-6",
+              "CY-CONC-1781449117519-9",
+              "CY-CONC-1781449117519-7",
+              "CY-CONC-1781449117519-8",
+              "CY-CONC-1781449117519-3",
+              "CY-VERIFY-1781449445211-0",
+              "CY-VERIFY-1781449445211-7",
+              "CY-VERIFY-1781449445211-8",
+              "CY-VERIFY-1781449445211-6",
+              "CY-VERIFY-1781449445211-5",
+              "CY-VERIFY-1781449445211-1",
+              "CY-VERIFY-1781449445211-4",
+              "CY-VERIFY-1781449445211-2",
+              "CY-VERIFY-1781449445211-9",
+              "CY-VERIFY-1781449445211-3",
+              "CY-VERIFY-1781449445211-10",
+              "CY-VERIFY-1781449445211-11",
+              "CY-VERIFY-ACTION-1781449445211",
+              "CY-IDEM-CHECK-1781449533704",
+              "CY-IDEM-FIX-1781450092958",
+              "CY-CON-1781450256751-0",
+              "CY-CON-1781450256751-3",
+              "CY-CON-1781450256751-4",
+              "CY-CON-1781450256751-1",
+              "CY-CON-1781450256751-2",
+              "CY-ACTION-1781450256751",
+              "CY-IDEM-FIX2-1781450256938"
+            ],
+            "expectedCylinderDetails": [
+              {
+                "id": "CY-88001",
+                "gasType": "高纯氩",
+                "capacity": "40L",
+                "status": "in_stock",
+                "location": "一号仓",
+                "customer": null
+              },
+              {
+                "id": "CY-88002",
+                "gasType": "混合标准气",
+                "capacity": "8L",
+                "status": "rented",
+                "location": "宁川检测",
+                "customer": "宁川检测"
+              },
+              {
+                "id": "CY-IDEM-TEST",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-1781423329133",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-IDEM-1781423597795",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CONCUR-1781429924637-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781433343",
+                "gasType": "t",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781434162",
+                "gasType": "test",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781434651415-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781435831491-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-0",
+                "gasType": "测试气0",
+                "capacity": "10L",
+                "status": "returned",
+                "location": "待检区",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-5",
+                "gasType": "测试气5",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-2",
+                "gasType": "测试气2",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-1",
+                "gasType": "测试气1",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-4",
+                "gasType": "测试气4",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-6",
+                "gasType": "测试气6",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-9",
+                "gasType": "测试气9",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-7",
+                "gasType": "测试气7",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-8",
+                "gasType": "测试气8",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-3",
+                "gasType": "测试气3",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-0",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-7",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-8",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-6",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-5",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-1",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-4",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-2",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-9",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-3",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-10",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-11",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-ACTION-1781449445211",
+                "gasType": "动作验证气",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-CHECK-1781449533704",
+                "gasType": "幂等验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX-1781450092958",
+                "gasType": "幂等修复验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CON-1781450256751-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-3",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-4",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-1",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-2",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-ACTION-1781450256751",
+                "gasType": "流转测试",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX2-1781450256938",
+                "gasType": "幂等修复二次验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              }
+            ],
+            "scannedEntries": [
+              {
+                "cylinderId": "CY-88001",
+                "scannedAt": "2026-06-14T15:30:17.983Z",
+                "operator": "admin",
+                "scanIndex": 1,
+                "duplicate": false
+              },
+              {
+                "cylinderId": "CY-88001",
+                "scannedAt": "2026-06-14T15:30:18.016Z",
+                "operator": "admin",
+                "scanIndex": 2,
+                "duplicate": true
+              }
+            ],
+            "scanIndexCounter": 2,
+            "differences": null,
+            "suggestions": null,
+            "status": "scanning",
+            "createdAt": "2026-06-14T15:29:58.507Z",
+            "scanningStartedAt": "2026-06-14T15:30:17.958Z",
+            "completedAt": null,
+            "confirmedAt": null,
+            "confirmedBy": null,
+            "createdBy": null,
+            "note": null
+          },
+          "entry": {
+            "cylinderId": "CY-88001",
+            "scannedAt": "2026-06-14T15:30:18.016Z",
+            "operator": "admin",
+            "scanIndex": 2,
+            "duplicate": true
+          }
+        }
+      },
+      "operationLogId": "op-1781451018017-6ac3cc",
+      "createdAt": "2026-06-14T15:30:18.014Z",
+      "completedAt": "2026-06-14T15:30:18.018Z"
+    },
+    "auto-609cf4235f10b6192681d3467fc20b88": {
+      "key": "auto-609cf4235f10b6192681d3467fc20b88",
+      "method": "POST",
+      "path": "/inventory-checks/:id/complete",
+      "bodyHash": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "id": "IC-1781450998507-aa743c",
+          "title": "6月盘点",
+          "scope": {
+            "location": null,
+            "gasType": null,
+            "status": null
+          },
+          "expectedCount": 42,
+          "expectedCylinderIds": [
+            "CY-88001",
+            "CY-88002",
+            "CY-IDEM-TEST",
+            "CY-IDEM-1781423329133",
+            "CY-IDEM-1781423597795",
+            "CY-CONCUR-1781429924637-0",
+            "CY-SMOKE-1781433343",
+            "CY-SMOKE-1781434162",
+            "CY-CON-1781434651415-0",
+            "CY-CON-1781435831491-0",
+            "CY-CONC-1781449117519-0",
+            "CY-CONC-1781449117519-5",
+            "CY-CONC-1781449117519-2",
+            "CY-CONC-1781449117519-1",
+            "CY-CONC-1781449117519-4",
+            "CY-CONC-1781449117519-6",
+            "CY-CONC-1781449117519-9",
+            "CY-CONC-1781449117519-7",
+            "CY-CONC-1781449117519-8",
+            "CY-CONC-1781449117519-3",
+            "CY-VERIFY-1781449445211-0",
+            "CY-VERIFY-1781449445211-7",
+            "CY-VERIFY-1781449445211-8",
+            "CY-VERIFY-1781449445211-6",
+            "CY-VERIFY-1781449445211-5",
+            "CY-VERIFY-1781449445211-1",
+            "CY-VERIFY-1781449445211-4",
+            "CY-VERIFY-1781449445211-2",
+            "CY-VERIFY-1781449445211-9",
+            "CY-VERIFY-1781449445211-3",
+            "CY-VERIFY-1781449445211-10",
+            "CY-VERIFY-1781449445211-11",
+            "CY-VERIFY-ACTION-1781449445211",
+            "CY-IDEM-CHECK-1781449533704",
+            "CY-IDEM-FIX-1781450092958",
+            "CY-CON-1781450256751-0",
+            "CY-CON-1781450256751-3",
+            "CY-CON-1781450256751-4",
+            "CY-CON-1781450256751-1",
+            "CY-CON-1781450256751-2",
+            "CY-ACTION-1781450256751",
+            "CY-IDEM-FIX2-1781450256938"
+          ],
+          "expectedCylinderDetails": [
+            {
+              "id": "CY-88001",
+              "gasType": "高纯氩",
+              "capacity": "40L",
+              "status": "in_stock",
+              "location": "一号仓",
+              "customer": null
+            },
+            {
+              "id": "CY-88002",
+              "gasType": "混合标准气",
+              "capacity": "8L",
+              "status": "rented",
+              "location": "宁川检测",
+              "customer": "宁川检测"
+            },
+            {
+              "id": "CY-IDEM-TEST",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-1781423329133",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-IDEM-1781423597795",
+              "gasType": "测试氧气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CONCUR-1781429924637-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781433343",
+              "gasType": "t",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-SMOKE-1781434162",
+              "gasType": "test",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781434651415-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781435831491-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-0",
+              "gasType": "测试气0",
+              "capacity": "10L",
+              "status": "returned",
+              "location": "待检区",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-5",
+              "gasType": "测试气5",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-2",
+              "gasType": "测试气2",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-1",
+              "gasType": "测试气1",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-4",
+              "gasType": "测试气4",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-6",
+              "gasType": "测试气6",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-9",
+              "gasType": "测试气9",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-7",
+              "gasType": "测试气7",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-8",
+              "gasType": "测试气8",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CONC-1781449117519-3",
+              "gasType": "测试气3",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-0",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-7",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-8",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-6",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-5",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-1",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-4",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-2",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-9",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-3",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-10",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-1781449445211-11",
+              "gasType": "验证气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-VERIFY-ACTION-1781449445211",
+              "gasType": "动作验证气",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-CHECK-1781449533704",
+              "gasType": "幂等验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX-1781450092958",
+              "gasType": "幂等修复验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-CON-1781450256751-0",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-3",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-4",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-1",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-CON-1781450256751-2",
+              "gasType": "并发测试气",
+              "capacity": "10L",
+              "status": "in_stock",
+              "location": "仓库",
+              "customer": null
+            },
+            {
+              "id": "CY-ACTION-1781450256751",
+              "gasType": "流转测试",
+              "capacity": "40L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            },
+            {
+              "id": "CY-IDEM-FIX2-1781450256938",
+              "gasType": "幂等修复二次验证气",
+              "capacity": "10L",
+              "status": "rented",
+              "location": "CUS-001",
+              "customer": "CUS-001"
+            }
+          ],
+          "scannedEntries": [
+            {
+              "cylinderId": "CY-88001",
+              "scannedAt": "2026-06-14T15:30:17.983Z",
+              "operator": "admin",
+              "scanIndex": 1,
+              "duplicate": false
+            },
+            {
+              "cylinderId": "CY-88001",
+              "scannedAt": "2026-06-14T15:30:18.016Z",
+              "operator": "admin",
+              "scanIndex": 2,
+              "duplicate": true
+            }
+          ],
+          "scanIndexCounter": 2,
+          "differences": {
+            "expectedCount": 42,
+            "uniqueScannedCount": 1,
+            "matchedCount": 1,
+            "deficitCount": 41,
+            "surplusCount": 0,
+            "duplicateScanCount": 1,
+            "matched": [
+              {
+                "cylinderId": "CY-88001",
+                "gasType": "高纯氩",
+                "capacity": "40L",
+                "status": "in_stock",
+                "location": "一号仓"
+              }
+            ],
+            "deficit": [
+              {
+                "cylinderId": "CY-88002",
+                "gasType": "混合标准气",
+                "capacity": "8L",
+                "status": "rented",
+                "location": "宁川检测",
+                "customer": "宁川检测",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-IDEM-TEST",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-IDEM-1781423329133",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-IDEM-1781423597795",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-CONCUR-1781429924637-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-SMOKE-1781433343",
+                "gasType": "t",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-SMOKE-1781434162",
+                "gasType": "test",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781434651415-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781435831491-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-0",
+                "gasType": "测试气0",
+                "capacity": "10L",
+                "status": "returned",
+                "location": "待检区",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-5",
+                "gasType": "测试气5",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-2",
+                "gasType": "测试气2",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-1",
+                "gasType": "测试气1",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-4",
+                "gasType": "测试气4",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-6",
+                "gasType": "测试气6",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-9",
+                "gasType": "测试气9",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-7",
+                "gasType": "测试气7",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-8",
+                "gasType": "测试气8",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-3",
+                "gasType": "测试气3",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-0",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-7",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-8",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-6",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-5",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-1",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-4",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-2",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-9",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-3",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-10",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-11",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-VERIFY-ACTION-1781449445211",
+                "gasType": "动作验证气",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-IDEM-CHECK-1781449533704",
+                "gasType": "幂等验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-IDEM-FIX-1781450092958",
+                "gasType": "幂等修复验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-3",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-4",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-1",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-2",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null,
+                "protected": false
+              },
+              {
+                "cylinderId": "CY-ACTION-1781450256751",
+                "gasType": "流转测试",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              },
+              {
+                "cylinderId": "CY-IDEM-FIX2-1781450256938",
+                "gasType": "幂等修复二次验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001",
+                "protected": true
+              }
+            ],
+            "surplus": []
+          },
+          "suggestions": [
+            {
+              "cylinderId": "CY-88002",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-88002当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-IDEM-TEST",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-IDEM-TEST当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-IDEM-1781423329133",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-IDEM-1781423329133盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-IDEM-1781423597795",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-IDEM-1781423597795当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-CONCUR-1781429924637-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONCUR-1781429924637-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-SMOKE-1781433343",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-SMOKE-1781433343盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-SMOKE-1781434162",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-SMOKE-1781434162盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781434651415-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781434651415-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781435831491-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781435831491-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-5",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-5盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-2",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-2盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-1",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-1盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-4",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-4盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-6",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-6盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-9",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-9盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-7",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-7盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-8",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-8盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-3",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CONC-1781449117519-3盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-7",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-7盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-8",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-8盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-6",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-6盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-5",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-5盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-1",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-1盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-4",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-4盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-2",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-2盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-9",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-9盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-3",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-3盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-10",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-10盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-11",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-VERIFY-1781449445211-11盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-VERIFY-ACTION-1781449445211",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-VERIFY-ACTION-1781449445211当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-IDEM-CHECK-1781449533704",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-IDEM-CHECK-1781449533704当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-IDEM-FIX-1781450092958",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-IDEM-FIX-1781450092958当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-0",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781450256751-0盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-3",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781450256751-3盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-4",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781450256751-4盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-1",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781450256751-1盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-2",
+              "type": "deficit_actionable",
+              "suggestion": "钢瓶CY-CON-1781450256751-2盘亏，建议标记为待核查并追踪去向",
+              "action": "mark_pending_check",
+              "priority": "high"
+            },
+            {
+              "cylinderId": "CY-ACTION-1781450256751",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-ACTION-1781450256751当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": "CY-IDEM-FIX2-1781450256938",
+              "type": "deficit_protected",
+              "suggestion": "钢瓶CY-IDEM-FIX2-1781450256938当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+              "action": "manual_verify",
+              "priority": "medium"
+            },
+            {
+              "cylinderId": null,
+              "type": "duplicate_scans",
+              "suggestion": "存在1次重复扫描记录，已自动去重计算，原始扫描记录可追溯",
+              "action": "review_duplicates",
+              "priority": "low"
+            }
+          ],
+          "status": "completed",
+          "createdAt": "2026-06-14T15:29:58.507Z",
+          "scanningStartedAt": "2026-06-14T15:30:17.958Z",
+          "completedAt": "2026-06-14T15:30:18.047Z",
+          "confirmedAt": null,
+          "confirmedBy": null,
+          "createdBy": null,
+          "note": null
+        }
+      },
+      "operationLogId": "op-1781451018049-e7419d",
+      "createdAt": "2026-06-14T15:30:18.044Z",
+      "completedAt": "2026-06-14T15:30:18.050Z"
+    },
+    "auto-170e77e869b10f95f201a8a0289f0356": {
+      "key": "auto-170e77e869b10f95f201a8a0289f0356",
+      "method": "POST",
+      "path": "/inventory-checks/:id/confirm",
+      "bodyHash": "d529c5973e0efb80f87d59afe831405f13ee5bfa304279cf4e67042154f99c21",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": {
+          "check": {
+            "id": "IC-1781450998507-aa743c",
+            "title": "6月盘点",
+            "scope": {
+              "location": null,
+              "gasType": null,
+              "status": null
+            },
+            "expectedCount": 42,
+            "expectedCylinderIds": [
+              "CY-88001",
+              "CY-88002",
+              "CY-IDEM-TEST",
+              "CY-IDEM-1781423329133",
+              "CY-IDEM-1781423597795",
+              "CY-CONCUR-1781429924637-0",
+              "CY-SMOKE-1781433343",
+              "CY-SMOKE-1781434162",
+              "CY-CON-1781434651415-0",
+              "CY-CON-1781435831491-0",
+              "CY-CONC-1781449117519-0",
+              "CY-CONC-1781449117519-5",
+              "CY-CONC-1781449117519-2",
+              "CY-CONC-1781449117519-1",
+              "CY-CONC-1781449117519-4",
+              "CY-CONC-1781449117519-6",
+              "CY-CONC-1781449117519-9",
+              "CY-CONC-1781449117519-7",
+              "CY-CONC-1781449117519-8",
+              "CY-CONC-1781449117519-3",
+              "CY-VERIFY-1781449445211-0",
+              "CY-VERIFY-1781449445211-7",
+              "CY-VERIFY-1781449445211-8",
+              "CY-VERIFY-1781449445211-6",
+              "CY-VERIFY-1781449445211-5",
+              "CY-VERIFY-1781449445211-1",
+              "CY-VERIFY-1781449445211-4",
+              "CY-VERIFY-1781449445211-2",
+              "CY-VERIFY-1781449445211-9",
+              "CY-VERIFY-1781449445211-3",
+              "CY-VERIFY-1781449445211-10",
+              "CY-VERIFY-1781449445211-11",
+              "CY-VERIFY-ACTION-1781449445211",
+              "CY-IDEM-CHECK-1781449533704",
+              "CY-IDEM-FIX-1781450092958",
+              "CY-CON-1781450256751-0",
+              "CY-CON-1781450256751-3",
+              "CY-CON-1781450256751-4",
+              "CY-CON-1781450256751-1",
+              "CY-CON-1781450256751-2",
+              "CY-ACTION-1781450256751",
+              "CY-IDEM-FIX2-1781450256938"
+            ],
+            "expectedCylinderDetails": [
+              {
+                "id": "CY-88001",
+                "gasType": "高纯氩",
+                "capacity": "40L",
+                "status": "in_stock",
+                "location": "一号仓",
+                "customer": null
+              },
+              {
+                "id": "CY-88002",
+                "gasType": "混合标准气",
+                "capacity": "8L",
+                "status": "rented",
+                "location": "宁川检测",
+                "customer": "宁川检测"
+              },
+              {
+                "id": "CY-IDEM-TEST",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-1781423329133",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-IDEM-1781423597795",
+                "gasType": "测试氧气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CONCUR-1781429924637-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781433343",
+                "gasType": "t",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-SMOKE-1781434162",
+                "gasType": "test",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781434651415-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781435831491-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-0",
+                "gasType": "测试气0",
+                "capacity": "10L",
+                "status": "returned",
+                "location": "待检区",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-5",
+                "gasType": "测试气5",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-2",
+                "gasType": "测试气2",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-1",
+                "gasType": "测试气1",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-4",
+                "gasType": "测试气4",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-6",
+                "gasType": "测试气6",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-9",
+                "gasType": "测试气9",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-7",
+                "gasType": "测试气7",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-8",
+                "gasType": "测试气8",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CONC-1781449117519-3",
+                "gasType": "测试气3",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-0",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-7",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-8",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-6",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-5",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-1",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-4",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-2",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-9",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-3",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-10",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-1781449445211-11",
+                "gasType": "验证气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-VERIFY-ACTION-1781449445211",
+                "gasType": "动作验证气",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-CHECK-1781449533704",
+                "gasType": "幂等验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX-1781450092958",
+                "gasType": "幂等修复验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-CON-1781450256751-0",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-3",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-4",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-1",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-CON-1781450256751-2",
+                "gasType": "并发测试气",
+                "capacity": "10L",
+                "status": "in_stock",
+                "location": "仓库",
+                "customer": null
+              },
+              {
+                "id": "CY-ACTION-1781450256751",
+                "gasType": "流转测试",
+                "capacity": "40L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              },
+              {
+                "id": "CY-IDEM-FIX2-1781450256938",
+                "gasType": "幂等修复二次验证气",
+                "capacity": "10L",
+                "status": "rented",
+                "location": "CUS-001",
+                "customer": "CUS-001"
+              }
+            ],
+            "scannedEntries": [
+              {
+                "cylinderId": "CY-88001",
+                "scannedAt": "2026-06-14T15:30:17.983Z",
+                "operator": "admin",
+                "scanIndex": 1,
+                "duplicate": false
+              },
+              {
+                "cylinderId": "CY-88001",
+                "scannedAt": "2026-06-14T15:30:18.016Z",
+                "operator": "admin",
+                "scanIndex": 2,
+                "duplicate": true
+              }
+            ],
+            "scanIndexCounter": 2,
+            "differences": {
+              "expectedCount": 42,
+              "uniqueScannedCount": 1,
+              "matchedCount": 1,
+              "deficitCount": 41,
+              "surplusCount": 0,
+              "duplicateScanCount": 1,
+              "matched": [
+                {
+                  "cylinderId": "CY-88001",
+                  "gasType": "高纯氩",
+                  "capacity": "40L",
+                  "status": "in_stock",
+                  "location": "一号仓"
+                }
+              ],
+              "deficit": [
+                {
+                  "cylinderId": "CY-88002",
+                  "gasType": "混合标准气",
+                  "capacity": "8L",
+                  "status": "rented",
+                  "location": "宁川检测",
+                  "customer": "宁川检测",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-IDEM-TEST",
+                  "gasType": "测试氧气",
+                  "capacity": "10L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-IDEM-1781423329133",
+                  "gasType": "测试氧气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-IDEM-1781423597795",
+                  "gasType": "测试氧气",
+                  "capacity": "10L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-CONCUR-1781429924637-0",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-SMOKE-1781433343",
+                  "gasType": "t",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-SMOKE-1781434162",
+                  "gasType": "test",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781434651415-0",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781435831491-0",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-0",
+                  "gasType": "测试气0",
+                  "capacity": "10L",
+                  "status": "returned",
+                  "location": "待检区",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-5",
+                  "gasType": "测试气5",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-2",
+                  "gasType": "测试气2",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-1",
+                  "gasType": "测试气1",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-4",
+                  "gasType": "测试气4",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-6",
+                  "gasType": "测试气6",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-9",
+                  "gasType": "测试气9",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-7",
+                  "gasType": "测试气7",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-8",
+                  "gasType": "测试气8",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CONC-1781449117519-3",
+                  "gasType": "测试气3",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-0",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-7",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-8",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-6",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-5",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-1",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-4",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-2",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-9",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-3",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-10",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-1781449445211-11",
+                  "gasType": "验证气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-VERIFY-ACTION-1781449445211",
+                  "gasType": "动作验证气",
+                  "capacity": "40L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-IDEM-CHECK-1781449533704",
+                  "gasType": "幂等验证气",
+                  "capacity": "10L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-IDEM-FIX-1781450092958",
+                  "gasType": "幂等修复验证气",
+                  "capacity": "10L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-CON-1781450256751-0",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781450256751-3",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781450256751-4",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781450256751-1",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-CON-1781450256751-2",
+                  "gasType": "并发测试气",
+                  "capacity": "10L",
+                  "status": "in_stock",
+                  "location": "仓库",
+                  "customer": null,
+                  "protected": false
+                },
+                {
+                  "cylinderId": "CY-ACTION-1781450256751",
+                  "gasType": "流转测试",
+                  "capacity": "40L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                },
+                {
+                  "cylinderId": "CY-IDEM-FIX2-1781450256938",
+                  "gasType": "幂等修复二次验证气",
+                  "capacity": "10L",
+                  "status": "rented",
+                  "location": "CUS-001",
+                  "customer": "CUS-001",
+                  "protected": true
+                }
+              ],
+              "surplus": []
+            },
+            "suggestions": [
+              {
+                "cylinderId": "CY-88002",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-88002当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-IDEM-TEST",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-IDEM-TEST当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-IDEM-1781423329133",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-IDEM-1781423329133盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-IDEM-1781423597795",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-IDEM-1781423597795当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-CONCUR-1781429924637-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONCUR-1781429924637-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-SMOKE-1781433343",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-SMOKE-1781433343盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-SMOKE-1781434162",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-SMOKE-1781434162盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781434651415-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781434651415-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781435831491-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781435831491-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-5",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-5盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-2",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-2盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-1",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-1盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-4",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-4盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-6",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-6盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-9",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-9盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-7",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-7盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-8",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-8盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CONC-1781449117519-3",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CONC-1781449117519-3盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-7",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-7盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-8",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-8盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-6",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-6盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-5",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-5盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-1",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-1盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-4",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-4盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-2",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-2盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-9",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-9盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-3",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-3盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-10",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-10盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-1781449445211-11",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-VERIFY-1781449445211-11盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-VERIFY-ACTION-1781449445211",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-VERIFY-ACTION-1781449445211当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-IDEM-CHECK-1781449533704",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-IDEM-CHECK-1781449533704当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-IDEM-FIX-1781450092958",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-IDEM-FIX-1781450092958当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-0",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781450256751-0盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-3",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781450256751-3盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-4",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781450256751-4盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-1",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781450256751-1盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-CON-1781450256751-2",
+                "type": "deficit_actionable",
+                "suggestion": "钢瓶CY-CON-1781450256751-2盘亏，建议标记为待核查并追踪去向",
+                "action": "mark_pending_check",
+                "priority": "high"
+              },
+              {
+                "cylinderId": "CY-ACTION-1781450256751",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-ACTION-1781450256751当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": "CY-IDEM-FIX2-1781450256938",
+                "type": "deficit_protected",
+                "suggestion": "钢瓶CY-IDEM-FIX2-1781450256938当前状态为rented（受保护），盘点未扫到但状态不可变更，建议人工核实",
+                "action": "manual_verify",
+                "priority": "medium"
+              },
+              {
+                "cylinderId": null,
+                "type": "duplicate_scans",
+                "suggestion": "存在1次重复扫描记录，已自动去重计算，原始扫描记录可追溯",
+                "action": "review_duplicates",
+                "priority": "low"
+              }
+            ],
+            "status": "confirmed",
+            "createdAt": "2026-06-14T15:29:58.507Z",
+            "scanningStartedAt": "2026-06-14T15:30:17.958Z",
+            "completedAt": "2026-06-14T15:30:18.047Z",
+            "confirmedAt": "2026-06-14T15:30:18.102Z",
+            "confirmedBy": "admin",
+            "createdBy": null,
+            "note": null
+          },
+          "affectedCylinders": [
+            {
+              "cylinderId": "CY-IDEM-1781423329133",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONCUR-1781429924637-0",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-SMOKE-1781433343",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-SMOKE-1781434162",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781434651415-0",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781435831491-0",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-0",
+              "previousStatus": "returned",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-5",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-2",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-1",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-4",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-6",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-9",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-7",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-8",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CONC-1781449117519-3",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-0",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-7",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-8",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-6",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-5",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-1",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-4",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-2",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-9",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-3",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-10",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-VERIFY-1781449445211-11",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-0",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-3",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-4",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-1",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            },
+            {
+              "cylinderId": "CY-CON-1781450256751-2",
+              "previousStatus": "in_stock",
+              "newStatus": "pending_check"
+            }
+          ]
+        }
+      },
+      "operationLogId": "op-1781451018104-c4e3c2",
+      "createdAt": "2026-06-14T15:30:18.101Z",
+      "completedAt": "2026-06-14T15:30:18.105Z"
     }
   },
   "version": 1

@@ -33,7 +33,9 @@ export function normalizePath(pathname) {
     .replace(/\/customers\/[^/]+$/, "/customers/:id")
     .replace(/\/rental-orders\/[^/]+$/, "/rental-orders/:id")
     .replace(/\/inspection-tasks\/[^/]+\/(send|inspect|restock)$/, "/inspection-tasks/:id/$1")
-    .replace(/\/inspection-tasks\/[^/]+$/, "/inspection-tasks/:id");
+    .replace(/\/inspection-tasks\/[^/]+$/, "/inspection-tasks/:id")
+    .replace(/\/inventory-checks\/[^/]+\/(start|scan|complete|confirm|differences|history)$/, "/inventory-checks/:id/$1")
+    .replace(/\/inventory-checks\/[^/]+$/, "/inventory-checks/:id");
 }
 
 function ensureBodyLoaded(req) {

@@ -76,7 +76,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -86,6 +86,12 @@
           "type": "create",
           "at": "2026-06-14T07:48:49.136Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-49c0cf",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -133,7 +139,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -143,6 +149,12 @@
           "type": "create",
           "at": "2026-06-14T09:38:44.652Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-57a1dd",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -152,7 +164,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -162,6 +174,12 @@
           "type": "create",
           "at": "2026-06-14T10:35:43.860Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-c6b707",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -171,7 +189,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -181,6 +199,12 @@
           "type": "create",
           "at": "2026-06-14T10:49:23.011Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-1de581",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -190,7 +214,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -200,6 +224,12 @@
           "type": "create",
           "at": "2026-06-14T10:57:31.447Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-3f5c13",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -209,7 +239,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -219,6 +249,12 @@
           "type": "create",
           "at": "2026-06-14T11:17:11.919Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-6d5e8a",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -228,7 +264,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "待检区",
-      "status": "returned",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "refundable",
       "fills": [],
@@ -250,6 +286,12 @@
           "type": "return",
           "at": "2026-06-14T14:58:38.481Z",
           "note": "归还测试"
+        },
+        {
+          "id": "evt-1781451018102-8f2083",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -259,7 +301,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -269,6 +311,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.325Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-9ff19c",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -278,7 +326,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -288,6 +336,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.337Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-0703f0",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -297,7 +351,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -307,6 +361,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.343Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-b09cb6",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -316,7 +376,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -326,6 +386,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.362Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-68455d",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -335,7 +401,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -345,6 +411,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.377Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-97709c",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -354,7 +426,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -364,6 +436,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.388Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-174fd1",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -373,7 +451,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -383,6 +461,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.394Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-ad4356",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -392,7 +476,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -402,6 +486,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.411Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-4a0b6d",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -411,7 +501,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -421,6 +511,12 @@
           "type": "create",
           "at": "2026-06-14T14:58:38.418Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-915a4a",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -430,7 +526,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -440,6 +536,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.239Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-fd4d96",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -449,7 +551,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -459,6 +561,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.244Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-c3b1e3",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -468,7 +576,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -478,6 +586,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.246Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-13ca14",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -487,7 +601,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -497,6 +611,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.247Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-6e76e5",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -506,7 +626,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -516,6 +636,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.249Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-89d0ef",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -525,7 +651,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -535,6 +661,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.252Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-3f00e7",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -544,7 +676,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -554,6 +686,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.253Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-f2a83e",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -563,7 +701,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -573,6 +711,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.255Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-55a63f",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -582,7 +726,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -592,6 +736,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.256Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-bf1db2",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -601,7 +751,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -611,6 +761,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.257Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-cd6432",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -620,7 +776,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -630,6 +786,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.261Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-feaac9",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -639,7 +801,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -649,6 +811,12 @@
           "type": "create",
           "at": "2026-06-14T15:04:05.263Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-176762",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -758,7 +926,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -768,6 +936,12 @@
           "type": "create",
           "at": "2026-06-14T15:17:36.780Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-3bd06f",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -777,7 +951,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -787,6 +961,12 @@
           "type": "create",
           "at": "2026-06-14T15:17:36.788Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-60fc08",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -796,7 +976,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -806,6 +986,12 @@
           "type": "create",
           "at": "2026-06-14T15:17:36.798Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-46a284",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -815,7 +1001,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -825,6 +1011,12 @@
           "type": "create",
           "at": "2026-06-14T15:17:36.803Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-d25535",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
@@ -834,7 +1026,7 @@
       "capacity": "10L",
       "inspectionDue": "2027-01-01",
       "location": "仓库",
-      "status": "in_stock",
+      "status": "pending_check",
       "customer": null,
       "depositStatus": "none",
       "fills": [],
@@ -844,6 +1036,12 @@
           "type": "create",
           "at": "2026-06-14T15:17:36.808Z",
           "note": "新建钢瓶"
+        },
+        {
+          "id": "evt-1781451018102-f6665e",
+          "type": "inventory_check",
+          "at": "2026-06-14T15:30:18.102Z",
+          "note": "盘亏标记待核查，盘点单IC-1781450998507-aa743c"
         }
       ]
     },
