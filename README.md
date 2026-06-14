@@ -352,7 +352,7 @@ pending → sent → passed → restocked
 
 ### 生成待检任务
 
-扫描所有钢瓶，将临近检验（默认45天内）且状态不是 `scrapped` 或 `inspection`、且没有进行中任务的钢瓶生成待检任务。
+扫描所有钢瓶，将临近检验（默认45天内）且状态不是 `scrapped`、`inspection` 或 `rented`、且没有进行中任务的钢瓶生成待检任务。
 
 ```json
 POST /inspection-tasks/generate
@@ -367,6 +367,11 @@ POST /inspection-tasks/generate
 {
   "generated": 2,
   "skipped": 0,
+  "breakdown": {
+    "byStatus": 0,
+    "byExistingTask": 0,
+    "byDueDate": 0
+  },
   "tasks": [
     {
       "id": "IT-1718389234567-a1b2c3",
@@ -397,6 +402,14 @@ POST /inspection-tasks/generate
   ]
 }
 ```
+
+**`breakdown` 字段说明：**
+
+| 字段 | 说明 |
+|------|------|
+| `byStatus` | 因钢瓶状态为 `scrapped`/`inspection`/`rented` 被排除的数量 |
+| `byExistingTask` | 因该钢瓶已有进行中检验任务被排除的数量 |
+| `byDueDate` | 因距检验到期日超过阈值天数被排除的数量 |
 
 重复调用不会为同一钢瓶生成重复任务（已有进行中任务的钢瓶会被跳过）。
 

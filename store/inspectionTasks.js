@@ -43,7 +43,7 @@ function daysUntil(dateText) {
 
 export function generateTasks(cylinders, existingTasks, options = {}) {
   const thresholdDays = options.thresholdDays ?? 45;
-  const excludedStatuses = ["scrapped", "inspection"];
+  const excludedStatuses = ["scrapped", "inspection", "rented"];
 
   const existingActiveCylinderIds = new Set(
     existingTasks
@@ -51,10 +51,24 @@ export function generateTasks(cylinders, existingTasks, options = {}) {
       .map((t) => t.cylinderId)
   );
 
+  let excludedByStatus = 0;
+  let excludedByExistingTask = 0;
+  let excludedByDueDate = 0;
+
   const candidates = cylinders.filter((c) => {
-    if (excludedStatuses.includes(c.status)) return false;
-    if (existingActiveCylinderIds.has(c.id)) return false;
-    return daysUntil(c.inspectionDue) <= thresholdDays;
+    if (excludedStatuses.includes(c.status)) {
+      excludedByStatus++;
+      return false;
+    }
+    if (existingActiveCylinderIds.has(c.id)) {
+      excludedByExistingTask++;
+      return false;
+    }
+    if (daysUntil(c.inspectionDue) > thresholdDays) {
+      excludedByDueDate++;
+      return false;
+    }
+    return true;
   });
 
   const now = new Date().toISOString();
@@ -72,7 +86,16 @@ export function generateTasks(cylinders, existingTasks, options = {}) {
     restockedAt: null
   }));
 
-  return { newTasks, skipped: cylinders.length - candidates.length - existingActiveCylinderIds.size };
+  return {
+    newTasks,
+    generated: newTasks.length,
+    skipped: excludedByStatus + excludedByExistingTask + excludedByDueDate,
+    breakdown: {
+      byStatus: excludedByStatus,
+      byExistingTask: excludedByExistingTask,
+      byDueDate: excludedByDueDate
+    }
+  };
 }
 
 export function validateTransition(task, nextStatus) {

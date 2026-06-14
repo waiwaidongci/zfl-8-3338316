@@ -30,8 +30,9 @@ export async function handleInspectionTasks(req, res, url) {
     const allTasks = [...existingTasks, ...result.newTasks];
     await saveTasks(allTasks);
     return send(res, 201, {
-      generated: result.newTasks.length,
+      generated: result.generated,
       skipped: result.skipped,
+      breakdown: result.breakdown,
       tasks: result.newTasks
     });
   }
