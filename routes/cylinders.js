@@ -75,8 +75,8 @@ export async function handleCylinders(req, res, url) {
     const total = cylinders.length;
 
     if (pagination) {
-      const validPage = Math.max(1, page);
-      const validPageSize = Math.max(1, Math.min(100, pageSize));
+      const validPage = Math.max(1, Number.isNaN(page) ? 1 : page);
+      const validPageSize = Math.max(1, Math.min(100, Number.isNaN(pageSize) ? 20 : pageSize));
       const totalPages = Math.ceil(total / validPageSize);
       const start = (validPage - 1) * validPageSize;
       const items = cylinders.slice(start, start + validPageSize);
