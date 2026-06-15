@@ -6,7 +6,101 @@
 npm start
 ```
 
-默认端口是`3008`，数据保存在`data/cylinders.json`。
+默认端口是`3008`。
+
+## 数据版本与迁移
+
+### 概述
+
+系统内置数据版本管理和自动迁移机制，支持数据Schema的平滑演进。启动服务时会自动检测数据版本并执行必要的迁移。
+
+### 数据目录结构
+
+```
+data/
+  meta.json              # 版本元信息（当前版本、迁移历史等）
+  v2/                    # v2 版本数据目录
+    cylinders.json       # 钢瓶数据
+    customers.json       # 客户数据
+    rentalOrders.json    # 租瓶订单数据
+    inspectionTasks.json # 检验任务数据
+    operationLogs.json   # 操作流水数据
+    inventoryChecks.json # 库存盘点数据
+    idempotency.json     # 幂等性数据
+    README.md            # 版本说明
+  backups/               # 迁移备份目录
+    v1-to-v2-20260615-000000/
+      backup-meta.json   # 备份元信息
+      ...                # 备份的数据文件
+```
+
+### 版本历史
+
+| 版本 | 说明 |
+|------|------|
+| v1 | 扁平结构，数据文件直接放在 `data/` 目录下 |
+| v2 | 版本化目录结构，每个实体独立存储，文件包含 Schema 版本元数据 |
+
+### 自动迁移
+
+服务启动时会自动执行数据迁移：
+
+1. 检测当前数据版本
+2. 如果不是最新版本，先创建完整备份
+3. 按顺序执行各版本迁移脚本
+4. 迁移失败时自动回滚到原版本，不破坏原始数据
+5. 更新版本元信息
+
+### 命令行工具
+
+提供独立的迁移管理脚本 `scripts/migrate.js`：
+
+```bash
+# 查看数据版本状态
+npm run migrate:status
+
+# 执行迁移到最新版本
+npm run migrate
+
+# 创建当前数据的备份
+npm run migrate:backup
+
+# 列出所有备份
+npm run migrate:backups
+
+# 从指定备份恢复（需要交互确认）
+npm run migrate:restore -- backup-name
+
+# 验证备份完整性
+npm run migrate:verify -- backup-name
+```
+
+也可以直接运行脚本：
+
+```bash
+node scripts/migrate.js status
+node scripts/migrate.js migrate
+node scripts/migrate.js backup
+node scripts/migrate.js backups
+node scripts/migrate.js restore <backup-name>
+node scripts/migrate.js verify <backup-name>
+```
+
+### 迁移安全机制
+
+- **前置备份**：迁移前自动创建完整数据备份
+- **备份验证**：备份创建后自动验证完整性
+- **失败回滚**：迁移过程中任何错误都会触发自动回滚
+- **原子写入**：使用临时文件 + 重命名的原子写入方式，避免写入中断损坏数据
+- **备份保留**：所有历史备份保留在 `data/backups/` 目录
+
+### 向后兼容性
+
+所有 API 接口保持完全向后兼容：
+
+- 现有接口返回的数据格式和字段保持不变
+- 内部版本元数据（`_schemaVersion`、`_meta`）不会泄露到 API 响应中
+- 保存数据时自动保留版本元数据
 
 ## 库存盘点模块
 
@@ -122,4 +216,52 @@ POST /cylinders/:id/actions
 
 ### 数据文件
 
-盘点数据保存在 `data/inventoryChecks.json`。
+盘点数据保存在当前版本数据目录下的 `inventoryChecks.json`。
+
+## 迁移开发指南
+
+### 添加新的迁移脚本
+
+当需要修改数据 Schema 时，按以下步骤添加新的迁移：
+
+1. 在 `store/migrations/` 目录下创建新的迁移文件，命名格式为 `v{版本号}_{描述}.js`
+
+2. 迁移文件格式：
+
+```javascript
+export default {
+  version: 3,  // 目标版本号
+  description: "简短描述本次迁移的内容",
+
+  async up(context) {
+    // 升级逻辑
+    // context.rootDataDir: 数据根目录
+    // context.fromVersion: 源版本号
+    // context.toVersion: 目标版本号
+    // context.backupPath: 备份目录路径
+  },
+
+  async down(context) {
+    // 降级逻辑（可选，用于回滚）
+  }
+};
+```
+
+3. 更新 `store/dataVersion.js` 中的 `LATEST_VERSION` 常量
+
+4. 编写迁移逻辑时的注意事项：
+   - 迁移应该是幂等的
+   - 确保迁移失败时可以通过备份恢复
+   - 保持向后兼容性，新字段应该有默认值
+   - 使用 `context.rootDataDir` 和版本号构造文件路径
+
+### 迁移框架核心模块
+
+| 文件 | 说明 |
+|------|------|
+| `store/dataVersion.js` | 数据版本管理核心，包含版本检测、备份、回滚、迁移执行 |
+| `store/migrations/` | 迁移脚本目录，每个版本一个脚本 |
+| `store/common.js` | 数据读写公共模块，集成版本化数据目录 |
+| `scripts/migrate.js` | 命令行迁移管理工具 |
+| `data/meta.json` | 版本元数据文件 |
+| `data/backups/` | 备份目录 |

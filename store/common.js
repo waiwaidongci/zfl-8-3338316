@@ -3,9 +3,39 @@ import { existsSync } from "node:fs";
 import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { detectCurrentVersion, getDataDirForVersion, getDataKey } from "./migration.js";
+import { normalizeItemForAPI, getEntityFromFilename } from "./compatibility.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const dataDir = join(__dirname, "..", "data");
+const projectRoot = join(__dirname, "..");
+const baseDataDir = join(projectRoot, "data");
+
+let currentDataVersion = null;
+let cachedDataDir = null;
+
+async function getDataDir() {
+  if (cachedDataDir) return cachedDataDir;
+  try {
+    currentDataVersion = await detectCurrentVersion();
+    cachedDataDir = getDataDirForVersion(currentDataVersion);
+    return cachedDataDir;
+  } catch (err) {
+    console.warn(`[common] Failed to detect version, using base data dir: ${err.message}`);
+    return baseDataDir;
+  }
+}
+
+export function clearDataDirCache() {
+  cachedDataDir = null;
+  currentDataVersion = null;
+}
+
+export async function getCurrentDataVersion() {
+  if (currentDataVersion === null) {
+    currentDataVersion = await detectCurrentVersion();
+  }
+  return currentDataVersion;
+}
 
 const writeLocks = new Map();
 const txQueues = new Map();
@@ -124,37 +154,45 @@ async function ensureDir(dirPath) {
 }
 
 export async function loadJson(filename, fallback, { skipCache = false } = {}) {
-  const filePath = join(dataDir, filename);
+  const dynamicDataDir = await getDataDir();
+  const filePath = join(dynamicDataDir, filename);
   await ensureDir(dirname(filePath));
+  
   if (!skipCache && jsonCache.has(filename)) {
     return jsonCache.get(filename);
   }
+  
   if (!existsSync(filePath)) {
     const fallbackClone = JSON.parse(JSON.stringify(fallback));
-    await atomicWriteFile(filePath, JSON.stringify(fallback, null, 2));
-    jsonCache.set(filename, fallbackClone);
-    return fallbackClone;
+    const versionedFallback = await addVersionMeta(fallbackClone, filename);
+    await atomicWriteFile(filePath, JSON.stringify(versionedFallback, null, 2));
+    jsonCache.set(filename, versionedFallback);
+    return versionedFallback;
   }
+  
   try {
     const content = await readFile(filePath, "utf8");
     const parsed = JSON.parse(content);
-    jsonCache.set(filename, parsed);
-    return parsed;
+    const normalized = normalizeForCompatibility(parsed, filename);
+    jsonCache.set(filename, normalized);
+    return normalized;
   } catch (err) {
     const backupPath = filePath + ".bak";
     if (existsSync(backupPath)) {
       try {
         const backupContent = await readFile(backupPath, "utf8");
         const parsed = JSON.parse(backupContent);
+        const normalized = normalizeForCompatibility(parsed, filename);
         await atomicWriteFile(filePath, backupContent);
-        jsonCache.set(filename, parsed);
-        return parsed;
+        jsonCache.set(filename, normalized);
+        return normalized;
       } catch {}
     }
     const fallbackClone = JSON.parse(JSON.stringify(fallback));
-    await atomicWriteFile(filePath, JSON.stringify(fallback, null, 2));
-    jsonCache.set(filename, fallbackClone);
-    return fallbackClone;
+    const versionedFallback = await addVersionMeta(fallbackClone, filename);
+    await atomicWriteFile(filePath, JSON.stringify(versionedFallback, null, 2));
+    jsonCache.set(filename, versionedFallback);
+    return versionedFallback;
   }
 }
 
@@ -223,9 +261,77 @@ async function atomicWriteFile(filePath, content) {
   }
 }
 
+async function addVersionMeta(data, filename) {
+  const version = await getCurrentDataVersion();
+  if (version < 2) {
+    return data;
+  }
+  
+  if (data._schemaVersion) {
+    return data;
+  }
+  
+  const entity = filename.replace(".json", "");
+  return {
+    ...data,
+    _schemaVersion: "2.0",
+    _meta: {
+      createdAt: new Date().toISOString(),
+      entity,
+      sourceFile: filename
+    }
+  };
+}
+
+function normalizeForCompatibility(data, filename) {
+  const entity = getEntityFromFilename(filename);
+  
+  if (!data._schemaVersion) {
+    if (entity) {
+      const dataKey = getDataKey(entity);
+      const collection = data[dataKey] || data[entity] || [];
+      if (Array.isArray(collection)) {
+        return {
+          ...data,
+          [dataKey]: collection.map(item => normalizeItemForAPI(item, entity))
+        };
+      }
+    }
+    return data;
+  }
+  
+  const { _schemaVersion, _meta, ...rest } = data;
+  
+  if (entity) {
+    const dataKey = getDataKey(entity);
+    const collection = rest[dataKey] || rest[entity] || [];
+    if (Array.isArray(collection)) {
+      return {
+        ...rest,
+        [dataKey]: collection.map(item => normalizeItemForAPI(item, entity))
+      };
+    }
+  }
+  
+  return rest;
+}
+
+function stripVersionMetaForWrite(data) {
+  if (!data || !data._schemaVersion) {
+    return data;
+  }
+  
+  const result = { ...data };
+  return result;
+}
+
 export async function saveJson(filename, data) {
-  const filePath = join(dataDir, filename);
+  const dynamicDataDir = await getDataDir();
+  const filePath = join(dynamicDataDir, filename);
   await ensureDir(dirname(filePath));
-  const content = JSON.stringify(data, null, 2);
+  
+  const dataToWrite = stripVersionMetaForWrite(data);
+  const versionedData = await addVersionMeta(dataToWrite, filename);
+  const content = JSON.stringify(versionedData, null, 2);
   await atomicWriteFile(filePath, content);
 }

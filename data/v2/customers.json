@@ -16,5 +16,13 @@
       "address": "宁川市东路88号",
       "createdAt": "2026-02-20T10:00:00.000Z"
     }
-  ]
+  ],
+  "_schemaVersion": "2.0",
+  "_meta": {
+    "createdAt": "2026-06-15T02:00:58.611Z",
+    "migratedAt": "2026-06-15T02:00:58.611Z",
+    "migratedFrom": "v1",
+    "entity": "customers",
+    "sourceFile": "customers.json"
+  }
 }

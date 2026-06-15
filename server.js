@@ -1,5 +1,5 @@
 import http from "node:http";
-import { send } from "./store/common.js";
+import { send, clearDataDirCache } from "./store/common.js";
 import { handleAuth } from "./routes/auth.js";
 import { handleCylinders } from "./routes/cylinders.js";
 import { handleCustomers } from "./routes/customers.js";
@@ -8,6 +8,7 @@ import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 import { handleEventAudit } from "./routes/eventAudit.js";
 import { handleInventoryChecks } from "./routes/inventoryChecks.js";
 import { recoverStaleProcessing } from "./store/idempotency.js";
+import { runMigrations, getMigrationStatus, CURRENT_VERSION } from "./store/migration.js";
 
 process.on("unhandledRejection", (err) => {
   console.error("[unhandledRejection]", err?.stack || err);
@@ -81,9 +82,12 @@ const server = http.createServer(async (req, res) => {
     const url = new URL(req.url, `http://${req.headers.host}`);
 
     if (req.method === "GET" && url.pathname === "/") {
+      const migrationStatus = await getMigrationStatus();
       return send(res, 200, {
         service: "特种气体钢瓶流转API",
         version: "2.0.0",
+        dataVersion: migrationStatus.currentVersion,
+        targetDataVersion: migrationStatus.targetVersion,
         features: {
           idempotency: {
             enabled: true,
@@ -94,6 +98,13 @@ const server = http.createServer(async (req, res) => {
           operationLogs: {
             enabled: true,
             endpoints: ["/operation-logs", "/operation-logs/types", "/operation-logs/:id"]
+          },
+          dataMigration: {
+            enabled: true,
+            currentVersion: migrationStatus.currentVersion,
+            needsMigration: migrationStatus.needsMigration,
+            availableBackups: migrationStatus.availableBackups.length,
+            note: "数据支持版本化迁移和回滚，使用 node scripts/migrate.js 管理"
           }
         },
         endpoints: ROOT_ENDPOINTS
@@ -113,7 +124,55 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+async function runStartupMigration() {
+  const status = await getMigrationStatus();
+  console.log(`[Migration] 当前数据版本: v${status.currentVersion}, 目标版本: v${status.targetVersion}`);
+  
+  if (status.needsMigration) {
+    console.log(`[Migration] 检测到需要数据迁移，开始自动执行...`);
+    
+    const result = await runMigrations(CURRENT_VERSION);
+    
+    if (result.success) {
+      if (result.skipped) {
+        console.log(`[Migration] ${result.message}`);
+      } else {
+        console.log(`[Migration] 自动迁移成功完成: v${result.fromVersion} -> v${result.toVersion}`);
+        console.log(`[Migration] 备份目录: ${result.backupDir}`);
+      }
+      clearDataDirCache();
+      return { success: true, result };
+    } else {
+      console.error(`[Migration] 自动迁移失败: ${result.error}`);
+      if (result.backupDir) {
+        console.error(`[Migration] 备份已保存至: ${result.backupDir}`);
+        console.error(`[Migration] 如需手动恢复，请运行: node scripts/migrate.js restore ${result.backupName}`);
+      }
+      
+      if (process.env.ALLOW_START_WITH_MIGRATION_ERROR !== "true") {
+        console.error(`[Migration] 服务启动被阻止。如需强制启动，请设置环境变量 ALLOW_START_WITH_MIGRATION_ERROR=true`);
+        return { success: false, fatal: true, result };
+      }
+      
+      return { success: false, fatal: false, result };
+    }
+  } else {
+    console.log(`[Migration] 数据版本已是最新，无需迁移`);
+    return { success: true, skipped: true };
+  }
+}
+
 async function bootstrap() {
+  console.log("========================================");
+  console.log("  特种气体钢瓶流转API - 服务启动");
+  console.log("========================================");
+  
+  const migrationResult = await runStartupMigration();
+  if (migrationResult.fatal) {
+    console.error("\n[Fatal] 数据迁移失败，服务无法启动");
+    process.exit(1);
+  }
+  
   try {
     const recovered = await recoverStaleProcessing();
     if (recovered > 0) {
@@ -124,7 +183,9 @@ async function bootstrap() {
   }
 
   server.listen(port, () => {
-    console.log(`Gas cylinder flow API listening on http://localhost:${port}`);
+    console.log(`\nGas cylinder flow API listening on http://localhost:${port}`);
+    console.log(`数据版本: v${CURRENT_VERSION}`);
+    console.log(`服务版本: 2.0.0`);
   });
 }
 

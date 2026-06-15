@@ -1,9 +1,15 @@
 {
   "name": "zfl-8-gas-cylinder-flow-api",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "migrate:status": "node scripts/migrate.js status",
+    "migrate:up": "node scripts/migrate.js up",
+    "migrate:down": "node scripts/migrate.js down 1",
+    "migrate:restore": "node scripts/migrate.js restore",
+    "migrate:list-backups": "node scripts/migrate.js list-backups",
+    "migrate:force": "node scripts/migrate.js force-up"
   }
 }
