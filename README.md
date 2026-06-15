@@ -318,8 +318,8 @@ POST /cylinders/:id/actions
 |------|------|------|
 | `status` | 按报表状态筛选 | `pending`、`processing`、`completed`、`failed` |
 | `requestedBy` | 按创建人筛选 | `admin` |
-| `createdFrom` | 创建时间起始（ISO 8601） | `2026-06-01T00:00:00.000Z` |
-| `createdTo` | 创建时间截止（ISO 8601） | `2026-06-30T23:59:59.999Z` |
+| `periodFrom` | 报表覆盖周期起始（ISO 8601），按已生成报表的 `params.startAt`/`params.endAt` 判断是否与筛选区间重叠 | `2026-06-01T00:00:00.000Z` |
+| `periodTo` | 报表覆盖周期截止（ISO 8601），按已生成报表的 `params.startAt`/`params.endAt` 判断是否与筛选区间重叠 | `2026-06-30T23:59:59.999Z` |
 | `hasHighRisk` | 是否包含高风险（`true`/`false`），仅对已完成报表有效；未完成报表不会被误判为无风险 | `true` |
 | `hasDiscrepancy` | 是否包含盘点差异（`true`/`false`），仅对已完成报表有效；未完成报表不会被误判为无差异 | `false` |
 | `page` | 页码 | `1` |
@@ -332,7 +332,7 @@ POST /cylinders/:id/actions
 示例：
 
 ```
-GET /compliance-reports?status=completed&hasHighRisk=true&createdFrom=2026-06-01T00:00:00.000Z&createdTo=2026-06-30T23:59:59.999Z
+GET /compliance-reports?status=completed&hasHighRisk=true&periodFrom=2026-06-01T00:00:00.000Z&periodTo=2026-06-30T23:59:59.999Z
 ```
 
 ### 创建报表

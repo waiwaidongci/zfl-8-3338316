@@ -673,6 +673,34 @@ async function testReportListFilters() {
         result: null,
         error: "another_error",
         createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-PARAM-IN-CREATED-OUT",
+        status: "completed",
+        params: { startAt: "2026-03-01T00:00:00.000Z", endAt: "2026-03-31T23:59:59.999Z" },
+        requestedBy: "admin",
+        result: {
+          summary: {
+            highRiskCount: 0,
+            discrepancyCount: 0
+          }
+        },
+        createdAt: new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-PARAM-OUT-CREATED-IN",
+        status: "completed",
+        params: { startAt: "2025-01-01T00:00:00.000Z", endAt: "2025-01-31T23:59:59.999Z" },
+        requestedBy: "admin",
+        result: {
+          summary: {
+            highRiskCount: 0,
+            discrepancyCount: 0
+          }
+        },
+        createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString()
       }
     ]
   };
@@ -684,11 +712,11 @@ async function testReportListFilters() {
   const token = await login();
 
   console.log("\n  --- 12.1 时间区间筛选 ---");
-  const fromTime = new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString();
-  const toTime = new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString();
+  const fromTime = "2026-03-01T00:00:00.000Z";
+  const toTime = "2026-03-31T23:59:59.999Z";
   const byTimeRange = await request(
     "GET",
-    `/compliance-reports?createdFrom=${encodeURIComponent(fromTime)}&createdTo=${encodeURIComponent(toTime)}`,
+    `/compliance-reports?periodFrom=${encodeURIComponent(fromTime)}&periodTo=${encodeURIComponent(toTime)}`,
     { token }
   );
   assert(byTimeRange.statusCode === 200, "时间区间筛选返回200");
@@ -696,8 +724,9 @@ async function testReportListFilters() {
   const timeRangeIds = byTimeRange.body.items.map((r) => r.id);
   assert(timeRangeIds.includes("CR-HIGH-RISK"), "时间范围内报表被包含: CR-HIGH-RISK");
   assert(timeRangeIds.includes("CR-LOW-RISK"), "时间范围内报表被包含: CR-LOW-RISK");
-  assert(!timeRangeIds.includes("CR-DISCREPANCY-ONLY"), "时间范围外报表被排除: CR-DISCREPANCY-ONLY");
-  assert(!timeRangeIds.includes("CR-FAILED"), "时间范围外报表被排除: CR-FAILED");
+  assert(timeRangeIds.includes("CR-DISCREPANCY-ONLY"), "params与筛选区间重叠的报表被包含: CR-DISCREPANCY-ONLY");
+  assert(timeRangeIds.includes("CR-PARAM-IN-CREATED-OUT"), "params在区间内但createdAt不在区间内的报表被包含");
+  assert(!timeRangeIds.includes("CR-PARAM-OUT-CREATED-IN"), "createdAt在区间内但params不在区间内的报表被排除");
 
   console.log("\n  --- 12.2 hasHighRisk=true 筛选 ---");
   const withHighRisk = await request("GET", "/compliance-reports?hasHighRisk=true", { token });
@@ -754,7 +783,7 @@ async function testReportListFilters() {
   assert(combo2Ids.length === 0 || combo2Ids.every((id) => id !== "CR-LOW-RISK"), "warehouse创建的报表不出现在admin筛选中");
 
   console.log("\n  --- 12.8 无效时间参数安全降级 ---");
-  const invalidTime = await request("GET", "/compliance-reports?createdFrom=not-a-date", { token });
+  const invalidTime = await request("GET", "/compliance-reports?periodFrom=not-a-date", { token });
   assert(invalidTime.statusCode === 200, "无效时间参数不报错");
   assert(Array.isArray(invalidTime.body.items), "无效时间参数返回数组");
 
