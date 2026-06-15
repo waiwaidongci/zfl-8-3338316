@@ -102,6 +102,65 @@ node scripts/migrate.js force-up
 - 内部版本元数据（`_schemaVersion`、`_meta`）不会泄露到 API 响应中
 - 保存数据时自动保留版本元数据
 
+## 权限矩阵接口
+
+### 概述
+
+`GET /auth/permissions` 提供可查询的权限矩阵详情，返回每个业务权限的中文说明、对应接口路径和拥有该权限的角色列表，支持按角色过滤。数据从 `auth/users.js` 的 `PERMISSIONS`、`ROLE_PERMISSIONS` 和 `PERMISSION_META` 自动生成，与代码中的真实权限定义保持同步。
+
+### 接口
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| `GET` | `/auth/permissions` | 查询权限矩阵 | Bearer Token |
+| `GET` | `/auth/permissions?role=qc` | 按角色过滤权限矩阵 | Bearer Token |
+
+### 查询参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `role` | 按角色过滤，仅返回该角色拥有的权限 | `admin`、`warehouse`、`sales`、`qc` |
+
+### 响应格式
+
+```json
+{
+  "permissions": [
+    {
+      "key": "cylinder:create",
+      "label": "新建钢瓶",
+      "category": "钢瓶管理",
+      "endpoints": ["POST /cylinders"],
+      "roles": ["admin", "warehouse"]
+    }
+  ],
+  "roleInfo": [
+    { "role": "admin", "label": "管理员" },
+    { "role": "warehouse", "label": "仓库" },
+    { "role": "sales", "label": "销售" },
+    { "role": "qc", "label": "质检" }
+  ],
+  "totalPermissions": 21,
+  "note": "所有已认证用户均可访问 GET 查询类接口（无需特定权限），此处仅列出写操作权限"
+}
+```
+
+### 权限分类
+
+| 分类 | 包含权限 |
+|------|---------|
+| 钢瓶管理 | `cylinder:create`、`cylinder:bulk`、`cylinder:inbound`、`cylinder:outbound`、`cylinder:return`、`cylinder:inspect`、`cylinder:scrap`、`cylinder:fill` |
+| 客户管理 | `customer:create` |
+| 订单管理 | `order:create`、`order:return` |
+| 检验管理 | `inspection:generate`、`inspection:send`、`inspection:inspect`、`inspection:restock`、`inspection:postpone` |
+| 盘点管理 | `inventory:create`、`inventory:scan`、`inventory:complete`、`inventory:confirm` |
+| 数据查询 | `query` |
+
+### 与 /auth/roles 的区别
+
+- `/auth/roles`：返回角色列表及每个角色的权限字符串数组，适合 UI 角色展示
+- `/auth/permissions`：以权限为中心的矩阵视图，包含中文说明和对应接口，适合权限文档化和审计
+
 ## 钢瓶列表接口
 
 ### 概述

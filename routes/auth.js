@@ -7,7 +7,7 @@ import {
   extractTokenFromRequest,
   findUserByUsername
 } from "../auth/authStore.js";
-import { ROLES, ROLE_LABELS, ROLE_PERMISSIONS, PERMISSIONS } from "../auth/users.js";
+import { ROLES, ROLE_LABELS, ROLE_PERMISSIONS, PERMISSIONS, buildPermissionMatrix } from "../auth/users.js";
 
 export async function handleAuth(req, res, url) {
   if (req.method === "POST" && url.pathname === "/auth/login") {
@@ -86,6 +86,31 @@ export async function handleAuth(req, res, url) {
       permissions: ROLE_PERMISSIONS[key] || []
     }));
     return send(res, 200, { roles, allPermissions: Object.values(PERMISSIONS) });
+  }
+
+  if (req.method === "GET" && url.pathname === "/auth/permissions") {
+    const token = extractTokenFromRequest(req);
+    if (!token) {
+      return send(res, 401, { error: "unauthorized", message: "未提供认证Token" });
+    }
+    const { user, error } = await getUserByToken(token);
+    if (error || !user) {
+      return send(res, 401, { error: error || "unauthorized", message: "认证失败" });
+    }
+    const roleFilter = url.searchParams.get("role");
+    if (roleFilter && !ROLE_LABELS[roleFilter]) {
+      return send(res, 400, { error: "invalid_role", message: `无效角色: ${roleFilter}，有效值: ${Object.keys(ROLE_LABELS).join(", ")}` });
+    }
+    const matrix = buildPermissionMatrix(roleFilter);
+    const roleInfo = Object.entries(ROLE_LABELS)
+      .filter(([key]) => !roleFilter || key === roleFilter)
+      .map(([key, label]) => ({ role: key, label }));
+    return send(res, 200, {
+      permissions: matrix,
+      roleInfo,
+      totalPermissions: matrix.length,
+      note: "所有已认证用户均可访问 GET 查询类接口（无需特定权限），此处仅列出写操作权限"
+    });
   }
 
   return null;

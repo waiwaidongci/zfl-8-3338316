@@ -69,6 +69,7 @@ const ROOT_ENDPOINTS = [
   "POST /auth/logout",
   "GET /auth/me",
   "GET /auth/roles",
+  "GET /auth/permissions",
   "POST /compliance-reports",
   "GET /compliance-reports",
   "GET /compliance-reports/:id",
@@ -107,6 +108,12 @@ const server = http.createServer(async (req, res) => {
           operationLogs: {
             enabled: true,
             endpoints: ["/operation-logs", "/operation-logs/types", "/operation-logs/:id"]
+          },
+          permissionMatrix: {
+            enabled: true,
+            endpoint: "GET /auth/permissions",
+            params: { role: "按角色过滤（可选，值: admin/warehouse/sales/qc）" },
+            note: "返回每个权限的中文说明、对应接口和拥有该权限的角色列表"
           },
           dataMigration: {
             enabled: true,

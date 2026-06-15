@@ -79,6 +79,134 @@ export const ROLE_PERMISSIONS = {
   ]
 };
 
+export const PERMISSION_META = {
+  [PERMISSIONS.CYLINDER_CREATE]: {
+    label: "新建钢瓶",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders"]
+  },
+  [PERMISSIONS.CYLINDER_BULK]: {
+    label: "批量导入钢瓶",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/bulk"]
+  },
+  [PERMISSIONS.CYLINDER_INBOUND]: {
+    label: "钢瓶入库",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/actions (type=inbound/clear_pending_check)"]
+  },
+  [PERMISSIONS.CYLINDER_OUTBOUND]: {
+    label: "钢瓶出库",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/actions (type=outbound)"]
+  },
+  [PERMISSIONS.CYLINDER_RETURN]: {
+    label: "钢瓶归还",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/actions (type=return)"]
+  },
+  [PERMISSIONS.CYLINDER_INSPECT]: {
+    label: "钢瓶送检",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/actions (type=inspect)"]
+  },
+  [PERMISSIONS.CYLINDER_SCRAP]: {
+    label: "钢瓶报废与待核查标记",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/actions (type=scrap/mark_pending_check)"]
+  },
+  [PERMISSIONS.CYLINDER_FILL]: {
+    label: "钢瓶充装",
+    category: "钢瓶管理",
+    endpoints: ["POST /cylinders/:id/fills"]
+  },
+  [PERMISSIONS.CUSTOMER_CREATE]: {
+    label: "新建客户",
+    category: "客户管理",
+    endpoints: ["POST /customers"]
+  },
+  [PERMISSIONS.ORDER_CREATE]: {
+    label: "创建租瓶订单",
+    category: "订单管理",
+    endpoints: ["POST /rental-orders"]
+  },
+  [PERMISSIONS.ORDER_RETURN]: {
+    label: "订单归还钢瓶",
+    category: "订单管理",
+    endpoints: ["POST /rental-orders/:id/return"]
+  },
+  [PERMISSIONS.INSPECTION_GENERATE]: {
+    label: "生成检验任务",
+    category: "检验管理",
+    endpoints: ["POST /inspection-tasks/generate"]
+  },
+  [PERMISSIONS.INSPECTION_SEND]: {
+    label: "送检",
+    category: "检验管理",
+    endpoints: ["POST /inspection-tasks/:id/send"]
+  },
+  [PERMISSIONS.INSPECTION_INSPECT]: {
+    label: "录入检验结果",
+    category: "检验管理",
+    endpoints: ["POST /inspection-tasks/:id/inspect"]
+  },
+  [PERMISSIONS.INSPECTION_RESTOCK]: {
+    label: "检验回库",
+    category: "检验管理",
+    endpoints: ["POST /inspection-tasks/:id/restock"]
+  },
+  [PERMISSIONS.INSPECTION_POSTPONE]: {
+    label: "延期检验",
+    category: "检验管理",
+    endpoints: ["POST /inspection-tasks/:id/postpone"]
+  },
+  [PERMISSIONS.INVENTORY_CREATE]: {
+    label: "创建盘点单",
+    category: "盘点管理",
+    endpoints: ["POST /inventory-checks"]
+  },
+  [PERMISSIONS.INVENTORY_SCAN]: {
+    label: "盘点扫描与开始",
+    category: "盘点管理",
+    endpoints: ["POST /inventory-checks/:id/start", "POST /inventory-checks/:id/scan"]
+  },
+  [PERMISSIONS.INVENTORY_COMPLETE]: {
+    label: "完成盘点",
+    category: "盘点管理",
+    endpoints: ["POST /inventory-checks/:id/complete"]
+  },
+  [PERMISSIONS.INVENTORY_CONFIRM]: {
+    label: "确认盘点",
+    category: "盘点管理",
+    endpoints: ["POST /inventory-checks/:id/confirm"]
+  },
+  [PERMISSIONS.QUERY]: {
+    label: "数据查询与合规报表",
+    category: "数据查询",
+    endpoints: ["POST /compliance-reports", "POST /compliance-reports/:id/retry"]
+  }
+};
+
+export function buildPermissionMatrix(roleFilter) {
+  const matrix = Object.values(PERMISSIONS).map((permKey) => {
+    const meta = PERMISSION_META[permKey] || { label: permKey, category: "未分类", endpoints: [] };
+    const rolesWithPermission = Object.entries(ROLE_PERMISSIONS)
+      .filter(([, perms]) => perms.includes(permKey))
+      .map(([role]) => role);
+    return {
+      key: permKey,
+      label: meta.label,
+      category: meta.category,
+      endpoints: meta.endpoints,
+      roles: rolesWithPermission
+    };
+  });
+  if (roleFilter) {
+    return matrix.filter((entry) => entry.roles.includes(roleFilter));
+  }
+  return matrix;
+}
+
 export function hasPermission(role, permission) {
   const perms = ROLE_PERMISSIONS[role] || [];
   return perms.includes(permission);
