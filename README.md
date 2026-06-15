@@ -60,30 +60,30 @@ data/
 npm run migrate:status
 
 # 执行迁移到最新版本
-npm run migrate
-
-# 创建当前数据的备份
-npm run migrate:backup
+npm run migrate:up
 
 # 列出所有备份
-npm run migrate:backups
+npm run migrate:list-backups
 
-# 从指定备份恢复（需要交互确认）
+# 从指定备份恢复
 npm run migrate:restore -- backup-name
 
-# 验证备份完整性
-npm run migrate:verify -- backup-name
+# 回滚到 v1
+npm run migrate:down
+
+# 强制升级（忽略验证错误）
+npm run migrate:force
 ```
 
 也可以直接运行脚本：
 
 ```bash
 node scripts/migrate.js status
-node scripts/migrate.js migrate
-node scripts/migrate.js backup
-node scripts/migrate.js backups
+node scripts/migrate.js up
+node scripts/migrate.js down 1
+node scripts/migrate.js list-backups
 node scripts/migrate.js restore <backup-name>
-node scripts/migrate.js verify <backup-name>
+node scripts/migrate.js force-up
 ```
 
 ### 迁移安全机制
@@ -224,7 +224,7 @@ POST /cylinders/:id/actions
 
 当需要修改数据 Schema 时，按以下步骤添加新的迁移：
 
-1. 在 `store/migrations/` 目录下创建新的迁移文件，命名格式为 `v{版本号}_{描述}.js`
+1. 在 `store/migration.js` 的 `MIGRATIONS` 数组中注册新的迁移步骤。
 
 2. 迁移文件格式：
 
@@ -247,7 +247,7 @@ export default {
 };
 ```
 
-3. 更新 `store/dataVersion.js` 中的 `LATEST_VERSION` 常量
+3. 更新 `store/migration.js` 中的 `CURRENT_VERSION` 常量。
 
 4. 编写迁移逻辑时的注意事项：
    - 迁移应该是幂等的
@@ -259,8 +259,7 @@ export default {
 
 | 文件 | 说明 |
 |------|------|
-| `store/dataVersion.js` | 数据版本管理核心，包含版本检测、备份、回滚、迁移执行 |
-| `store/migrations/` | 迁移脚本目录，每个版本一个脚本 |
+| `store/migration.js` | 数据版本管理核心，包含版本检测、备份、回滚、迁移执行 |
 | `store/common.js` | 数据读写公共模块，集成版本化数据目录 |
 | `scripts/migrate.js` | 命令行迁移管理工具 |
 | `data/meta.json` | 版本元数据文件 |

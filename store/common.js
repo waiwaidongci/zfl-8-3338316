@@ -166,8 +166,9 @@ export async function loadJson(filename, fallback, { skipCache = false } = {}) {
     const fallbackClone = JSON.parse(JSON.stringify(fallback));
     const versionedFallback = await addVersionMeta(fallbackClone, filename);
     await atomicWriteFile(filePath, JSON.stringify(versionedFallback, null, 2));
-    jsonCache.set(filename, versionedFallback);
-    return versionedFallback;
+    const normalizedFallback = normalizeForCompatibility(versionedFallback, filename);
+    jsonCache.set(filename, normalizedFallback);
+    return normalizedFallback;
   }
   
   try {
@@ -191,8 +192,9 @@ export async function loadJson(filename, fallback, { skipCache = false } = {}) {
     const fallbackClone = JSON.parse(JSON.stringify(fallback));
     const versionedFallback = await addVersionMeta(fallbackClone, filename);
     await atomicWriteFile(filePath, JSON.stringify(versionedFallback, null, 2));
-    jsonCache.set(filename, versionedFallback);
-    return versionedFallback;
+    const normalizedFallback = normalizeForCompatibility(versionedFallback, filename);
+    jsonCache.set(filename, normalizedFallback);
+    return normalizedFallback;
   }
 }
 
@@ -365,4 +367,5 @@ export async function saveJson(filename, data) {
   const versionedData = await addVersionMeta(dataToWrite, filename);
   const content = JSON.stringify(versionedData, null, 2);
   await atomicWriteFile(filePath, content);
+  jsonCache.set(filename, normalizeForCompatibility(versionedData, filename));
 }
