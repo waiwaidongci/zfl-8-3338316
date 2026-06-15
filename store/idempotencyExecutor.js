@@ -31,6 +31,7 @@ export function normalizePath(pathname) {
     .replace(/\/cylinders\/[^/]+$/, "/cylinders/:id")
     .replace(/\/customers\/[^/]+\/(cylinders|deposits|orders)$/, "/customers/:id/$1")
     .replace(/\/customers\/[^/]+$/, "/customers/:id")
+    .replace(/\/rental-orders\/[^/]+\/return$/, "/rental-orders/:id/return")
     .replace(/\/rental-orders\/[^/]+$/, "/rental-orders/:id")
     .replace(/\/inspection-tasks\/[^/]+\/(send|inspect|restock)$/, "/inspection-tasks/:id/$1")
     .replace(/\/inspection-tasks\/[^/]+$/, "/inspection-tasks/:id")

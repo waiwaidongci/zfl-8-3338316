@@ -1,9 +1,9 @@
 import { send, body, makeEvent, withMultiJsonTx } from "../store/common.js";
 import { SEED as CYLINDERS_SEED } from "../store/cylinders.js";
 import { SEED as ORDERS_SEED } from "../store/rentalOrders.js";
-import { findCylinder } from "../store/cylinders.js";
+import { findCylinder, transitions } from "../store/cylinders.js";
 import { findCustomer } from "../store/customers.js";
-import { findOrder, findOrdersByCustomer, createOrder } from "../store/rentalOrders.js";
+import { findOrder, findOrdersByCustomer, createOrder, returnOrderCylinders, calculateOrderStatus } from "../store/rentalOrders.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
 import { PERMISSIONS } from "../auth/users.js";
 import { executeWithIdempotency } from "../store/idempotencyExecutor.js";
@@ -28,6 +28,32 @@ function validateCreateOrderInput(input) {
       return { valid: false, error: `duplicate_cylinder:${item.id}`, status: 400 };
     }
     seen.add(item.id);
+  }
+  return { valid: true };
+}
+
+function validateReturnOrderInput(input) {
+  if (!Array.isArray(input.cylinderIds) || input.cylinderIds.length === 0) {
+    return { valid: false, error: "cylinderIds_required", status: 400 };
+  }
+  const seen = new Set();
+  for (const id of input.cylinderIds) {
+    if (!id || typeof id !== "string") {
+      return { valid: false, error: "cylinder_id_required", status: 400 };
+    }
+    if (seen.has(id)) {
+      return { valid: false, error: `duplicate_cylinder:${id}`, status: 400 };
+    }
+    seen.add(id);
+  }
+  if (input.returnLocation !== undefined && typeof input.returnLocation !== "string") {
+    return { valid: false, error: "returnLocation_invalid", status: 400 };
+  }
+  if (input.depositRefunded !== undefined && typeof input.depositRefunded !== "boolean") {
+    return { valid: false, error: "depositRefunded_invalid", status: 400 };
+  }
+  if (input.note !== undefined && typeof input.note !== "string") {
+    return { valid: false, error: "note_invalid", status: 400 };
   }
   return { valid: true };
 }
@@ -127,6 +153,136 @@ export async function handleRentalOrders(req, res, url) {
             orders.push(created);
 
             return { statusCode: 201, body: created };
+          }
+        );
+      }
+    });
+  }
+
+  const returnMatch = url.pathname.match(/^\/rental-orders\/([^/]+)\/return$/);
+  if (returnMatch && req.method === "POST") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.ORDER_RETURN);
+    if (!auth.authorized) return true;
+    const [, orderId] = returnMatch;
+    await body(req);
+    return executeWithIdempotency(req, res, url, {
+      auth,
+      operationType: OPERATION_TYPES.ORDER_RETURN,
+      targetType: TARGET_TYPES.ORDER,
+      targetIdExtractor: () => orderId,
+      operation: async (ctx) => {
+        const input = await body(req);
+
+        const validation = validateReturnOrderInput(input);
+        if (!validation.valid) {
+          return { statusCode: validation.status, body: { error: validation.error } };
+        }
+
+        return withMultiJsonTx(
+          [
+            { filename: CYLINDERS_FILE, fallback: CYLINDERS_SEED },
+            { filename: ORDERS_FILE, fallback: ORDERS_SEED }
+          ],
+          async (dbs) => {
+            const cylinders = dbs[CYLINDERS_FILE].cylinders;
+            const orders = dbs[ORDERS_FILE].orders;
+
+            const order = findOrder(orders, orderId);
+            if (!order) {
+              return { statusCode: 404, body: { error: "order_not_found" } };
+            }
+
+            if (!Array.isArray(order.cylinders)) {
+              order.cylinders = [];
+              order.returnedCount = 0;
+            }
+            if (!Array.isArray(order.returnHistory)) {
+              order.returnHistory = [];
+            }
+
+            const errors = [];
+            const validCylinders = [];
+            const cylinderSnapshotsBefore = [];
+            const eventIds = [];
+
+            for (const cylinderId of input.cylinderIds) {
+              const orderCylinder = order.cylinders.find((c) => c.id === cylinderId);
+              if (!orderCylinder) {
+                errors.push({ cylinderId, error: "cylinder_not_in_order" });
+                continue;
+              }
+              if (orderCylinder.returned) {
+                errors.push({ cylinderId, error: "cylinder_already_returned", returnedAt: orderCylinder.returnedAt });
+                continue;
+              }
+
+              const cylinder = findCylinder(cylinders, cylinderId);
+              if (!cylinder) {
+                errors.push({ cylinderId, error: "cylinder_not_found" });
+                continue;
+              }
+              if (cylinder.status !== "rented") {
+                errors.push({ cylinderId, error: "cylinder_not_rented", currentStatus: cylinder.status });
+                continue;
+              }
+              if (cylinder.customer !== order.customerId && cylinder.customer !== order.customerName) {
+                errors.push({ cylinderId, error: "cylinder_customer_mismatch", orderCustomer: order.customerName, actualCustomer: cylinder.customer });
+                continue;
+              }
+
+              cylinderSnapshotsBefore.push(snapshotEntity(cylinder));
+              validCylinders.push({ orderCylinder, cylinder });
+            }
+
+            if (errors.length > 0 && validCylinders.length === 0) {
+              return {
+                statusCode: 422,
+                body: {
+                  error: "return_validation_failed",
+                  message: "所有钢瓶校验失败，未执行归还操作",
+                  errors
+                }
+              };
+            }
+
+            const validCylinderIds = validCylinders.map((v) => v.orderCylinder.id);
+
+            ctx.setBeforeState({
+              order: snapshotEntity(order),
+              cylinders: cylinderSnapshotsBefore
+            });
+
+            for (const { orderCylinder, cylinder } of validCylinders) {
+              transitions.return(cylinder, {
+                location: input.returnLocation || "待检区",
+                depositStatus: input.depositRefunded ? "refunded" : "refundable"
+              });
+              const evt = makeEvent("return", `订单归还${input.note ? " - " + input.note : ""}`);
+              cylinder.events.push(evt);
+              eventIds.push(evt.id);
+            }
+
+            ctx.captureEventIds(eventIds);
+
+            const returnRecord = returnOrderCylinders(order, {
+              cylinderIds: validCylinderIds,
+              returnLocation: input.returnLocation || "待检区",
+              depositRefunded: input.depositRefunded || false,
+              note: input.note || ""
+            });
+
+            return {
+              statusCode: errors.length > 0 ? 207 : 200,
+              body: {
+                orderId: order.id,
+                orderStatus: order.status,
+                returnedCount: order.returnedCount,
+                totalCylinders: order.cylinders.length,
+                returnRecord,
+                returnedCylinders: returnRecord.cylinders,
+                errors: errors.length > 0 ? errors : undefined
+              }
+            };
           }
         );
       }

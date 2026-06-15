@@ -87,6 +87,7 @@ export const OPERATION_TYPES = {
   CYLINDER_ACTION: "cylinder.action",
   CYLINDER_FILL: "cylinder.fill",
   ORDER_CREATE: "order.create",
+  ORDER_RETURN: "order.return",
   INSPECTION_GENERATE: "inspection.generate",
   INSPECTION_SEND: "inspection.send",
   INSPECTION_INSPECT: "inspection.inspect",

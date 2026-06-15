@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
+    "test:order-return": "node scripts/test-order-return.js",
     "migrate:status": "node scripts/migrate.js status",
     "migrate:up": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down 1",

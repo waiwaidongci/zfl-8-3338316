@@ -153,6 +153,110 @@ node scripts/migrate.js force-up
 GET /cylinders?status=in_stock&latestEventType=inbound&latestEventTimeFrom=2026-06-01T00:00:00.000Z&latestEventTimeTo=2026-06-30T23:59:59.999Z&pagination=1&page=1&pageSize=10
 ```
 
+## 租瓶订单模块
+
+### 概述
+
+租瓶订单模块支持钢瓶租借订单的创建、查询和归还闭环。订单记录了客户信息、租借钢瓶明细、押金状态等，归还操作支持按订单部分或全部归还钢瓶，并自动更新钢瓶状态、押金状态、库位和操作日志。
+
+### 订单状态
+
+| 状态 | 说明 |
+|------|------|
+| `completed` | 订单已完成创建，未发生归还 |
+| `partially_returned` | 部分钢瓶已归还 |
+| `fully_returned` | 全部钢瓶已归还 |
+
+### 订单数据结构
+
+每个钢瓶在订单中包含以下归还信息：
+- `returned`：是否已归还
+- `returnedAt`：归还时间
+- `returnNote`：归还备注
+
+订单级别字段：
+- `returnedCount`：已归还钢瓶数
+- `returnHistory`：归还历史记录数组，每次归还生成一条记录
+
+### API 接口
+
+| 方法 | 路径 | 说明 | 权限 |
+|------|------|------|------|
+| `GET` | `/rental-orders` | 查询租瓶订单列表 | `query` |
+| `POST` | `/rental-orders` | 创建租瓶订单 | `order:create` |
+| `GET` | `/rental-orders/:id` | 获取订单详情 | `query` |
+| `POST` | `/rental-orders/:id/return` | 订单级归还钢瓶 | `order:return` |
+| `GET` | `/customers/:id/orders` | 查询某客户的所有订单 | `query` |
+
+### 创建租瓶订单
+
+```json
+POST /rental-orders
+{
+  "customerId": "CUS-001",
+  "cylinders": [
+    { "id": "CY-88001", "depositStatus": "paid", "note": "" }
+  ],
+  "note": "月度租借"
+}
+```
+
+### 订单级归还钢瓶
+
+```json
+POST /rental-orders/:id/return
+{
+  "cylinderIds": ["CY-88001", "CY-88002"],
+  "returnLocation": "待检区",
+  "depositRefunded": false,
+  "note": "客户归还"
+}
+```
+
+#### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `cylinderIds` | `string[]` | 是 | 要归还的钢瓶 ID 列表，支持部分归还 |
+| `returnLocation` | `string` | 否 | 归还后库位，默认"待检区" |
+| `depositRefunded` | `boolean` | 否 | 是否已退还押金，默认 `false` |
+| `note` | `string` | 否 | 归还备注 |
+
+#### 校验规则
+
+- 钢瓶必须属于该订单
+- 钢瓶不能已归还
+- 钢瓶状态必须为 `rented`
+- 钢瓶当前客户必须与订单客户匹配
+
+#### 响应状态码
+
+| 状态码 | 说明 |
+|--------|------|
+| `200` | 全部钢瓶归还成功 |
+| `207` | 部分钢瓶归还成功，部分校验失败（响应中包含 `errors` 字段） |
+| `400` | 请求参数校验失败 |
+| `404` | 订单不存在 |
+| `422` | 所有钢瓶均校验失败，未执行任何归还操作 |
+
+#### 归还操作自动完成
+
+1. **钢瓶状态**：`rented` → `returned`
+2. **钢瓶库位**：更新为指定的归还位置
+3. **押金状态**：`depositRefunded=true` → `refunded`，否则 `refundable`
+4. **订单归还明细**：标记对应钢瓶为已归还，记录归还时间和备注
+5. **订单状态**：自动计算为 `partially_returned` 或 `fully_returned`
+6. **操作日志**：生成 `order.return` 类型操作记录
+7. **钢瓶事件**：每个归还钢瓶添加 `return` 类型事件
+8. **幂等保护**：使用 `Idempotency-Key` 头或自动幂等键，重复请求不会重复写事件
+
+### 权限分配
+
+| 权限 | admin | warehouse | qc | sales |
+|------|-------|-----------|-----|-------|
+| `order:create` | ✅ | ✅ | - | ✅ |
+| `order:return` | ✅ | ✅ | - | ✅ |
+
 ## 库存盘点模块
 
 ### 概述

@@ -41,6 +41,7 @@ const ROOT_ENDPOINTS = [
   "GET /rental-orders",
   "POST /rental-orders",
   "GET /rental-orders/:id",
+  "POST /rental-orders/:id/return",
   "GET /inspection-tasks",
   "POST /inspection-tasks/generate",
   "GET /inspection-tasks/:id",
