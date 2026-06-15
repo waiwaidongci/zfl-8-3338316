@@ -12,7 +12,7 @@ const IDEMPOTENCY_FILE = "idempotency.json";
 const IDEMPOTENCY_TTL_MS = 24 * 60 * 60 * 1000;
 const PROCESSING_TIMEOUT_MS = 5 * 60 * 1000;
 
-const SEED = {
+export const SEED = {
   records: {},
   version: 1
 };

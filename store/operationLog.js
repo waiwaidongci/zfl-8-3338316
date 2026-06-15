@@ -8,7 +8,7 @@ const dataDir = join(__dirname, "..", "data");
 const lockDir = join(dataDir, "locks");
 
 const OPLOG_FILE = "operationLogs.json";
-const SEED = {
+export const SEED = {
   logs: [],
   version: 1
 };
