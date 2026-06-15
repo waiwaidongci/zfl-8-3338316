@@ -183,7 +183,7 @@ draft → scanning → completed → confirmed
 
 | 方法 | 路径 | 说明 | 权限 |
 |------|------|------|------|
-| `GET` | `/inventory-checks` | 查询盘点单列表（支持`?status=`筛选） | `query` |
+| `GET` | `/inventory-checks` | 查询盘点单列表（支持多维度筛选） | `query` |
 | `POST` | `/inventory-checks` | 创建盘点单 | `inventory:create` |
 | `GET` | `/inventory-checks/:id` | 获取盘点单详情 | `query` |
 | `POST` | `/inventory-checks/:id/start` | 开始扫描 | `inventory:scan` |
@@ -194,6 +194,25 @@ draft → scanning → completed → confirmed
 | `GET` | `/inventory-checks/:id/history?cylinderId=XX` | 查询某钢瓶在该盘点单中的历史 | `query` |
 | `GET` | `/cylinders/:id/inventory-history` | 查询某钢瓶在所有盘点中的历史 | `query` |
 | `GET` | `/reports/inventory-summary` | 盘点汇总报表 | `query` |
+
+#### 盘点单列表筛选参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `status` | 按盘点单状态筛选 | `draft`、`scanning`、`completed`、`confirmed` |
+| `createdBy` | 按创建人筛选 | `张三` |
+| `location` | 按盘点范围库位筛选（匹配 `scope.location`） | `一号仓` |
+| `gasType` | 按盘点范围气体类型筛选（匹配 `scope.gasType`） | `高纯氩` |
+| `createdFrom` | 创建时间起始（ISO 8601） | `2026-06-01T00:00:00.000Z` |
+| `createdTo` | 创建时间截止（ISO 8601） | `2026-06-30T23:59:59.999Z` |
+
+返回结果默认按 `createdAt` 倒序排列。所有筛选参数均可独立使用或任意组合。
+
+示例：
+
+```
+GET /inventory-checks?status=draft&createdBy=张三&location=一号仓&createdFrom=2026-06-01T00:00:00.000Z&createdTo=2026-06-30T23:59:59.999Z
+```
 
 ### 创建盘点单
 

@@ -29,6 +29,38 @@ export async function withChecksTx(mutator) {
   });
 }
 
+export function filterChecks(checks, query = {}) {
+  let result = [...checks];
+
+  if (query.status) {
+    result = result.filter((c) => c.status === query.status);
+  }
+  if (query.createdBy) {
+    result = result.filter((c) => c.createdBy === query.createdBy);
+  }
+  if (query.location) {
+    result = result.filter((c) => c.scope && c.scope.location === query.location);
+  }
+  if (query.gasType) {
+    result = result.filter((c) => c.scope && c.scope.gasType === query.gasType);
+  }
+  if (query.createdFrom) {
+    const from = new Date(query.createdFrom).getTime();
+    if (!isNaN(from)) {
+      result = result.filter((c) => new Date(c.createdAt).getTime() >= from);
+    }
+  }
+  if (query.createdTo) {
+    const to = new Date(query.createdTo).getTime();
+    if (!isNaN(to)) {
+      result = result.filter((c) => new Date(c.createdAt).getTime() <= to);
+    }
+  }
+
+  result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  return result;
+}
+
 export function findCheck(checks, id) {
   return checks.find((c) => c.id === id) || null;
 }

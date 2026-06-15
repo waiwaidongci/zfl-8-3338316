@@ -3,6 +3,7 @@ import { SEED as CYLINDERS_SEED } from "../store/cylinders.js";
 import { SEED as CHECKS_SEED } from "../store/inventoryChecks.js";
 import {
   loadChecks,
+  filterChecks,
   findCheck,
   createCheck,
   applyStart,
@@ -27,9 +28,16 @@ export async function handleInventoryChecks(req, res, url) {
   if (req.method === "GET" && url.pathname === "/inventory-checks") {
     const auth = await checkQueryAuth(req, res);
     if (!auth.authorized) return true;
-    const status = url.searchParams.get("status");
+    const query = {
+      status: url.searchParams.get("status"),
+      createdBy: url.searchParams.get("createdBy"),
+      location: url.searchParams.get("location"),
+      gasType: url.searchParams.get("gasType"),
+      createdFrom: url.searchParams.get("createdFrom"),
+      createdTo: url.searchParams.get("createdTo")
+    };
     let checks = await loadChecks();
-    if (status) checks = checks.filter((c) => c.status === status);
+    checks = filterChecks(checks, query);
     return send(res, 200, checks);
   }
 
