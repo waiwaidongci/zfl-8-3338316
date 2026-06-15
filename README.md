@@ -488,8 +488,57 @@ POST /inventory-checks/:id/scan
 
 - **matched**：预期内且已扫到的钢瓶（账实相符）
 - **deficit**：预期内但未扫到的钢瓶（盘亏），标记是否受保护
-- **surplus**：非预期但扫到的钢瓶（盘盈）
+- **surplus**：非预期但扫到的钢瓶（盘盈），包含 `existsInSystem` 和 `protected` 标记
 - **suggestions**：差异处理建议，区分可操作和受保护两类
+
+盘盈钢瓶分为三种类型：
+- **surplus_migratable**：系统已存在且状态非受保护，确认时可选择迁移到盘点库位
+- **surplus_protected**：系统已存在但状态受保护（租借中/送检中/已报废），不可迁移，需人工核实
+- **surplus_unregistered**：系统中不存在，确认时生成待登记建议，需人工核实后建档
+
+### 确认盘点
+
+确认盘点时，除了将盘亏钢瓶标记为 `pending_check`，还可对盘盈钢瓶进行处理：
+
+```json
+POST /inventory-checks/:id/confirm
+{
+  "operator": "张三",
+  "surplusMigrateIds": ["CY-88001", "CY-88002"]
+}
+```
+
+#### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `operator` | `string` | 否 | 操作人 |
+| `surplusMigrateIds` | `string[]` | 否 | 需要迁移到盘点库位的盘盈钢瓶 ID 列表，仅对系统已存在且非受保护状态的钢瓶生效 |
+
+#### 确认后自动处理
+
+1. **盘亏处理**：非受保护状态的盘亏钢瓶标记为 `pending_check`，库位设为"待核查区"
+2. **盘盈迁移**：`surplusMigrateIds` 中指定的、系统已存在且非受保护的盘盈钢瓶，库位迁移到盘点单的 `scope.location`
+3. **待登记建议**：系统中不存在的盘盈钢瓶，生成待登记建议列表（不直接建档，需人工核实后登记）
+4. **钢瓶事件**：盘亏钢瓶添加 `inventory_check` 事件，盘盈迁移钢瓶添加 `inventory_migrate` 事件
+5. **操作日志**：生成 `inventory.confirm` 类型操作记录，包含盘点单前后状态和关联事件 ID
+
+#### 响应示例
+
+```json
+{
+  "check": { ... },
+  "affectedDeficit": [
+    { "cylinderId": "CY-88001", "previousStatus": "in_stock", "newStatus": "pending_check" }
+  ],
+  "affectedSurplusMigrated": [
+    { "cylinderId": "CY-88003", "previousLocation": "二号仓", "newLocation": "一号仓" }
+  ],
+  "surplusRegistrationSuggestions": [
+    { "cylinderId": "CY-99001", "suggestedLocation": "一号仓", "checkId": "IC-xxx" }
+  ]
+}
+```
 
 ### 钢瓶状态
 
@@ -503,6 +552,8 @@ POST /cylinders/:id/actions
   "location": "仓库"
 }
 ```
+
+盘盈迁移操作会在钢瓶事件中新增 `inventory_migrate` 类型事件，记录迁移前后的库位信息。
 
 ### 权限分配
 

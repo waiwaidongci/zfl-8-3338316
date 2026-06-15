@@ -209,10 +209,12 @@ export function computeDifferences(check, cylinders) {
     const c = cylinderMap.get(id);
     return {
       cylinderId: id,
+      existsInSystem: !!c,
       gasType: c?.gasType || null,
       capacity: c?.capacity || null,
       status: c?.status || null,
-      location: c?.location || null
+      location: c?.location || null,
+      protected: c ? PROTECTED_STATUSES.includes(c.status) : false
     };
   });
 
@@ -266,13 +268,33 @@ export function generateSuggestions(differences) {
   }
 
   for (const item of differences.surplus) {
-    suggestions.push({
-      cylinderId: item.cylinderId,
-      type: "surplus",
-      suggestion: `钢瓶${item.cylinderId}盘盈（不在预期范围内），建议核实是否为错放或未登记入库`,
-      action: "verify_surplus",
-      priority: "medium"
-    });
+    if (item.existsInSystem) {
+      if (item.protected) {
+        suggestions.push({
+          cylinderId: item.cylinderId,
+          type: "surplus_protected",
+          suggestion: `钢瓶${item.cylinderId}盘盈，当前状态为${item.status}（受保护），不可迁移，建议人工核实`,
+          action: "manual_verify",
+          priority: "medium"
+        });
+      } else {
+        suggestions.push({
+          cylinderId: item.cylinderId,
+          type: "surplus_migratable",
+          suggestion: `钢瓶${item.cylinderId}盘盈（系统已存在），当前库位${item.location || "未知"}，确认时可选择迁移到盘点库位`,
+          action: "migrate_location",
+          priority: "high"
+        });
+      }
+    } else {
+      suggestions.push({
+        cylinderId: item.cylinderId,
+        type: "surplus_unregistered",
+        suggestion: `钢瓶${item.cylinderId}盘盈（系统中不存在），建议核实后登记建档`,
+        action: "register_suggestion",
+        priority: "high"
+      });
+    }
   }
 
   if (differences.duplicateScanCount > 0) {
@@ -300,7 +322,7 @@ export function applyComplete(check, cylinders) {
   check.completedAt = new Date().toISOString();
 }
 
-export function applyConfirm(check, cylinders, operator) {
+export function applyConfirm(check, cylinders, operator, options = {}) {
   validateTransition(check, "confirmed");
 
   if (!check.differences) {
@@ -309,7 +331,13 @@ export function applyConfirm(check, cylinders, operator) {
     throw err;
   }
 
-  const affectedCylinders = [];
+  const surplusMigrateIds = Array.isArray(options.surplusMigrateIds) ? options.surplusMigrateIds : [];
+  const surplusMigrateSet = new Set(surplusMigrateIds);
+  const targetLocation = check.scope?.location || "盘点库位";
+
+  const affectedDeficit = [];
+  const affectedSurplusMigrated = [];
+  const surplusRegistrationSuggestions = [];
 
   for (const item of check.differences.deficit) {
     if (item.protected) continue;
@@ -320,18 +348,54 @@ export function applyConfirm(check, cylinders, operator) {
     cylinder.status = "pending_check";
     cylinder.location = cylinder.location || "待核查区";
     cylinder.events.push(makeEvent("inventory_check", `盘亏标记待核查，盘点单${check.id}`));
-    affectedCylinders.push({
+    affectedDeficit.push({
       cylinderId: cylinder.id,
       previousStatus: item.status,
-      newStatus: "pending_check"
+      newStatus: "pending_check",
+      previousLocation: item.location,
+      newLocation: cylinder.location
     });
+  }
+
+  for (const item of check.differences.surplus) {
+    if (item.existsInSystem) {
+      if (item.protected) continue;
+      if (!surplusMigrateSet.has(item.cylinderId)) continue;
+
+      const cylinder = cylinders.find((c) => c.id === item.cylinderId);
+      if (!cylinder) continue;
+      if (PROTECTED_STATUSES.includes(cylinder.status)) continue;
+
+      const previousLocation = cylinder.location;
+      cylinder.location = targetLocation;
+      cylinder.events.push(makeEvent("inventory_migrate", `盘点盘盈迁移库位：${previousLocation || "未知"} → ${targetLocation}，盘点单${check.id}`));
+      affectedSurplusMigrated.push({
+        cylinderId: cylinder.id,
+        previousLocation,
+        newLocation: targetLocation,
+        previousStatus: cylinder.status
+      });
+    } else {
+      surplusRegistrationSuggestions.push({
+        cylinderId: item.cylinderId,
+        suggestedLocation: targetLocation,
+        checkId: check.id,
+        suggestedAt: new Date().toISOString()
+      });
+    }
   }
 
   check.status = "confirmed";
   check.confirmedAt = new Date().toISOString();
   check.confirmedBy = operator || null;
+  check.surplusMigrated = affectedSurplusMigrated;
+  check.surplusRegistrationSuggestions = surplusRegistrationSuggestions;
 
-  return affectedCylinders;
+  return {
+    deficit: affectedDeficit,
+    surplusMigrated: affectedSurplusMigrated,
+    surplusRegistrationSuggestions
+  };
 }
 
 export function getCheckHistory(checks, cylinderId) {

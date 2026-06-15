@@ -7,6 +7,8 @@
     "start": "node server.js",
     "test:order-return": "node scripts/test-order-return.js",
     "test:inspection-postpone": "node scripts/test-inspection-postpone.js",
+    "test:inventory-check-filters": "node scripts/test-inventory-check-filters.js",
+    "test:inventory-check-surplus": "node scripts/test-inventory-check-surplus.js",
     "migrate:status": "node scripts/migrate.js status",
     "migrate:up": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down 1",

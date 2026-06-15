@@ -236,6 +236,12 @@ export async function handleInventoryChecks(req, res, url) {
       targetIdExtractor: () => id,
       operation: async (ctx) => {
         const input = await body(req);
+        const surplusMigrateIds = Array.isArray(input.surplusMigrateIds) ? input.surplusMigrateIds : [];
+        for (const cid of surplusMigrateIds) {
+          if (typeof cid !== "string" || !cid.trim()) {
+            return { statusCode: 400, body: { error: "invalid_surplus_migrate_id", detail: cid } };
+          }
+        }
         return withMultiJsonTx(
           [
             { filename: CYLINDERS_FILE, fallback: CYLINDERS_SEED },
@@ -249,7 +255,9 @@ export async function handleInventoryChecks(req, res, url) {
             ctx.setBeforeState({ check: snapshotEntity(check) });
             let affected;
             try {
-              affected = applyConfirm(check, cylinders, input.operator || auth.user?.username);
+              affected = applyConfirm(check, cylinders, input.operator || auth.user?.username, {
+                surplusMigrateIds
+              });
             } catch (err) {
               if (err.statusCode) return { statusCode: err.statusCode, body: { error: err.message } };
               throw err;
@@ -257,12 +265,20 @@ export async function handleInventoryChecks(req, res, url) {
             const eventIds = [];
             for (const c of cylinders) {
               const lastEvt = c.events[c.events.length - 1];
-              if (lastEvt && lastEvt.type === "inventory_check") {
+              if (lastEvt && (lastEvt.type === "inventory_check" || lastEvt.type === "inventory_migrate")) {
                 eventIds.push(lastEvt.id);
               }
             }
             ctx.captureEventIds(eventIds);
-            return { statusCode: 200, body: { check, affectedCylinders: affected } };
+            return {
+              statusCode: 200,
+              body: {
+                check,
+                affectedDeficit: affected.deficit,
+                affectedSurplusMigrated: affected.surplusMigrated,
+                surplusRegistrationSuggestions: affected.surplusRegistrationSuggestions
+              }
+            };
           }
         );
       }
