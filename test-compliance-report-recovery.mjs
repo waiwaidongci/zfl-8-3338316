@@ -600,6 +600,168 @@ async function testTimeRangeFiltering() {
   await cleanEntityFiles(["customers.json", "cylinders.json", "rentalOrders.json", "inspectionTasks.json", "inventoryChecks.json", "operationLogs.json"]);
 }
 
+async function testReportListFilters() {
+  console.log("\n📋 测试12: 报表列表多维度筛选");
+
+  await cleanReportFile();
+
+  const now = Date.now();
+  const reportData = {
+    _schemaVersion: "2.0",
+    _meta: {
+      createdAt: new Date().toISOString(),
+      entity: "complianceReports",
+      sourceFile: "complianceReports.json"
+    },
+    reports: [
+      {
+        id: "CR-HIGH-RISK",
+        status: "completed",
+        params: { startAt: "2026-01-01T00:00:00.000Z", endAt: "2026-12-31T23:59:59.999Z" },
+        requestedBy: "admin",
+        result: {
+          summary: {
+            highRiskCount: 5,
+            discrepancyCount: 2
+          }
+        },
+        createdAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(now - 2 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-LOW-RISK",
+        status: "completed",
+        params: { startAt: "2026-01-01T00:00:00.000Z", endAt: "2026-06-30T23:59:59.999Z" },
+        requestedBy: "warehouse",
+        result: {
+          summary: {
+            highRiskCount: 0,
+            discrepancyCount: 0
+          }
+        },
+        createdAt: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(now - 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-DISCREPANCY-ONLY",
+        status: "completed",
+        params: { startAt: "2026-03-01T00:00:00.000Z", endAt: "2026-09-30T23:59:59.999Z" },
+        requestedBy: "admin",
+        result: {
+          summary: {
+            highRiskCount: 0,
+            discrepancyCount: 3
+          }
+        },
+        createdAt: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString(),
+        completedAt: new Date(now - 10 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-FAILED",
+        status: "failed",
+        params: { startAt: "2026-01-01T00:00:00.000Z", endAt: "2026-12-31T23:59:59.999Z" },
+        requestedBy: "qc",
+        result: null,
+        error: "generation_error",
+        createdAt: new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "CR-FAILED-2",
+        status: "failed",
+        params: { startAt: "2026-02-01T00:00:00.000Z", endAt: "2026-08-31T23:59:59.999Z" },
+        requestedBy: "warehouse",
+        result: null,
+        error: "another_error",
+        createdAt: new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ]
+  };
+
+  await writeReportFile(reportData);
+
+  const proc = await startServer();
+  await sleep(2000);
+  const token = await login();
+
+  console.log("\n  --- 12.1 时间区间筛选 ---");
+  const fromTime = new Date(now - 6 * 24 * 60 * 60 * 1000).toISOString();
+  const toTime = new Date(now - 1 * 24 * 60 * 60 * 1000).toISOString();
+  const byTimeRange = await request(
+    "GET",
+    `/compliance-reports?createdFrom=${encodeURIComponent(fromTime)}&createdTo=${encodeURIComponent(toTime)}`,
+    { token }
+  );
+  assert(byTimeRange.statusCode === 200, "时间区间筛选返回200");
+  assert(Array.isArray(byTimeRange.body.items), "返回items数组");
+  const timeRangeIds = byTimeRange.body.items.map((r) => r.id);
+  assert(timeRangeIds.includes("CR-HIGH-RISK"), "时间范围内报表被包含: CR-HIGH-RISK");
+  assert(timeRangeIds.includes("CR-LOW-RISK"), "时间范围内报表被包含: CR-LOW-RISK");
+  assert(!timeRangeIds.includes("CR-DISCREPANCY-ONLY"), "时间范围外报表被排除: CR-DISCREPANCY-ONLY");
+  assert(!timeRangeIds.includes("CR-FAILED"), "时间范围外报表被排除: CR-FAILED");
+
+  console.log("\n  --- 12.2 hasHighRisk=true 筛选 ---");
+  const withHighRisk = await request("GET", "/compliance-reports?hasHighRisk=true", { token });
+  assert(withHighRisk.statusCode === 200, "hasHighRisk=true 返回200");
+  const highRiskIds = withHighRisk.body.items.map((r) => r.id);
+  assert(highRiskIds.includes("CR-HIGH-RISK"), "高风险报表被包含: CR-HIGH-RISK");
+  assert(!highRiskIds.includes("CR-LOW-RISK"), "无风险报表被排除: CR-LOW-RISK");
+  assert(!highRiskIds.includes("CR-DISCREPANCY-ONLY"), "无风险报表被排除: CR-DISCREPANCY-ONLY");
+  assert(!highRiskIds.includes("CR-FAILED"), "失败报表不被误判为有风险: CR-FAILED");
+  assert(!highRiskIds.includes("CR-FAILED-2"), "失败报表不被误判为有风险: CR-FAILED-2");
+
+  console.log("\n  --- 12.3 hasHighRisk=false 筛选 ---");
+  const noHighRisk = await request("GET", "/compliance-reports?hasHighRisk=false", { token });
+  assert(noHighRisk.statusCode === 200, "hasHighRisk=false 返回200");
+  const noHighRiskIds = noHighRisk.body.items.map((r) => r.id);
+  assert(!noHighRiskIds.includes("CR-HIGH-RISK"), "高风险报表被排除: CR-HIGH-RISK");
+  assert(noHighRiskIds.includes("CR-LOW-RISK"), "无风险报表被包含: CR-LOW-RISK");
+  assert(noHighRiskIds.includes("CR-DISCREPANCY-ONLY"), "无风险报表被包含: CR-DISCREPANCY-ONLY");
+  assert(!noHighRiskIds.includes("CR-FAILED"), "失败报表不被误判为无风险: CR-FAILED");
+  assert(!noHighRiskIds.includes("CR-FAILED-2"), "失败报表不被误判为无风险: CR-FAILED-2");
+
+  console.log("\n  --- 12.4 hasDiscrepancy=true 筛选 ---");
+  const withDiscrepancy = await request("GET", "/compliance-reports?hasDiscrepancy=true", { token });
+  assert(withDiscrepancy.statusCode === 200, "hasDiscrepancy=true 返回200");
+  const discIds = withDiscrepancy.body.items.map((r) => r.id);
+  assert(discIds.includes("CR-HIGH-RISK"), "有差异报表被包含: CR-HIGH-RISK");
+  assert(discIds.includes("CR-DISCREPANCY-ONLY"), "有差异报表被包含: CR-DISCREPANCY-ONLY");
+  assert(!discIds.includes("CR-LOW-RISK"), "无差异报表被排除: CR-LOW-RISK");
+  assert(!discIds.includes("CR-FAILED"), "失败报表不被误判为有差异: CR-FAILED");
+  assert(!discIds.includes("CR-FAILED-2"), "失败报表不被误判为有差异: CR-FAILED-2");
+
+  console.log("\n  --- 12.5 hasDiscrepancy=false 筛选 ---");
+  const noDiscrepancy = await request("GET", "/compliance-reports?hasDiscrepancy=false", { token });
+  assert(noDiscrepancy.statusCode === 200, "hasDiscrepancy=false 返回200");
+  const noDiscIds = noDiscrepancy.body.items.map((r) => r.id);
+  assert(!noDiscIds.includes("CR-HIGH-RISK"), "有差异报表被排除: CR-HIGH-RISK");
+  assert(!noDiscIds.includes("CR-DISCREPANCY-ONLY"), "有差异报表被排除: CR-DISCREPANCY-ONLY");
+  assert(noDiscIds.includes("CR-LOW-RISK"), "无差异报表被包含: CR-LOW-RISK");
+  assert(!noDiscIds.includes("CR-FAILED"), "失败报表不被误判为无差异: CR-FAILED");
+  assert(!noDiscIds.includes("CR-FAILED-2"), "失败报表不被误判为无差异: CR-FAILED-2");
+
+  console.log("\n  --- 12.6 组合筛选：status + hasHighRisk ---");
+  const combo1 = await request("GET", "/compliance-reports?status=completed&hasHighRisk=true", { token });
+  assert(combo1.statusCode === 200, "组合筛选返回200");
+  const combo1Ids = combo1.body.items.map((r) => r.id);
+  assert(combo1Ids.every((id) => id === "CR-HIGH-RISK"), "组合筛选结果正确");
+
+  console.log("\n  --- 12.7 组合筛选：requestedBy + hasDiscrepancy ---");
+  const combo2 = await request("GET", "/compliance-reports?requestedBy=admin&hasDiscrepancy=false", { token });
+  assert(combo2.statusCode === 200, "组合筛选返回200");
+  const combo2Ids = combo2.body.items.map((r) => r.id);
+  assert(!combo2Ids.includes("CR-HIGH-RISK"), "admin创建的有差异报表被排除");
+  assert(!combo2Ids.includes("CR-DISCREPANCY-ONLY"), "admin创建的有差异报表被排除");
+  assert(combo2Ids.length === 0 || combo2Ids.every((id) => id !== "CR-LOW-RISK"), "warehouse创建的报表不出现在admin筛选中");
+
+  console.log("\n  --- 12.8 无效时间参数安全降级 ---");
+  const invalidTime = await request("GET", "/compliance-reports?createdFrom=not-a-date", { token });
+  assert(invalidTime.statusCode === 200, "无效时间参数不报错");
+  assert(Array.isArray(invalidTime.body.items), "无效时间参数返回数组");
+
+  await stopServer(proc);
+  await cleanReportFile();
+}
+
 async function main() {
   console.log("========================================");
   console.log("  合规追溯报表 - 测试脚本");
@@ -631,6 +793,7 @@ async function main() {
     await stopServer(serverProc);
     serverProc = null;
     await testTimeRangeFiltering();
+    await testReportListFilters();
 
   } catch (err) {
     console.error(`\n❌ 测试执行失败: ${err.message}`);

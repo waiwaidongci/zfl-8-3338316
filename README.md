@@ -288,6 +288,80 @@ POST /cylinders/:id/actions
 
 盘点数据保存在当前版本数据目录下的 `inventoryChecks.json`。
 
+## 合规追溯报表
+
+### 概述
+
+合规追溯报表模块支持生成指定时间范围内的钢瓶全生命周期合规追溯报告，涵盖客户、订单、检验、盘点、操作日志等多维度数据。报表采用异步生成方式，支持列表查询与多维度筛选。
+
+### 报表状态
+
+| 状态 | 说明 |
+|------|------|
+| `pending` | 等待处理 |
+| `processing` | 生成中 |
+| `completed` | 已完成 |
+| `failed` | 生成失败 |
+
+### API 接口
+
+| 方法 | 路径 | 说明 | 权限 |
+|------|------|------|------|
+| `POST` | `/compliance-reports` | 创建合规追溯报表任务 | `query` |
+| `GET` | `/compliance-reports` | 查询报表列表（支持多维度筛选与分页） | `query` |
+| `GET` | `/compliance-reports/:id` | 获取报表详情 | `query` |
+| `POST` | `/compliance-reports/:id/retry` | 重试失败的报表 | `query` |
+
+#### 报表列表筛选参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `status` | 按报表状态筛选 | `pending`、`processing`、`completed`、`failed` |
+| `requestedBy` | 按创建人筛选 | `admin` |
+| `createdFrom` | 创建时间起始（ISO 8601） | `2026-06-01T00:00:00.000Z` |
+| `createdTo` | 创建时间截止（ISO 8601） | `2026-06-30T23:59:59.999Z` |
+| `hasHighRisk` | 是否包含高风险（`true`/`false`），仅对已完成报表有效；未完成报表不会被误判为无风险 | `true` |
+| `hasDiscrepancy` | 是否包含盘点差异（`true`/`false`），仅对已完成报表有效；未完成报表不会被误判为无差异 | `false` |
+| `page` | 页码 | `1` |
+| `pageSize` | 每页条数，最大 100 | `20` |
+
+返回结果默认按 `createdAt` 倒序排列。所有筛选参数均可独立使用或任意组合。
+
+> **注意**：`hasHighRisk` 和 `hasDiscrepancy` 筛选仅针对 `status=completed` 的报表。未完成（pending/processing/failed）的报表不包含完整的汇总数据，因此在使用这两个筛选条件时会被自动排除，不会误判为无风险或无差异。
+
+示例：
+
+```
+GET /compliance-reports?status=completed&hasHighRisk=true&createdFrom=2026-06-01T00:00:00.000Z&createdTo=2026-06-30T23:59:59.999Z
+```
+
+### 创建报表
+
+```json
+POST /compliance-reports
+{
+  "startAt": "2026-01-01T00:00:00.000Z",
+  "endAt": "2026-12-31T23:59:59.999Z"
+}
+```
+
+`startAt` 和 `endAt` 至少需提供一个。
+
+### 报表内容
+
+已完成的报表包含以下数据：
+
+- **period**：报表覆盖的时间周期
+- **summary**：汇总统计（钢瓶数、客户数、订单数、高风险数、差异数等）
+- **cylinders**：钢瓶追溯详情（状态变化、关联订单、检验风险、盘点差异等）
+- **risks**：全部检验风险列表
+- **discrepancies**：全部盘点差异列表
+- **operatorSummary**：操作人汇总
+
+### 数据文件
+
+报表数据保存在当前版本数据目录下的 `complianceReports.json`。
+
 ## 迁移开发指南
 
 ### 添加新的迁移脚本

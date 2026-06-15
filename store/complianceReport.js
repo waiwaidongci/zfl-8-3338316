@@ -429,6 +429,34 @@ export async function listReports(filters = {}) {
   if (filters.requestedBy) {
     reports = reports.filter((r) => r.requestedBy === filters.requestedBy);
   }
+  if (filters.createdFrom) {
+    const from = new Date(filters.createdFrom).getTime();
+    if (!isNaN(from)) {
+      reports = reports.filter((r) => new Date(r.createdAt).getTime() >= from);
+    }
+  }
+  if (filters.createdTo) {
+    const to = new Date(filters.createdTo).getTime();
+    if (!isNaN(to)) {
+      reports = reports.filter((r) => new Date(r.createdAt).getTime() <= to);
+    }
+  }
+  if (filters.hasHighRisk !== undefined && filters.hasHighRisk !== "") {
+    const hasHighRisk = filters.hasHighRisk === "true" || filters.hasHighRisk === true;
+    reports = reports.filter((r) => {
+      if (r.status !== "completed") return false;
+      const highRiskCount = r.result?.summary?.highRiskCount ?? 0;
+      return hasHighRisk ? highRiskCount > 0 : highRiskCount === 0;
+    });
+  }
+  if (filters.hasDiscrepancy !== undefined && filters.hasDiscrepancy !== "") {
+    const hasDiscrepancy = filters.hasDiscrepancy === "true" || filters.hasDiscrepancy === true;
+    reports = reports.filter((r) => {
+      if (r.status !== "completed") return false;
+      const discrepancyCount = r.result?.summary?.discrepancyCount ?? 0;
+      return hasDiscrepancy ? discrepancyCount > 0 : discrepancyCount === 0;
+    });
+  }
 
   reports.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
