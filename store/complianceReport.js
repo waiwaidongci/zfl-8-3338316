@@ -429,16 +429,20 @@ export async function listReports(filters = {}) {
   if (filters.requestedBy) {
     reports = reports.filter((r) => r.requestedBy === filters.requestedBy);
   }
-  if (filters.createdFrom) {
-    const from = new Date(filters.createdFrom).getTime();
-    if (!isNaN(from)) {
-      reports = reports.filter((r) => new Date(r.createdAt).getTime() >= from);
+  if (filters.periodFrom || filters.periodTo) {
+    const periodFrom = filters.periodFrom ? new Date(filters.periodFrom).getTime() : null;
+    const periodTo = filters.periodTo ? new Date(filters.periodTo).getTime() : null;
+    if (periodFrom !== null && !isNaN(periodFrom)) {
+      reports = reports.filter((r) => {
+        const endAt = r.params?.endAt ? new Date(r.params.endAt).getTime() : Infinity;
+        return endAt >= periodFrom;
+      });
     }
-  }
-  if (filters.createdTo) {
-    const to = new Date(filters.createdTo).getTime();
-    if (!isNaN(to)) {
-      reports = reports.filter((r) => new Date(r.createdAt).getTime() <= to);
+    if (periodTo !== null && !isNaN(periodTo)) {
+      reports = reports.filter((r) => {
+        const startAt = r.params?.startAt ? new Date(r.params.startAt).getTime() : -Infinity;
+        return startAt <= periodTo;
+      });
     }
   }
   if (filters.hasHighRisk !== undefined && filters.hasHighRisk !== "") {

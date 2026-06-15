@@ -39,8 +39,8 @@ export async function handleComplianceReport(req, res, url) {
     const filters = {
       status: url.searchParams.get("status") || "",
       requestedBy: url.searchParams.get("requestedBy") || "",
-      createdFrom: url.searchParams.get("createdFrom") || "",
-      createdTo: url.searchParams.get("createdTo") || "",
+      periodFrom: url.searchParams.get("periodFrom") || "",
+      periodTo: url.searchParams.get("periodTo") || "",
       hasHighRisk: url.searchParams.get("hasHighRisk") || "",
       hasDiscrepancy: url.searchParams.get("hasDiscrepancy") || "",
       page: url.searchParams.get("page") || "1",
