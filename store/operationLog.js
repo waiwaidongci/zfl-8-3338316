@@ -92,6 +92,7 @@ export const OPERATION_TYPES = {
   INSPECTION_SEND: "inspection.send",
   INSPECTION_INSPECT: "inspection.inspect",
   INSPECTION_RESTOCK: "inspection.restock",
+  INSPECTION_POSTPONE: "inspection.postpone",
   CUSTOMER_CREATE: "customer.create",
   INVENTORY_CREATE: "inventory.create",
   INVENTORY_START: "inventory.start",

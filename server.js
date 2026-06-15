@@ -48,6 +48,7 @@ const ROOT_ENDPOINTS = [
   "POST /inspection-tasks/:id/send",
   "POST /inspection-tasks/:id/inspect",
   "POST /inspection-tasks/:id/restock",
+  "POST /inspection-tasks/:id/postpone",
   "GET /inventory-checks",
   "POST /inventory-checks",
   "GET /inventory-checks/:id",

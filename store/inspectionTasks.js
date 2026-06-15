@@ -206,3 +206,76 @@ export function applyRestock(task, cylinder, input) {
   cylinder.depositStatus = "none";
   cylinder.events.push(makeEvent("inbound", `检验完成恢复入库，任务${task.id}`));
 }
+
+export function canPostpone(task, cylinder) {
+  if (cylinder.status === "scrapped") return false;
+  if (task.status === "failed" || task.status === "restocked") return false;
+  if (task.status === "passed") return false;
+  return true;
+}
+
+export function applyPostpone(task, cylinder, input) {
+  if (!input || !input.newInspectionDue) {
+    const err = new Error("newInspectionDue_required");
+    err.statusCode = 400;
+    throw err;
+  }
+  if (!input.reason || typeof input.reason !== "string" || input.reason.trim().length === 0) {
+    const err = new Error("reason_required");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  const newDueDate = new Date(input.newInspectionDue);
+  if (isNaN(newDueDate.getTime())) {
+    const err = new Error("invalid_newInspectionDue");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (cylinder.status === "scrapped") {
+    const err = new Error("cylinder_scrapped_cannot_postpone");
+    err.statusCode = 422;
+    throw err;
+  }
+  if (task.status === "failed" || task.status === "restocked") {
+    const err = new Error(`task_${task.status}_cannot_postpone`);
+    err.statusCode = 422;
+    throw err;
+  }
+  if (task.status === "passed") {
+    const err = new Error("task_passed_cannot_postpone");
+    err.statusCode = 422;
+    throw err;
+  }
+
+  const oldInspectionDue = task.inspectionDue;
+  const now = new Date().toISOString();
+  const newDue = newDueDate.toISOString().slice(0, 10);
+
+  task.inspectionDue = newDue;
+
+  if (!task.postponements) {
+    task.postponements = [];
+  }
+  task.postponements.push({
+    id: genId("P"),
+    oldInspectionDue,
+    newInspectionDue: newDue,
+    reason: input.reason,
+    postponedAt: now,
+    operator: input.operator || null
+  });
+
+  if (!task.statusHistory) {
+    task.statusHistory = [];
+  }
+  task.statusHistory.push({
+    status: task.status,
+    at: now,
+    note: `延期检验，原因：${input.reason}，新到检日期：${newDue}`
+  });
+
+  cylinder.inspectionDue = newDue;
+  cylinder.events.push(makeEvent("inspect_postpone", `检验延期，任务${task.id}，原因：${input.reason}，新到检日期：${newDue}`));
+}

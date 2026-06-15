@@ -6,7 +6,8 @@ import {
   generateTasks,
   applySend,
   applyInspectResult,
-  applyRestock
+  applyRestock,
+  applyPostpone
 } from "../store/inspectionTasks.js";
 import { findCylinder } from "../store/cylinders.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
@@ -205,6 +206,53 @@ export async function handleInspectionTasks(req, res, url) {
             ctx.setBeforeState({ task: snapshotEntity(task), cylinder: snapshotEntity(cylinder) });
             try {
               applyRestock(task, cylinder, input);
+            } catch (err) {
+              if (err.statusCode) {
+                return { statusCode: err.statusCode, body: { error: err.message } };
+              }
+              throw err;
+            }
+            const eventIds = cylinder.events.slice(-1).map((e) => e.id);
+            ctx.captureEventIds(eventIds);
+            return { statusCode: 200, body: { task, cylinder } };
+          }
+        );
+      }
+    });
+  }
+
+  const postponeMatch = url.pathname.match(/^\/inspection-tasks\/([^/]+)\/postpone$/);
+  if (postponeMatch && req.method === "POST") {
+    const auth = await checkActionAuth(req, res, PERMISSIONS.INSPECTION_POSTPONE);
+    if (!auth.authorized) return true;
+    const [, id] = postponeMatch;
+    await body(req);
+    return executeWithIdempotency(req, res, url, {
+      auth,
+      operationType: OPERATION_TYPES.INSPECTION_POSTPONE,
+      targetType: TARGET_TYPES.INSPECTION_TASK,
+      targetIdExtractor: () => id,
+      operation: async (ctx) => {
+        const input = await body(req);
+        return withMultiJsonTx(
+          [
+            { filename: CYLINDERS_FILE, fallback: CYLINDERS_SEED },
+            { filename: TASKS_FILE, fallback: TASKS_SEED }
+          ],
+          async (dbs) => {
+            const cylinders = dbs[CYLINDERS_FILE].cylinders;
+            const tasks = dbs[TASKS_FILE].tasks;
+            const task = findTask(tasks, id);
+            if (!task) {
+              return { statusCode: 404, body: { error: "task_not_found" } };
+            }
+            const cylinder = findCylinder(cylinders, task.cylinderId);
+            if (!cylinder) {
+              return { statusCode: 404, body: { error: "cylinder_not_found" } };
+            }
+            ctx.setBeforeState({ task: snapshotEntity(task), cylinder: snapshotEntity(cylinder) });
+            try {
+              applyPostpone(task, cylinder, input);
             } catch (err) {
               if (err.statusCode) {
                 return { statusCode: err.statusCode, body: { error: err.message } };

@@ -257,6 +257,131 @@ POST /rental-orders/:id/return
 | `order:create` | ✅ | ✅ | - | ✅ |
 | `order:return` | ✅ | ✅ | - | ✅ |
 
+## 检验任务模块
+
+### 概述
+
+检验任务模块支持钢瓶定期检验的全流程管理，包括任务生成、送检、录入检验结果、回库以及延期检验。系统根据钢瓶到检日期自动生成检验任务，质检人员可跟踪任务状态并执行相应操作。
+
+### 任务状态流转
+
+```
+pending → sent → passed → restocked
+              ↘ failed
+```
+
+| 状态 | 说明 |
+|------|------|
+| `pending` | 待送检，任务已生成但尚未送出 |
+| `sent` | 已送检，钢瓶已送出检验 |
+| `passed` | 检验合格 |
+| `failed` | 检验不合格，钢瓶已报废 |
+| `restocked` | 已回库，检验完成并恢复入库 |
+
+### API 接口
+
+| 方法 | 路径 | 说明 | 权限 |
+|------|------|------|------|
+| `GET` | `/inspection-tasks` | 查询检验任务列表 | `query` |
+| `POST` | `/inspection-tasks/generate` | 生成检验任务 | `inspection:generate` |
+| `GET` | `/inspection-tasks/:id` | 获取任务详情 | `query` |
+| `POST` | `/inspection-tasks/:id/send` | 送检 | `inspection:send` |
+| `POST` | `/inspection-tasks/:id/inspect` | 录入检验结果 | `inspection:inspect` |
+| `POST` | `/inspection-tasks/:id/restock` | 回库 | `inspection:restock` |
+| `POST` | `/inspection-tasks/:id/postpone` | 延期检验 | `inspection:postpone` |
+
+### 生成检验任务
+
+```json
+POST /inspection-tasks/generate
+{
+  "thresholdDays": 45
+}
+```
+
+系统会自动筛选距离到检日期在阈值天数内、未处于检验中/租借/报废状态、且没有活跃检验任务的钢瓶，生成检验任务。
+
+### 送检
+
+```json
+POST /inspection-tasks/:id/send
+{
+  "location": "第三方检验机构"
+}
+```
+
+送检后钢瓶状态变为 `inspection`，任务状态变为 `sent`。
+
+### 录入检验结果
+
+```json
+POST /inspection-tasks/:id/inspect
+{
+  "passed": true,
+  "inspector": "张三",
+  "notes": "检验合格",
+  "nextInspectionDue": "2027-06-15"
+}
+```
+
+检验合格时任务状态变为 `passed`，可选择更新下次到检日期；检验不合格时钢瓶自动报废，任务状态变为 `failed`。
+
+### 回库
+
+```json
+POST /inspection-tasks/:id/restock
+{
+  "location": "一号仓"
+}
+```
+
+检验合格的任务执行回库操作后，钢瓶状态恢复为 `in_stock`，任务状态变为 `restocked`。
+
+### 延期检验
+
+```json
+POST /inspection-tasks/:id/postpone
+{
+  "newInspectionDue": "2026-12-31",
+  "reason": "检验机构排期紧张",
+  "operator": "李四"
+}
+```
+
+#### 请求参数
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `newInspectionDue` | `string` | 是 | 新的到检日期（YYYY-MM-DD 格式） |
+| `reason` | `string` | 是 | 延期原因，不能为空 |
+| `operator` | `string` | 否 | 操作人 |
+
+#### 校验规则
+
+- 钢瓶已报废（`scrapped`）不能延期
+- 任务已完成（`passed`、`failed`、`restocked`）不能延期
+- 只能对 `pending` 或 `sent` 状态的任务执行延期
+
+#### 延期操作自动完成
+
+1. **任务到检日期**：更新为新的 `newInspectionDue`
+2. **延期历史**：在任务 `postponements` 数组中添加记录（包含原日期、新日期、原因、时间、操作人）
+3. **状态历史**：在任务 `statusHistory` 数组中添加记录
+4. **钢瓶到检日期**：同步更新钢瓶的 `inspectionDue`
+5. **钢瓶事件**：添加 `inspect_postpone` 类型事件
+6. **操作日志**：生成 `inspection.postpone` 类型操作记录
+7. **幂等保护**：支持 `Idempotency-Key` 头
+
+### 权限分配
+
+| 权限 | admin | warehouse | qc | sales |
+|------|-------|-----------|-----|-------|
+| `inspection:generate` | ✅ | - | ✅ | - |
+| `inspection:send` | ✅ | - | ✅ | - |
+| `inspection:inspect` | ✅ | - | ✅ | - |
+| `inspection:restock` | ✅ | ✅ | ✅ | - |
+| `inspection:postpone` | ✅ | - | ✅ | - |
+
 ## 库存盘点模块
 
 ### 概述

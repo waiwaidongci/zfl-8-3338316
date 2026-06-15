@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "test:order-return": "node scripts/test-order-return.js",
+    "test:inspection-postpone": "node scripts/test-inspection-postpone.js",
     "migrate:status": "node scripts/migrate.js status",
     "migrate:up": "node scripts/migrate.js up",
     "migrate:down": "node scripts/migrate.js down 1",
