@@ -127,6 +127,30 @@ async function cleanReportFile() {
   }
 }
 
+async function readEntityFile(fileName) {
+  const filePath = join(dataDir, fileName);
+  if (!existsSync(filePath)) return null;
+  const content = await readFile(filePath, "utf8");
+  return JSON.parse(content);
+}
+
+async function writeEntityFile(fileName, data) {
+  if (!existsSync(dataDir)) {
+    await mkdir(dataDir, { recursive: true });
+  }
+  const filePath = join(dataDir, fileName);
+  await writeFile(filePath, JSON.stringify(data, null, 2), "utf8");
+}
+
+async function cleanEntityFiles(fileNames) {
+  for (const fn of fileNames) {
+    const filePath = join(dataDir, fn);
+    if (existsSync(filePath)) {
+      try { await unlink(filePath); } catch {}
+    }
+  }
+}
+
 let passed = 0;
 let failed = 0;
 
@@ -436,6 +460,153 @@ async function testComplianceReportSnapshot(token) {
   assert(customersNoInternal, "customers快照无_schemaVersion泄露");
 }
 
+async function testTimeRangeFiltering() {
+  console.log("\n📋 测试11: 钢瓶追溯数据时间范围过滤");
+
+  const inRange = "2026-03-01T00:00:00.000Z";
+  const outOfRange = "2025-01-01T00:00:00.000Z";
+
+  const customersData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "customers", sourceFile: "customers.json" },
+    customers: [
+      { id: "CUS-TIME-1", name: "时间客户A", contact: "张", phone: "111", createdAt: inRange }
+    ]
+  };
+  const cylindersData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "cylinders", sourceFile: "cylinders.json" },
+    cylinders: [
+      {
+        id: "CY-TIME-1",
+        gasType: "高纯氩",
+        capacity: "40L",
+        inspectionDue: "2027-01-01",
+        location: "仓库",
+        status: "in_stock",
+        customer: null,
+        depositStatus: "none",
+        fills: [],
+        events: [
+          { id: "evt-in-range", type: "inbound", at: inRange, note: "周期内入库" },
+          { id: "evt-out-range", type: "inspect", at: outOfRange, note: "周期外检验" }
+        ]
+      }
+    ]
+  };
+  const ordersData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "rentalOrders", sourceFile: "rentalOrders.json" },
+    orders: [
+      {
+        id: "RO-IN-RANGE",
+        customerId: "CUS-TIME-1",
+        customerName: "时间客户A",
+        cylinderCount: 1,
+        cylinders: [{ id: "CY-TIME-1", gasType: "高纯氩", capacity: "40L", depositStatus: "paid" }],
+        status: "completed",
+        createdAt: inRange
+      },
+      {
+        id: "RO-OUT-RANGE",
+        customerId: "CUS-TIME-1",
+        customerName: "时间客户A",
+        cylinderCount: 1,
+        cylinders: [{ id: "CY-TIME-1", gasType: "高纯氩", capacity: "40L", depositStatus: "paid" }],
+        status: "completed",
+        createdAt: outOfRange
+      }
+    ]
+  };
+  const tasksData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "inspectionTasks", sourceFile: "inspectionTasks.json" },
+    tasks: [
+      { id: "IT-IN-RANGE", cylinderId: "CY-TIME-1", status: "passed", createdAt: inRange, inspectedAt: inRange, result: { passed: true } },
+      { id: "IT-OUT-RANGE", cylinderId: "CY-TIME-1", status: "failed", createdAt: outOfRange, inspectedAt: outOfRange, result: { passed: false } }
+    ]
+  };
+  const checksData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "inventoryChecks", sourceFile: "inventoryChecks.json" },
+    checks: [
+      {
+        id: "IC-IN-RANGE",
+        status: "completed",
+        createdAt: inRange,
+        completedAt: inRange,
+        confirmedAt: null,
+        differences: { deficit: [{ cylinderId: "CY-TIME-1", status: "unresolved" }], surplus: [] }
+      },
+      {
+        id: "IC-OUT-RANGE",
+        status: "completed",
+        createdAt: outOfRange,
+        completedAt: outOfRange,
+        confirmedAt: null,
+        differences: { deficit: [], surplus: [{ cylinderId: "CY-TIME-1", status: "unresolved" }] }
+      }
+    ]
+  };
+  const logsData = {
+    _schemaVersion: "2.0",
+    _meta: { createdAt: new Date().toISOString(), entity: "operationLogs", sourceFile: "operationLogs.json" },
+    logs: [
+      { id: "LOG-IN", targetId: "CY-TIME-1", operationType: "inbound", operator: "张三", status: "success", createdAt: inRange },
+      { id: "LOG-OUT", targetId: "CY-TIME-1", operationType: "outbound", operator: "李四", status: "success", createdAt: outOfRange }
+    ],
+    version: 1
+  };
+
+  await writeEntityFile("customers.json", customersData);
+  await writeEntityFile("cylinders.json", cylindersData);
+  await writeEntityFile("rentalOrders.json", ordersData);
+  await writeEntityFile("inspectionTasks.json", tasksData);
+  await writeEntityFile("inventoryChecks.json", checksData);
+  await writeEntityFile("operationLogs.json", logsData);
+
+  const proc = await startServer();
+  await sleep(2000);
+  const token = await login();
+
+  const res = await request("POST", "/compliance-reports", {
+    token,
+    body: {
+      startAt: "2026-02-01T00:00:00.000Z",
+      endAt: "2026-04-30T23:59:59.999Z"
+    }
+  });
+  assert(res.statusCode === 202, "时间过滤报表创建成功");
+
+  const completed = await waitForReportCompletion(token, res.body.id, 15000);
+  assert(completed.status === "completed", "时间过滤报表完成");
+
+  const r = completed.result;
+  const targetCylinder = r.cylinders.find((c) => c.cylinderId === "CY-TIME-1");
+  assert(targetCylinder !== undefined, "找到目标钢瓶CY-TIME-1");
+
+  if (targetCylinder) {
+    const relatedIds = targetCylinder.relatedOrders.map((o) => o.id);
+    assert(relatedIds.includes("RO-IN-RANGE"), `周期内订单被包含: ${JSON.stringify(relatedIds)}`);
+    assert(!relatedIds.includes("RO-OUT-RANGE"), `周期外订单被过滤: ${JSON.stringify(relatedIds)}`);
+
+    const riskTaskIds = targetCylinder.inspectionRisks.map((t) => t.id);
+    assert(riskTaskIds.includes("IT-IN-RANGE"), `周期内检验被包含: ${JSON.stringify(riskTaskIds)}`);
+    assert(!riskTaskIds.includes("IT-OUT-RANGE"), `周期外检验被过滤: ${JSON.stringify(riskTaskIds)}`);
+
+    const discCheckIds = targetCylinder.inventoryDiscrepancies.map((d) => d.checkId);
+    assert(discCheckIds.includes("IC-IN-RANGE"), `周期内盘点差异被包含: ${JSON.stringify(discCheckIds)}`);
+    assert(!discCheckIds.includes("IC-OUT-RANGE"), `周期外盘点差异被过滤: ${JSON.stringify(discCheckIds)}`);
+
+    const changeTypes = targetCylinder.statusChanges.map((e) => e.type);
+    assert(changeTypes.includes("inbound"), `周期内状态变化被包含: ${JSON.stringify(changeTypes)}`);
+    assert(!changeTypes.includes("inspect"), `周期外状态变化被过滤: ${JSON.stringify(changeTypes)}`);
+  }
+
+  await stopServer(proc);
+  await cleanEntityFiles(["customers.json", "cylinders.json", "rentalOrders.json", "inspectionTasks.json", "inventoryChecks.json", "operationLogs.json"]);
+}
+
 async function main() {
   console.log("========================================");
   console.log("  合规追溯报表 - 测试脚本");
@@ -463,6 +634,10 @@ async function main() {
     await testCylinderTraceability(newToken, reportId);
     await testCreateRequiresParams();
     await testComplianceReportSnapshot(newToken);
+
+    await stopServer(serverProc);
+    serverProc = null;
+    await testTimeRangeFiltering();
 
   } catch (err) {
     console.error(`\n❌ 测试执行失败: ${err.message}`);

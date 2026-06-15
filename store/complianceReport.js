@@ -66,9 +66,11 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
       note: evt.note || null
     }));
 
-  const relatedOrders = orders.filter((o) =>
-    o.cylinders && o.cylinders.some((c) => c.id === cylinder.id)
-  ).map((o) => ({
+  const relatedOrders = orders.filter((o) => {
+    if (!o.cylinders || !o.cylinders.some((c) => c.id === cylinder.id)) return false;
+    const t = new Date(o.createdAt).getTime();
+    return t >= startTime && t <= endTime;
+  }).map((o) => ({
     id: o.id,
     customerName: o.customerName,
     cylinderCount: o.cylinderCount,
@@ -77,7 +79,12 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
   }));
 
   const inspectionRisks = tasks
-    .filter((t) => t.cylinderId === cylinder.id)
+    .filter((t) => {
+      if (t.cylinderId !== cylinder.id) return false;
+      const timeField = t.inspectedAt || t.createdAt;
+      const tVal = new Date(timeField).getTime();
+      return tVal >= startTime && tVal <= endTime;
+    })
     .map((t) => ({
       id: t.id,
       status: t.status,
@@ -89,6 +96,9 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
 
   const inventoryDiscrepancies = [];
   for (const check of checks) {
+    const timeField = check.completedAt || check.confirmedAt || check.createdAt;
+    const tVal = new Date(timeField).getTime();
+    if (!(tVal >= startTime && tVal <= endTime)) continue;
     if (check.status !== "completed" && check.status !== "confirmed") continue;
     if (!check.differences) continue;
     const isDeficit = (check.differences.deficit || []).some((d) => d.cylinderId === cylinder.id);
