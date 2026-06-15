@@ -1,12 +1,12 @@
 {
-  "records": {},
+  "reports": [],
   "_schemaVersion": "2.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.177Z",
     "migratedAt": "2026-06-15T02:22:32.177Z",
     "migratedFrom": "v1",
-    "entity": "idempotency",
-    "sourceFile": "idempotency.json",
+    "entity": "complianceReports",
+    "sourceFile": "complianceReports.json",
     "storageType": "object"
   }
 }

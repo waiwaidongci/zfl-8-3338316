@@ -6,7 +6,7 @@
       "password": "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9",
       "role": "admin",
       "name": "系统管理员",
-      "createdAt": "2026-06-15T02:17:47.188Z"
+      "createdAt": "2026-06-15T02:22:32.173Z"
     },
     {
       "id": "user-warehouse",
@@ -14,7 +14,7 @@
       "password": "0e842cbe0341154ee33e0ed3bc18282cd69e016a8d56fda05ec92e7ff20a0f31",
       "role": "warehouse",
       "name": "仓库管理员",
-      "createdAt": "2026-06-15T02:17:47.193Z"
+      "createdAt": "2026-06-15T02:22:32.173Z"
     },
     {
       "id": "user-sales",
@@ -22,7 +22,7 @@
       "password": "6bc0a63cb29c92306020c0a6bbc358cc4628db277dc06e253535e126517ad637",
       "role": "sales",
       "name": "销售专员",
-      "createdAt": "2026-06-15T02:17:47.193Z"
+      "createdAt": "2026-06-15T02:22:32.173Z"
     },
     {
       "id": "user-qc",
@@ -30,7 +30,7 @@
       "password": "9d7248aac3d2459c349d2e1e132a5c64b5decb30c04b41b27eea3277260c55b9",
       "role": "qc",
       "name": "质检专员",
-      "createdAt": "2026-06-15T02:17:47.193Z"
+      "createdAt": "2026-06-15T02:22:32.173Z"
     }
   ],
   "_schemaVersion": "2.0",
