@@ -127,13 +127,6 @@ async function cleanReportFile() {
   }
 }
 
-async function readEntityFile(fileName) {
-  const filePath = join(dataDir, fileName);
-  if (!existsSync(filePath)) return null;
-  const content = await readFile(filePath, "utf8");
-  return JSON.parse(content);
-}
-
 async function writeEntityFile(fileName, data) {
   if (!existsSync(dataDir)) {
     await mkdir(dataDir, { recursive: true });
