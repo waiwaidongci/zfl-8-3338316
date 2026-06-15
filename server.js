@@ -7,7 +7,9 @@ import { handleRentalOrders } from "./routes/rentalOrders.js";
 import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 import { handleEventAudit } from "./routes/eventAudit.js";
 import { handleInventoryChecks } from "./routes/inventoryChecks.js";
+import { handleComplianceReport } from "./routes/complianceReport.js";
 import { recoverStaleProcessing } from "./store/idempotency.js";
+import { recoverPendingReports } from "./store/complianceReport.js";
 import { runMigrations, getMigrationStatus, CURRENT_VERSION } from "./store/migration.js";
 
 process.on("unhandledRejection", (err) => {
@@ -64,7 +66,11 @@ const ROOT_ENDPOINTS = [
   "POST /auth/login",
   "POST /auth/logout",
   "GET /auth/me",
-  "GET /auth/roles"
+  "GET /auth/roles",
+  "POST /compliance-reports",
+  "GET /compliance-reports",
+  "GET /compliance-reports/:id",
+  "POST /compliance-reports/:id/retry"
 ];
 
 const routeHandlers = [
@@ -74,7 +80,8 @@ const routeHandlers = [
   handleRentalOrders,
   handleInspectionTasks,
   handleInventoryChecks,
-  handleEventAudit
+  handleEventAudit,
+  handleComplianceReport
 ];
 
 const server = http.createServer(async (req, res) => {
@@ -180,6 +187,15 @@ async function bootstrap() {
     }
   } catch (err) {
     console.warn(`[Idempotency] 恢复 stale 记录失败: ${err.message}`);
+  }
+
+  try {
+    const recoveredReports = await recoverPendingReports();
+    if (recoveredReports > 0) {
+      console.log(`[ComplianceReport] 服务启动恢复 ${recoveredReports} 个未完成合规报表任务`);
+    }
+  } catch (err) {
+    console.warn(`[ComplianceReport] 恢复报表任务失败: ${err.message}`);
   }
 
   server.listen(port, () => {

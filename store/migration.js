@@ -19,6 +19,7 @@ export const ENTITY_FILES = {
   inspectionTasks: "inspectionTasks.json",
   operationLogs: "operationLogs.json",
   inventoryChecks: "inventoryChecks.json",
+  complianceReports: "complianceReports.json",
   idempotency: "idempotency.json",
   users: "users.json",
   tokens: "tokens.json"
@@ -227,6 +228,7 @@ function getDataKey(entity) {
     inspectionTasks: "tasks",
     operationLogs: "logs",
     inventoryChecks: "checks",
+    complianceReports: "reports",
     idempotency: "records",
     users: "users",
     tokens: "tokens"

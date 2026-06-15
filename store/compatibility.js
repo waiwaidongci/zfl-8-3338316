@@ -131,6 +131,31 @@ export const V2_SCHEMAS = {
     },
     reservedFields: ["_schemaVersion", "_meta"]
   },
+  complianceReports: {
+    schemaVersion: "2.0",
+    entity: "complianceReports",
+    dataKey: "reports",
+    requiredFields: ["id", "status"],
+    defaultFields: {
+      params: null,
+      requestedBy: null,
+      progress: null,
+      result: null,
+      error: null,
+      startedAt: null,
+      completedAt: null,
+      retryCount: 0,
+      lastRetriedAt: null
+    },
+    fieldAliases: {
+      "requested_by": "requestedBy",
+      "started_at": "startedAt",
+      "completed_at": "completedAt",
+      "retry_count": "retryCount",
+      "last_retried_at": "lastRetriedAt"
+    },
+    reservedFields: ["_schemaVersion", "_meta"]
+  },
   idempotency: {
     schemaVersion: "2.0",
     entity: "idempotency",
@@ -310,6 +335,7 @@ export const DATA_ENTITY_MAP = {
   "inspectionTasks.json": "inspectionTasks",
   "operationLogs.json": "operationLogs",
   "inventoryChecks.json": "inventoryChecks",
+  "complianceReports.json": "complianceReports",
   "idempotency.json": "idempotency",
   "users.json": "users",
   "tokens.json": "tokens"
