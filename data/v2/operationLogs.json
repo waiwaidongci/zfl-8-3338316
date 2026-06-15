@@ -7,6 +7,6 @@
     "migratedFrom": "v1",
     "entity": "operationLogs",
     "sourceFile": "operationLogs.json",
-    "storageType": "object"
+    "storageType": "array"
   }
 }

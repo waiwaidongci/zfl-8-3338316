@@ -59,7 +59,7 @@ async function main() {
   const full = await request("GET", "/auth/permissions", { token: adminToken });
   assert(full.statusCode === 200, `请求成功 (${full.statusCode})`);
   assert(Array.isArray(full.body.permissions), "permissions 是数组");
-  assert(full.body.permissions.length === 21, `共 21 个权限 (实际 ${full.body.permissions.length})`);
+  assert(full.body.permissions.length === 22, `共 22 个权限 (实际 ${full.body.permissions.length})`);
   assert(Array.isArray(full.body.roleInfo), "roleInfo 是数组");
   assert(full.body.roleInfo.length === 4, `共 4 个角色 (实际 ${full.body.roleInfo.length})`);
   assert(typeof full.body.note === "string", "包含 note 字段");
@@ -81,7 +81,7 @@ async function main() {
 
   console.log("\n=== 测试 4: 管理员拥有全部权限 ===");
   const adminPerms = full.body.permissions.filter((p) => p.roles.includes("admin"));
-  assert(adminPerms.length === 21, `admin 拥有全部 21 个权限 (实际 ${adminPerms.length})`);
+  assert(adminPerms.length === 22, `admin 拥有全部 22 个权限 (实际 ${adminPerms.length})`);
 
   console.log("\n=== 测试 5: 按角色过滤 - qc ===");
   const qcFilter = await request("GET", "/auth/permissions?role=qc", { token: adminToken });
@@ -134,6 +134,7 @@ async function main() {
   assert(categories.includes("检验管理"), "包含检验管理分类");
   assert(categories.includes("盘点管理"), "包含盘点管理分类");
   assert(categories.includes("数据查询"), "包含数据查询分类");
+  assert(categories.includes("系统管理"), "包含系统管理分类");
 
   console.log("\n=== 测试 11: 根端点包含新接口 ===");
   const root = await request("GET", "/");

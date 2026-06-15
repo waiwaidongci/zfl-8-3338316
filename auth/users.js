@@ -35,7 +35,8 @@ export const PERMISSIONS = {
   INVENTORY_SCAN: "inventory:scan",
   INVENTORY_COMPLETE: "inventory:complete",
   INVENTORY_CONFIRM: "inventory:confirm",
-  QUERY: "query"
+  QUERY: "query",
+  IDEMPOTENCY_QUERY: "idempotency:query"
 };
 
 export const ROLE_PERMISSIONS = {
@@ -184,6 +185,11 @@ export const PERMISSION_META = {
     label: "数据查询与合规报表",
     category: "数据查询",
     endpoints: ["POST /compliance-reports", "POST /compliance-reports/:id/retry"]
+  },
+  [PERMISSIONS.IDEMPOTENCY_QUERY]: {
+    label: "查询幂等记录",
+    category: "系统管理",
+    endpoints: ["GET /idempotency-records"]
   }
 };
 

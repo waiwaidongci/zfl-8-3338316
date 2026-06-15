@@ -155,11 +155,96 @@ node scripts/migrate.js force-up
 | 检验管理 | `inspection:generate`、`inspection:send`、`inspection:inspect`、`inspection:restock`、`inspection:postpone` |
 | 盘点管理 | `inventory:create`、`inventory:scan`、`inventory:complete`、`inventory:confirm` |
 | 数据查询 | `query` |
+| 系统管理 | `idempotency:query` |
 
 ### 与 /auth/roles 的区别
 
 - `/auth/roles`：返回角色列表及每个角色的权限字符串数组，适合 UI 角色展示
 - `/auth/permissions`：以权限为中心的矩阵视图，包含中文说明和对应接口，适合权限文档化和审计
+
+## 幂等记录查询接口
+
+### 概述
+
+`GET /idempotency-records` 提供幂等记录的查询能力，方便排查重复提交和失败操作。仅管理员角色可访问。响应中自动隐藏请求体和响应体中的敏感字段（password、token、secret 等），并关联 `operationLogId` 展示对应操作日志摘要。
+
+### 接口
+
+| 方法 | 路径 | 说明 | 权限 |
+|------|------|------|------|
+| `GET` | `/idempotency-records` | 查询幂等记录 | `idempotency:query`（仅 admin） |
+
+### 查询参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `key` | 按幂等键模糊搜索 | `auto-abc` |
+| `operator` | 按操作人模糊搜索 | `admin` |
+| `status` | 按状态筛选（`processing` / `completed`） | `completed` |
+| `path` | 按请求路径模糊搜索 | `/cylinders` |
+| `startAt` | 创建时间起始（ISO 8601） | `2026-06-01T00:00:00.000Z` |
+| `endAt` | 创建时间截止（ISO 8601） | `2026-06-30T23:59:59.999Z` |
+| `page` | 页码 | `1` |
+| `pageSize` | 每页条数，最大 100 | `20` |
+
+### 响应格式
+
+```json
+{
+  "items": [
+    {
+      "key": "auto-abc123...",
+      "method": "POST",
+      "path": "/cylinders",
+      "bodyHash": "sha256...",
+      "operator": "admin",
+      "status": "completed",
+      "response": {
+        "statusCode": 200,
+        "body": { "id": "CY-001", "gasType": "高纯氩" }
+      },
+      "operationLogId": "op-xxx",
+      "operationLog": {
+        "id": "op-xxx",
+        "operationType": "cylinder.create",
+        "targetType": "cylinder",
+        "targetId": "CY-001",
+        "status": "success",
+        "error": null,
+        "requestBody": { "gasType": "高纯氩", "capacity": "40L" },
+        "createdAt": "2026-06-15T10:00:00.000Z"
+      },
+      "createdAt": "2026-06-15T10:00:00.000Z",
+      "completedAt": "2026-06-15T10:00:01.000Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "pageSize": 20,
+    "totalCount": 1,
+    "totalPages": 1,
+    "hasNext": false,
+    "hasPrev": false
+  }
+}
+```
+
+### 敏感字段脱敏
+
+响应体和关联的操作日志请求体中，以下字段自动替换为 `******`：
+
+- `password`、`token`、`secret`、`authorization`
+- `creditcard`、`credit_card`
+- `apikey`、`api_key`
+- `accesstoken`、`access_token`、`refreshtoken`、`refresh_token`
+
+脱敏为递归处理，嵌套对象中的敏感字段同样会被隐藏。
+
+### 权限分配
+
+| 权限 | admin | warehouse | qc | sales |
+|------|-------|-----------|-----|-------|
+| `idempotency:query` | ✅ | - | - | - |
 
 ## 钢瓶列表接口
 

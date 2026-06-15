@@ -241,6 +241,61 @@ export function generateAutoKey({ method, path, body, operator, remoteAddress })
   return `auto-${createHash("sha256").update(JSON.stringify(payload)).digest("hex").slice(0, 32)}`;
 }
 
+export async function queryIdempotencyRecords(filters = {}) {
+  const db = await loadRecords();
+  let result = Object.entries(db.records);
+
+  if (filters.key) {
+    const kw = filters.key.toLowerCase();
+    result = result.filter(([k]) => k.toLowerCase().includes(kw));
+  }
+  if (filters.operator) {
+    const kw = filters.operator.toLowerCase();
+    result = result.filter(([, r]) => r.operator && r.operator.toLowerCase().includes(kw));
+  }
+  if (filters.status) {
+    result = result.filter(([, r]) => r.status === filters.status);
+  }
+  if (filters.path) {
+    const kw = filters.path.toLowerCase();
+    result = result.filter(([, r]) => r.path && r.path.toLowerCase().includes(kw));
+  }
+  if (filters.startAt) {
+    const start = new Date(filters.startAt).getTime();
+    if (!isNaN(start)) {
+      result = result.filter(([, r]) => new Date(r.createdAt).getTime() >= start);
+    }
+  }
+  if (filters.endAt) {
+    const end = new Date(filters.endAt).getTime();
+    if (!isNaN(end)) {
+      result = result.filter(([, r]) => new Date(r.createdAt).getTime() <= end);
+    }
+  }
+
+  const items = result.map(([key, rec]) => ({ key, ...rec }));
+  items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  const page = Math.max(1, parseInt(filters.page, 10) || 1);
+  const pageSize = Math.min(100, Math.max(1, parseInt(filters.pageSize, 10) || 20));
+  const totalCount = items.length;
+  const totalPages = Math.ceil(totalCount / pageSize) || 1;
+  const start = (page - 1) * pageSize;
+  const paged = items.slice(start, start + pageSize);
+
+  return {
+    items: paged,
+    pagination: {
+      page,
+      pageSize,
+      totalCount,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    }
+  };
+}
+
 export const IDEMPOTENCY_CONFIG = {
   TTL_MS: IDEMPOTENCY_TTL_MS,
   PROCESSING_TIMEOUT_MS,

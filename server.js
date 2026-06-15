@@ -8,6 +8,7 @@ import { handleInspectionTasks } from "./routes/inspectionTasks.js";
 import { handleEventAudit } from "./routes/eventAudit.js";
 import { handleInventoryChecks } from "./routes/inventoryChecks.js";
 import { handleComplianceReport } from "./routes/complianceReport.js";
+import { handleIdempotency } from "./routes/idempotency.js";
 import { recoverStaleProcessing } from "./store/idempotency.js";
 import { recoverPendingReports } from "./store/complianceReport.js";
 import { runMigrations, getMigrationStatus, CURRENT_VERSION } from "./store/migration.js";
@@ -73,7 +74,8 @@ const ROOT_ENDPOINTS = [
   "POST /compliance-reports",
   "GET /compliance-reports",
   "GET /compliance-reports/:id",
-  "POST /compliance-reports/:id/retry"
+  "POST /compliance-reports/:id/retry",
+  "GET /idempotency-records"
 ];
 
 const routeHandlers = [
@@ -84,7 +86,8 @@ const routeHandlers = [
   handleInspectionTasks,
   handleInventoryChecks,
   handleEventAudit,
-  handleComplianceReport
+  handleComplianceReport,
+  handleIdempotency
 ];
 
 const server = http.createServer(async (req, res) => {
@@ -121,6 +124,13 @@ const server = http.createServer(async (req, res) => {
             needsMigration: migrationStatus.needsMigration,
             availableBackups: migrationStatus.availableBackups.length,
             note: "数据支持版本化迁移和回滚，使用 node scripts/migrate.js 管理"
+          },
+          idempotencyRecords: {
+            enabled: true,
+            endpoint: "GET /idempotency-records",
+            permission: "idempotency:query",
+            roles: ["admin"],
+            note: "管理员可按 key、operator、status、path、时间范围查询幂等记录，响应自动脱敏敏感字段"
           }
         },
         endpoints: ROOT_ENDPOINTS
