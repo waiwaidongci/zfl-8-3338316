@@ -1,5 +1,5 @@
 import { send, body, getParsedBody } from "../store/common.js";
-import { loadCylinders, withCylindersTx, findCylinder, createCylinder, applyAction, addFill, buildAlerts } from "../store/cylinders.js";
+import { loadCylinders, withCylindersTx, findCylinder, createCylinder, applyAction, addFill, buildAlerts, getLatestEvent } from "../store/cylinders.js";
 import { validateCylinderBatch } from "../store/bulkImport.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
 import { PERMISSIONS, ROLE_LABELS } from "../auth/users.js";
@@ -35,6 +35,9 @@ export async function handleCylinders(req, res, url) {
     const customer = url.searchParams.get("customer");
     const inspectionDueBefore = url.searchParams.get("inspectionDueBefore");
     const keyword = url.searchParams.get("keyword");
+    const latestEventType = url.searchParams.get("latestEventType");
+    const latestEventTimeFrom = url.searchParams.get("latestEventTimeFrom");
+    const latestEventTimeTo = url.searchParams.get("latestEventTimeTo");
     const pagination = url.searchParams.get("pagination");
     const page = parseInt(url.searchParams.get("page") || "1", 10);
     const pageSize = parseInt(url.searchParams.get("pageSize") || "20", 10);
@@ -70,6 +73,30 @@ export async function handleCylinders(req, res, url) {
         ].filter(Boolean).map((v) => String(v).toLowerCase());
         return searchableFields.some((field) => field.includes(kw));
       });
+    }
+    if (latestEventType) {
+      cylinders = cylinders.filter((item) => {
+        const latest = getLatestEvent(item);
+        return latest && latest.type === latestEventType;
+      });
+    }
+    if (latestEventTimeFrom) {
+      const fromMs = new Date(latestEventTimeFrom).getTime();
+      if (!isNaN(fromMs)) {
+        cylinders = cylinders.filter((item) => {
+          const latest = getLatestEvent(item);
+          return latest && new Date(latest.at).getTime() >= fromMs;
+        });
+      }
+    }
+    if (latestEventTimeTo) {
+      const toMs = new Date(latestEventTimeTo).getTime();
+      if (!isNaN(toMs)) {
+        cylinders = cylinders.filter((item) => {
+          const latest = getLatestEvent(item);
+          return latest && new Date(latest.at).getTime() <= toMs;
+        });
+      }
     }
 
     const total = cylinders.length;

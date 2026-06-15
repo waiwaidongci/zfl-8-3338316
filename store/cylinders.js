@@ -128,6 +128,14 @@ export function addFill(cylinder, input) {
   return { fill, event: evt };
 }
 
+export function getLatestEvent(cylinder) {
+  if (!Array.isArray(cylinder.events) || cylinder.events.length === 0) return null;
+  const sorted = [...cylinder.events].sort(
+    (a, b) => new Date(b.at).getTime() - new Date(a.at).getTime()
+  );
+  return sorted[0];
+}
+
 export function daysUntil(dateText) {
   return Math.ceil((new Date(dateText).getTime() - Date.now()) / 86400000);
 }

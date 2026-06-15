@@ -102,6 +102,57 @@ node scripts/migrate.js force-up
 - 内部版本元数据（`_schemaVersion`、`_meta`）不会泄露到 API 响应中
 - 保存数据时自动保留版本元数据
 
+## 钢瓶列表接口
+
+### 概述
+
+`GET /cylinders` 支持多维度筛选与分页查询钢瓶列表。
+
+### 筛选参数
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| `status` | 按钢瓶状态筛选 | `in_stock`、`rented`、`returned`、`inspection`、`scrapped`、`pending_check` |
+| `gasType` | 按气体类型筛选 | `高纯氩`、`混合标准气` |
+| `location` | 按库位筛选 | `一号仓` |
+| `customer` | 按客户筛选；传空字符串筛选无客户钢瓶 | `宁川检测` |
+| `inspectionDueBefore` | 筛选到检日期早于指定日期的钢瓶 | `2026-07-01` |
+| `keyword` | 关键词模糊搜索（匹配 id、gasType、capacity、location、customer） | `CY-88` |
+| `latestEventType` | 按最近操作类型筛选（基于 events 字段最新一条） | `inbound`、`outbound`、`return`、`inspect`、`scrap`、`fill`、`create` |
+| `latestEventTimeFrom` | 最近操作时间起始（ISO 8601），与 `latestEventType` 可组合使用 | `2026-06-01T00:00:00.000Z` |
+| `latestEventTimeTo` | 最近操作时间截止（ISO 8601），与 `latestEventType` 可组合使用 | `2026-06-15T23:59:59.999Z` |
+
+### 分页参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `pagination` | 传任意值启用分页 | 无（不传则返回全量） |
+| `page` | 页码（需启用分页） | `1` |
+| `pageSize` | 每页条数，最大 100（需启用分页） | `20` |
+
+### 分页响应格式
+
+```json
+{
+  "items": [ ... ],
+  "total": 50,
+  "page": 1,
+  "pageSize": 20,
+  "totalPages": 3
+}
+```
+
+### 筛选逻辑说明
+
+- `latestEventType`：取钢瓶 `events` 数组中 `at` 时间最新的一条事件，若其 `type` 与参数匹配则保留。无事件的钢瓶会被排除。
+- `latestEventTimeFrom` / `latestEventTimeTo`：取钢瓶最近事件的 `at` 时间，判断是否落在指定时间范围内。可单独使用或与 `latestEventType` 组合。无事件的钢瓶会被排除。
+
+### 示例
+
+```
+GET /cylinders?status=in_stock&latestEventType=inbound&latestEventTimeFrom=2026-06-01T00:00:00.000Z&latestEventTimeTo=2026-06-30T23:59:59.999Z&pagination=1&page=1&pageSize=10
+```
+
 ## 库存盘点模块
 
 ### 概述
