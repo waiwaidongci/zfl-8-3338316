@@ -1,4 +1,5 @@
 import { loadJson, saveJson, genId, makeEvent, withJsonTx } from "./common.js";
+import { addStatusHistory } from "./compatibility.js";
 
 const FILE = "inventoryChecks.json";
 export const SEED = { checks: [] };
@@ -122,15 +123,43 @@ export function createCheck(input, cylinders) {
     confirmedAt: null,
     confirmedBy: null,
     createdBy: input.operator || null,
-    note: input.note || null
+    note: input.note || null,
+    statusHistory: [
+      {
+        id: `sh-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        fromStatus: null,
+        toStatus: "draft",
+        at: now,
+        note: "盘点单创建" + (input.note ? `：${input.note}` : ""),
+        operator: input.operator || null,
+        eventId: null,
+        extra: {
+          expectedCount: expected.length,
+          scope: {
+            location: scope.location || null,
+            gasType: scope.gasType || null,
+            status: scope.status || null
+          }
+        }
+      }
+    ]
   };
   return check;
 }
 
-export function applyStart(check) {
+export function applyStart(check, operator) {
   validateTransition(check, "scanning");
+  const fromStatus = check.status;
+  const now = new Date().toISOString();
   check.status = "scanning";
-  check.scanningStartedAt = new Date().toISOString();
+  check.scanningStartedAt = now;
+  addStatusHistory(check, {
+    fromStatus,
+    toStatus: "scanning",
+    at: now,
+    note: "开始盘点扫描",
+    operator: operator || check.createdBy || null
+  });
 }
 
 export function applyScan(check, input) {
@@ -310,16 +339,32 @@ export function generateSuggestions(differences) {
   return suggestions;
 }
 
-export function applyComplete(check, cylinders) {
+export function applyComplete(check, cylinders, operator) {
   validateTransition(check, "completed");
 
   const differences = computeDifferences(check, cylinders);
   const suggestions = generateSuggestions(differences);
+  const fromStatus = check.status;
+  const now = new Date().toISOString();
 
   check.differences = differences;
   check.suggestions = suggestions;
   check.status = "completed";
-  check.completedAt = new Date().toISOString();
+  check.completedAt = now;
+  addStatusHistory(check, {
+    fromStatus,
+    toStatus: "completed",
+    at: now,
+    note: `盘点完成，预期${differences.expectedCount}个，实扫${differences.uniqueScannedCount}个，盘亏${differences.deficitCount}个，盘盈${differences.surplusCount}个`,
+    operator: operator || check.createdBy || null,
+    extra: {
+      expectedCount: differences.expectedCount,
+      uniqueScannedCount: differences.uniqueScannedCount,
+      matchedCount: differences.matchedCount,
+      deficitCount: differences.deficitCount,
+      surplusCount: differences.surplusCount
+    }
+  });
 }
 
 export function applyConfirm(check, cylinders, operator, options = {}) {
@@ -334,6 +379,8 @@ export function applyConfirm(check, cylinders, operator, options = {}) {
   const surplusMigrateIds = Array.isArray(options.surplusMigrateIds) ? options.surplusMigrateIds : [];
   const surplusMigrateSet = new Set(surplusMigrateIds);
   const targetLocation = check.scope?.location || "盘点库位";
+  const fromStatus = check.status;
+  const now = new Date().toISOString();
 
   const affectedDeficit = [];
   const affectedSurplusMigrated = [];
@@ -345,9 +392,19 @@ export function applyConfirm(check, cylinders, operator, options = {}) {
     if (!cylinder) continue;
     if (PROTECTED_STATUSES.includes(cylinder.status)) continue;
 
+    const fromCylStatus = cylinder.status;
     cylinder.status = "pending_check";
     cylinder.location = cylinder.location || "待核查区";
-    cylinder.events.push(makeEvent("inventory_check", `盘亏标记待核查，盘点单${check.id}`));
+    const evt = makeEvent("inventory_check", `盘亏标记待核查，盘点单${check.id}`);
+    cylinder.events.push(evt);
+    addStatusHistory(cylinder, {
+      fromStatus: fromCylStatus,
+      toStatus: "pending_check",
+      at: now,
+      note: `盘点盘亏标记待核查，盘点单${check.id}`,
+      operator: operator || null,
+      eventId: evt.id
+    });
     affectedDeficit.push({
       cylinderId: cylinder.id,
       previousStatus: item.status,
@@ -368,7 +425,8 @@ export function applyConfirm(check, cylinders, operator, options = {}) {
 
       const previousLocation = cylinder.location;
       cylinder.location = targetLocation;
-      cylinder.events.push(makeEvent("inventory_migrate", `盘点盘盈迁移库位：${previousLocation || "未知"} → ${targetLocation}，盘点单${check.id}`));
+      const evt = makeEvent("inventory_migrate", `盘点盘盈迁移库位：${previousLocation || "未知"} → ${targetLocation}，盘点单${check.id}`);
+      cylinder.events.push(evt);
       affectedSurplusMigrated.push({
         cylinderId: cylinder.id,
         previousLocation,
@@ -386,10 +444,24 @@ export function applyConfirm(check, cylinders, operator, options = {}) {
   }
 
   check.status = "confirmed";
-  check.confirmedAt = new Date().toISOString();
+  check.confirmedAt = now;
   check.confirmedBy = operator || null;
   check.surplusMigrated = affectedSurplusMigrated;
   check.surplusRegistrationSuggestions = surplusRegistrationSuggestions;
+
+  addStatusHistory(check, {
+    fromStatus,
+    toStatus: "confirmed",
+    at: now,
+    note: `盘点确认，盘亏处理${affectedDeficit.length}个，盘盈迁移${affectedSurplusMigrated.length}个，待登记${surplusRegistrationSuggestions.length}个`,
+    operator: operator || null,
+    extra: {
+      deficitCount: affectedDeficit.length,
+      surplusMigratedCount: affectedSurplusMigrated.length,
+      surplusUnregisteredCount: surplusRegistrationSuggestions.length,
+      surplusMigrateIds: surplusMigrateIds
+    }
+  });
 
   return {
     deficit: affectedDeficit,

@@ -27,7 +27,21 @@
       ],
       "gas_type": "高纯氩",
       "inspection_due": "2026-07-20",
-      "deposit_status": "none"
+      "deposit_status": "none",
+      "statusHistory": [
+        {
+          "id": "sh-1781540004839-67a4e6",
+          "fromStatus": null,
+          "toStatus": "in_stock",
+          "at": "2026-06-02T08:20:00.000Z",
+          "note": "初始入库",
+          "eventId": "evt-1",
+          "operator": null,
+          "extra": {
+            "eventType": "inbound"
+          }
+        }
+      ]
     },
     {
       "id": "CY-88002",
@@ -49,14 +63,28 @@
       ],
       "gas_type": "混合标准气",
       "inspection_due": "2026-06-28",
-      "deposit_status": "paid"
+      "deposit_status": "paid",
+      "statusHistory": [
+        {
+          "id": "sh-1781540004839-9a490e",
+          "fromStatus": null,
+          "toStatus": "rented",
+          "at": "2026-05-10T10:00:00.000Z",
+          "note": "客户租借",
+          "eventId": "evt-2",
+          "operator": null,
+          "extra": {
+            "eventType": "outbound"
+          }
+        }
+      ]
     }
   ],
-  "_schemaVersion": "2.0",
+  "_schemaVersion": "3.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.174Z",
-    "migratedAt": "2026-06-15T16:13:24.832Z",
-    "migratedFrom": "v3",
+    "migratedAt": "2026-06-15T16:13:24.839Z",
+    "migratedFrom": "v2",
     "entity": "cylinders",
     "sourceFile": "cylinders.json",
     "storageType": "object",

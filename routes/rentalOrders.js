@@ -1,7 +1,7 @@
 import { send, body, makeEvent, withMultiJsonTx } from "../store/common.js";
 import { SEED as CYLINDERS_SEED } from "../store/cylinders.js";
 import { SEED as ORDERS_SEED } from "../store/rentalOrders.js";
-import { findCylinder, transitions } from "../store/cylinders.js";
+import { findCylinder, transitions, applyAction } from "../store/cylinders.js";
 import { findCustomer } from "../store/customers.js";
 import { findOrder, findOrdersByCustomer, createOrder, returnOrderCylinders, calculateOrderStatus } from "../store/rentalOrders.js";
 import { checkQueryAuth, checkActionAuth } from "./auth.js";
@@ -126,12 +126,15 @@ export async function handleRentalOrders(req, res, url) {
             const cylinderSnapshotsBefore = cylinderInfos.map((info) => snapshotEntity(info.cylinder));
             for (const info of cylinderInfos) {
               const c = info.cylinder;
-              c.status = "rented";
-              c.customer = customer.id;
-              c.location = customer.name;
-              c.depositStatus = info.depositStatus;
-              const evt = makeEvent("outbound", `订单出库${info.note ? " - " + info.note : ""}`);
-              c.events.push(evt);
+              const actionInput = {
+                type: "outbound",
+                customer: customer.id,
+                location: customer.name,
+                depositStatus: info.depositStatus,
+                note: `订单出库${info.note ? " - " + info.note : ""}`,
+                operator: auth.user?.username
+              };
+              const evt = applyAction(c, actionInput);
               eventIds.push(evt.id);
             }
 
@@ -148,7 +151,8 @@ export async function handleRentalOrders(req, res, url) {
             const created = createOrder({
               customer,
               cylinders: orderSnapshot,
-              note: input.note
+              note: input.note,
+              operator: auth.user?.username
             });
             orders.push(created);
 
@@ -253,12 +257,14 @@ export async function handleRentalOrders(req, res, url) {
             });
 
             for (const { orderCylinder, cylinder } of validCylinders) {
-              transitions.return(cylinder, {
+              const actionInput = {
+                type: "return",
                 location: input.returnLocation || "待检区",
-                depositStatus: input.depositRefunded ? "refunded" : "refundable"
-              });
-              const evt = makeEvent("return", `订单归还${input.note ? " - " + input.note : ""}`);
-              cylinder.events.push(evt);
+                depositStatus: input.depositRefunded ? "refunded" : "refundable",
+                note: `订单归还${input.note ? " - " + input.note : ""}`,
+                operator: auth.user?.username
+              };
+              const evt = applyAction(cylinder, actionInput);
               eventIds.push(evt.id);
             }
 
@@ -268,7 +274,8 @@ export async function handleRentalOrders(req, res, url) {
               cylinderIds: validCylinderIds,
               returnLocation: input.returnLocation || "待检区",
               depositRefunded: input.depositRefunded || false,
-              note: input.note || ""
+              note: input.note || "",
+              operator: auth.user?.username
             });
 
             return {

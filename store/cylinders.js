@@ -1,4 +1,5 @@
 import { loadJson, saveJson, makeEvent, withJsonTx } from "./common.js";
+import { addStatusHistory } from "./compatibility.js";
 
 const FILE = "cylinders.json";
 export const SEED = {
@@ -51,39 +52,53 @@ export function findCylinder(cylinders, id) {
 
 export const transitions = {
   inbound(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "in_stock";
     cylinder.location = input.location || "仓库";
     cylinder.customer = null;
     cylinder.depositStatus = "none";
+    return { fromStatus, toStatus: "in_stock" };
   },
   outbound(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "rented";
     cylinder.customer = input.customer;
     cylinder.location = input.customer;
     cylinder.depositStatus = input.depositStatus || "paid";
+    return { fromStatus, toStatus: "rented" };
   },
   return(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "returned";
     cylinder.location = input.location || "待检区";
     cylinder.customer = null;
     cylinder.depositStatus = input.depositStatus || "refundable";
+    return { fromStatus, toStatus: "returned" };
   },
   inspect(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "inspection";
     cylinder.location = input.location || "送检中";
     if (input.inspectionDue) cylinder.inspectionDue = input.inspectionDue;
+    return { fromStatus, toStatus: "inspection" };
   },
   scrap(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "scrapped";
     cylinder.location = input.location || "报废区";
+    return { fromStatus, toStatus: "scrapped" };
   },
   mark_pending_check(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = "pending_check";
     cylinder.location = input.location || "待核查区";
+    return { fromStatus, toStatus: "pending_check" };
   },
   clear_pending_check(cylinder, input) {
+    const fromStatus = cylinder.status;
     cylinder.status = input.targetStatus || "in_stock";
     cylinder.location = input.location || "仓库";
+    return { fromStatus, toStatus: input.targetStatus || "in_stock" };
   }
 };
 
@@ -93,13 +108,22 @@ export function applyAction(cylinder, input) {
     err.statusCode = 400;
     throw err;
   }
-  transitions[input.type](cylinder, input);
+  const { fromStatus, toStatus } = transitions[input.type](cylinder, input);
   const evt = makeEvent(input.type, input.note || input.type);
   cylinder.events.push(evt);
+  addStatusHistory(cylinder, {
+    fromStatus,
+    toStatus,
+    note: input.note || input.type,
+    operator: input.operator || null,
+    eventId: evt.id
+  });
   return evt;
 }
 
 export function createCylinder(input) {
+  const now = new Date().toISOString();
+  const createEvt = makeEvent("create", "新建钢瓶");
   const cylinder = {
     id: input.id,
     gasType: input.gasType,
@@ -110,7 +134,19 @@ export function createCylinder(input) {
     customer: null,
     depositStatus: "none",
     fills: [],
-    events: [makeEvent("create", "新建钢瓶")]
+    events: [createEvt],
+    statusHistory: [
+      {
+        id: `sh-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        fromStatus: null,
+        toStatus: "in_stock",
+        at: now,
+        note: "新建钢瓶",
+        operator: input.operator || null,
+        eventId: createEvt.id,
+        extra: null
+      }
+    ]
   };
   return cylinder;
 }

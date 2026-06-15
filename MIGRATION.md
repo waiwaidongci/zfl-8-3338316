@@ -10,6 +10,7 @@
 |------|------|----------|
 | v1 | 单一平面数据结构，所有JSON文件直接存放在 data/ 目录 | 初始版本 |
 | v2 | 版本化目录结构，每个实体独立存储，支持Schema版本管理 | 2026-06-15 |
+| v3 | 核心实体统一状态历史追溯字段（statusHistory），完整状态变更可回溯 | 2026-06-15 |
 
 ## 目录结构
 
@@ -46,6 +47,28 @@ data/
     └── tokens.json
 ```
 
+### v3 结构
+```
+data/
+├── meta.json              # 迁移元数据和版本信息
+├── backups/               # 迁移备份目录
+│   └── v2-to-v3-20260615-XXXXXX/
+│       ├── backup-meta.json
+│       └── *.json         # 备份的v2原始文件
+└── v3/                    # v3 数据目录
+    ├── README.md
+    ├── cylinders.json     # 新增 statusHistory 字段
+    ├── customers.json
+    ├── rentalOrders.json  # 新增 statusHistory 字段
+    ├── inspectionTasks.json  # 新增 statusHistory、postponements 字段
+    ├── operationLogs.json
+    ├── inventoryChecks.json  # 新增 statusHistory 字段
+    ├── complianceReports.json
+    ├── idempotency.json
+    ├── users.json
+    └── tokens.json
+```
+
 ## v2 Schema 变更
 
 每个 v2 数据文件包含以下元字段：
@@ -63,6 +86,103 @@ data/
   }
 }
 ```
+
+## v3 Schema 变更
+
+### statusHistory 统一结构
+
+每个 statusHistory 条目包含以下字段：
+
+```json
+{
+  "id": "sh-1718415299-a1b2c3",
+  "fromStatus": "in_stock",
+  "toStatus": "rented",
+  "at": "2026-06-15T10:00:00.000Z",
+  "note": "客户租借",
+  "operator": "张三",
+  "eventId": "evt-xxx",
+  "extra": {
+    "customer": "宁川检测"
+  }
+}
+```
+
+**statusHistory 字段说明**:
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `id` | string | 是 | 状态历史唯一标识，格式 `sh-<timestamp>-<random>` |
+| `fromStatus` | string/null | 否 | 变更前状态，初始状态为 null |
+| `toStatus` | string | 是 | 变更后状态 |
+| `at` | string | 是 | 状态变更时间（ISO8601） |
+| `note` | string/null | 否 | 变更说明 |
+| `operator` | string/null | 否 | 操作人 |
+| `eventId` | string/null | 否 | 关联事件 ID |
+| `extra` | object/null | 否 | 额外扩展信息 |
+
+### 各实体 statusHistory 回填规则
+
+| 实体 | 数据来源 | 回填策略 |
+|------|----------|----------|
+| **钢瓶 cylinders** | `events[]` 事件数组 | 按事件类型映射状态，按时间排序生成历史；最后补全当前状态 |
+| **订单 rentalOrders** | `createdAt`、`returnHistory[]` | 创建时间生成初始状态，每次归还追加状态变更 |
+| **检验任务 inspectionTasks** | `createdAt`、`sentAt`、`inspectedAt`、`restockedAt`、`postponements[]` | 按时间轴字段构建状态流，延期记录作为状态说明条目 |
+| **盘点单 inventoryChecks** | `createdAt`、`scanningStartedAt`、`completedAt`、`confirmedAt` | 按状态时间字段顺序生成 `draft→scanning→completed→confirmed` 流转 |
+
+### 各实体 v3 变更详情
+
+### 钢瓶 (cylinders)
+**必填字段**: `id`, `gasType`, `capacity`, `inspectionDue`, `location`, `status`
+**默认字段**: `customer: null`, `depositStatus: "none"`, `fills: []`, `events: []`, `statusHistory: []`
+**字段别名**: `gas_type` → `gasType`, `inspection_due` → `inspectionDue`, `deposit_status` → `depositStatus`, `status_history` → `statusHistory`
+
+**状态映射**:
+| 事件类型 | 映射状态 |
+|----------|----------|
+| `create` / `inbound` | `in_stock` |
+| `outbound` | `rented` |
+| `return` | `returned` |
+| `inspect` / `inspect_pass` / `inspect_postpone` | `inspection` |
+| `inspect_fail` / `scrap` | `scrapped` |
+| `mark_pending_check` / `inventory_check` | `pending_check` |
+| `clear_pending_check` | `in_stock` |
+
+### 客户 (customers)
+（无变更）
+
+### 订单 (rentalOrders)
+**必填字段**: `id`, `customerId`, `customerName`, `cylinders`
+**默认字段**: `cylinderCount: 0`, `note: ""`, `status: "completed"`, `createdAt: null`, `returnedCount: 0`, `returnHistory: []`, `statusHistory: []`
+**字段别名**: `customer_id` → `customerId`, `customer_name` → `customerName`, `cylinder_count` → `cylinderCount`, `returned_count` → `returnedCount`, `return_history` → `returnHistory`, `status_history` → `statusHistory`
+
+### 检验任务 (inspectionTasks)
+**必填字段**: `id`, `cylinderId`, `status`
+**默认字段**: `gasType: null`, `capacity: null`, `inspectionDue: null`, `result: null`, `createdAt: null`, `sentAt: null`, `inspectedAt: null`, `restockedAt: null`, `postponements: []`, `statusHistory: []`
+**字段别名**: `cylinder_id` → `cylinderId`, `gas_type` → `gasType`, `inspection_due` → `inspectionDue`, `sent_at` → `sentAt`, `inspected_at` → `inspectedAt`, `restocked_at` → `restockedAt`, `status_history` → `statusHistory`
+
+**状态流转**: `pending → sent → passed/failed → restocked`
+
+### 操作流水 (operationLogs)
+（无变更）
+
+### 库存盘点 (inventoryChecks)
+**必填字段**: `id`, `status`
+**默认字段**: `operator: null`, `scannedItems: []`, `discrepancies: []`, `startedAt: null`, `completedAt: null`, `confirmedAt: null`, `note: null`, `scannedEntries: []`, `scanIndexCounter: 0`, `expectedCount: 0`, `expectedCylinderIds: []`, `expectedCylinderDetails: []`, `differences: null`, `suggestions: null`, `statusHistory: []`
+**字段别名**: `scanned_items` → `scannedItems`, `started_at` → `startedAt`, `completed_at` → `completedAt`, `confirmed_at` → `confirmedAt`, `scanned_entries` → `scannedEntries`, `scan_index_counter` → `scanIndexCounter`, `expected_count` → `expectedCount`, `expected_cylinder_ids` → `expectedCylinderIds`, `expected_cylinder_details` → `expectedCylinderDetails`, `status_history` → `statusHistory`
+
+**状态流转**: `draft → scanning → completed → confirmed`
+
+### 合规报表 (complianceReports)
+（无变更）
+
+### 幂等记录 (idempotency)
+（无变更）
+
+### 用户 (users)
+（无变更）
+
+### 令牌 (tokens)
+（无变更）
 
 ## 实体 Schema 定义
 

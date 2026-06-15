@@ -52,7 +52,7 @@ export async function handleInventoryChecks(req, res, url) {
       operation: async (ctx) => {
         const input = await body(req);
         const cylinders = await loadCylinders();
-        const check = createCheck(input, cylinders);
+        const check = createCheck({ ...input, operator: input.operator || auth.user?.username }, cylinders);
         const eventIds = [];
         ctx.captureEventIds(eventIds);
         return withMultiJsonTx(
@@ -100,7 +100,7 @@ export async function handleInventoryChecks(req, res, url) {
             if (!check) return { statusCode: 404, body: { error: "check_not_found" } };
             ctx.setBeforeState(snapshotEntity(check));
             try {
-              applyStart(check);
+              applyStart(check, auth.user?.username);
             } catch (err) {
               if (err.statusCode) return { statusCode: err.statusCode, body: { error: err.message } };
               throw err;
@@ -189,7 +189,7 @@ export async function handleInventoryChecks(req, res, url) {
             if (!check) return { statusCode: 404, body: { error: "check_not_found" } };
             ctx.setBeforeState(snapshotEntity(check));
             try {
-              applyComplete(check, cylinders);
+              applyComplete(check, cylinders, auth.user?.username);
             } catch (err) {
               if (err.statusCode) return { statusCode: err.statusCode, body: { error: err.message } };
               throw err;

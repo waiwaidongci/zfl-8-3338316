@@ -1,4 +1,5 @@
 import { loadJson, saveJson, genId, makeEvent, withJsonTx } from "./common.js";
+import { addStatusHistory } from "./compatibility.js";
 
 const FILE = "inspectionTasks.json";
 export const SEED = { tasks: [] };
@@ -89,7 +90,20 @@ export function generateTasks(cylinders, existingTasks, options = {}) {
     createdAt: now,
     sentAt: null,
     inspectedAt: null,
-    restockedAt: null
+    restockedAt: null,
+    postponements: [],
+    statusHistory: [
+      {
+        id: `sh-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        fromStatus: null,
+        toStatus: "pending",
+        at: now,
+        note: `检验任务创建，到期日期：${c.inspectionDue}`,
+        operator: options.operator || null,
+        eventId: null,
+        extra: { generated: true, thresholdDays }
+      }
+    ]
   }));
 
   return {
@@ -129,11 +143,31 @@ export function applySend(task, cylinder, input) {
     err.statusCode = 422;
     throw err;
   }
+  const fromTaskStatus = task.status;
+  const fromCylinderStatus = cylinder.status;
+  const now = new Date().toISOString();
   task.status = "sent";
-  task.sentAt = new Date().toISOString();
+  task.sentAt = now;
   cylinder.status = "inspection";
   cylinder.location = input.location || "送检中";
-  cylinder.events.push(makeEvent("inspect", `送检，任务${task.id}`));
+  const evt = makeEvent("inspect", `送检，任务${task.id}`);
+  cylinder.events.push(evt);
+  addStatusHistory(task, {
+    fromStatus: fromTaskStatus,
+    toStatus: "sent",
+    at: now,
+    note: `送检，库位：${input.location || "送检中"}`,
+    operator: input.operator || null,
+    extra: { cylinderId: cylinder.id }
+  });
+  addStatusHistory(cylinder, {
+    fromStatus: fromCylinderStatus,
+    toStatus: "inspection",
+    at: now,
+    note: `送检，任务${task.id}`,
+    operator: input.operator || null,
+    eventId: evt.id
+  });
 }
 
 export function applyInspectResult(task, cylinder, input) {
@@ -158,6 +192,8 @@ export function applyInspectResult(task, cylinder, input) {
   }
 
   const now = new Date().toISOString();
+  const fromTaskStatus = task.status;
+  const fromCylinderStatus = cylinder.status;
   task.status = nextStatus;
   task.inspectedAt = now;
   task.result = {
@@ -167,15 +203,40 @@ export function applyInspectResult(task, cylinder, input) {
     nextInspectionDue: input.passed ? (input.nextInspectionDue || null) : null
   };
 
+  let cylinderEvt;
   if (input.passed) {
     if (input.nextInspectionDue) {
       cylinder.inspectionDue = input.nextInspectionDue;
     }
-    cylinder.events.push(makeEvent("inspect_pass", `检验合格，任务${task.id}${input.inspector ? "，检验员：" + input.inspector : ""}`));
+    cylinderEvt = makeEvent("inspect_pass", `检验合格，任务${task.id}${input.inspector ? "，检验员：" + input.inspector : ""}`);
+    cylinder.events.push(cylinderEvt);
   } else {
     cylinder.status = "scrapped";
     cylinder.location = "报废区";
-    cylinder.events.push(makeEvent("inspect_fail", `检验不合格，已报废，任务${task.id}${input.inspector ? "，检验员：" + input.inspector : ""}`));
+    cylinderEvt = makeEvent("inspect_fail", `检验不合格，已报废，任务${task.id}${input.inspector ? "，检验员：" + input.inspector : ""}`);
+    cylinder.events.push(cylinderEvt);
+  }
+
+  addStatusHistory(task, {
+    fromStatus: fromTaskStatus,
+    toStatus: nextStatus,
+    at: now,
+    note: input.passed
+      ? `检验合格${input.inspector ? "，检验员：" + input.inspector : ""}`
+      : `检验不合格，已报废${input.inspector ? "，检验员：" + input.inspector : ""}`,
+    operator: input.inspector || null,
+    extra: { cylinderId: cylinder.id, passed: input.passed }
+  });
+
+  if (!input.passed) {
+    addStatusHistory(cylinder, {
+      fromStatus: fromCylinderStatus,
+      toStatus: "scrapped",
+      at: now,
+      note: `检验不合格报废，任务${task.id}`,
+      operator: input.inspector || null,
+      eventId: cylinderEvt.id
+    });
   }
 }
 
@@ -198,13 +259,34 @@ export function applyRestock(task, cylinder, input) {
     throw err;
   }
 
+  const now = new Date().toISOString();
+  const fromTaskStatus = task.status;
+  const fromCylinderStatus = cylinder.status;
   task.status = "restocked";
-  task.restockedAt = new Date().toISOString();
+  task.restockedAt = now;
   cylinder.status = "in_stock";
   cylinder.location = input.location || "仓库";
   cylinder.customer = null;
   cylinder.depositStatus = "none";
-  cylinder.events.push(makeEvent("inbound", `检验完成恢复入库，任务${task.id}`));
+  const evt = makeEvent("inbound", `检验完成恢复入库，任务${task.id}`);
+  cylinder.events.push(evt);
+
+  addStatusHistory(task, {
+    fromStatus: fromTaskStatus,
+    toStatus: "restocked",
+    at: now,
+    note: `检验完成回库，库位：${input.location || "仓库"}`,
+    operator: input.operator || null,
+    extra: { cylinderId: cylinder.id }
+  });
+  addStatusHistory(cylinder, {
+    fromStatus: fromCylinderStatus,
+    toStatus: "in_stock",
+    at: now,
+    note: `检验完成恢复入库，任务${task.id}`,
+    operator: input.operator || null,
+    eventId: evt.id
+  });
 }
 
 export function canPostpone(task, cylinder) {
@@ -258,24 +340,26 @@ export function applyPostpone(task, cylinder, input) {
   if (!task.postponements) {
     task.postponements = [];
   }
-  task.postponements.push({
+  const postponement = {
     id: genId("P"),
     oldInspectionDue,
     newInspectionDue: newDue,
     reason: input.reason,
     postponedAt: now,
     operator: input.operator || null
-  });
+  };
+  task.postponements.push(postponement);
 
-  if (!task.statusHistory) {
-    task.statusHistory = [];
-  }
-  task.statusHistory.push({
-    status: task.status,
+  addStatusHistory(task, {
+    fromStatus: task.status,
+    toStatus: task.status,
     at: now,
-    note: `延期检验，原因：${input.reason}，新到检日期：${newDue}`
+    note: `延期检验，原因：${input.reason}，新到检日期：${newDue}`,
+    operator: input.operator || null,
+    extra: { postponementId: postponement.id, oldInspectionDue, newInspectionDue: newDue }
   });
 
   cylinder.inspectionDue = newDue;
-  cylinder.events.push(makeEvent("inspect_postpone", `检验延期，任务${task.id}，原因：${input.reason}，新到检日期：${newDue}`));
+  const evt = makeEvent("inspect_postpone", `检验延期，任务${task.id}，原因：${input.reason}，新到检日期：${newDue}`);
+  cylinder.events.push(evt);
 }

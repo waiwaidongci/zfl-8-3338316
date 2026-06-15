@@ -1,10 +1,10 @@
 {
   "tasks": [],
-  "_schemaVersion": "2.0",
+  "_schemaVersion": "3.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.177Z",
-    "migratedAt": "2026-06-15T16:13:24.833Z",
-    "migratedFrom": "v3",
+    "migratedAt": "2026-06-15T16:13:24.840Z",
+    "migratedFrom": "v2",
     "entity": "inspectionTasks",
     "sourceFile": "inspectionTasks.json",
     "storageType": "object",

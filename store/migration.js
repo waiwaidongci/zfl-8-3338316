@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
+import { transformV2ToV3Item, transformV3ToV2Item } from "./compatibility.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
@@ -10,7 +11,7 @@ const dataDir = join(projectRoot, "data");
 const backupsDir = join(dataDir, "backups");
 const metaFile = join(dataDir, "meta.json");
 
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
 export const ENTITY_FILES = {
   cylinders: "cylinders.json",
@@ -35,12 +36,32 @@ export const V1_FILES = [
   "idempotency.json"
 ];
 
+export const V2_FILES = [
+  "cylinders.json",
+  "customers.json",
+  "rentalOrders.json",
+  "inspectionTasks.json",
+  "operationLogs.json",
+  "inventoryChecks.json",
+  "complianceReports.json",
+  "idempotency.json",
+  "users.json",
+  "tokens.json",
+  "README.md"
+];
+
 const MIGRATIONS = [
   {
     version: 2,
     description: "版本化目录结构 - 实体独立存储与Schema版本管理",
     up: migrateV1ToV2,
     down: rollbackV2ToV1
+  },
+  {
+    version: 3,
+    description: "状态历史追溯 - 钢瓶/订单/检验任务/盘点单统一statusHistory字段",
+    up: migrateV2ToV3,
+    down: rollbackV3ToV2
   }
 ];
 
@@ -126,7 +147,9 @@ async function detectCurrentVersion() {
   
   const hasV1Files = V1_FILES.some(f => existsSync(join(dataDir, f)));
   const hasV2Dir = existsSync(join(dataDir, "v2"));
+  const hasV3Dir = existsSync(join(dataDir, "v3"));
   
+  if (hasV3Dir) return 3;
   if (hasV2Dir) return 2;
   if (hasV1Files) return 1;
   return 1;
@@ -142,6 +165,29 @@ async function validateV1Data() {
         JSON.parse(content);
       } catch (err) {
         errors.push(`Invalid JSON in ${file}: ${err.message}`);
+      }
+    }
+  }
+  return errors;
+}
+
+async function validateV2AndAboveData(version) {
+  const errors = [];
+  const sourceDir = join(dataDir, `v${version}`);
+  const schemaVersion = `${version}.0`;
+  
+  for (const entity of Object.keys(ENTITY_FILES)) {
+    const fileName = ENTITY_FILES[entity];
+    const filePath = join(sourceDir, fileName);
+    if (await fileExists(filePath)) {
+      try {
+        const content = await readFile(filePath, "utf8");
+        const data = JSON.parse(content);
+        if (data._schemaVersion && data._schemaVersion !== schemaVersion) {
+          console.warn(`[Migration] Schema version mismatch in ${fileName}: expected ${schemaVersion}, got ${data._schemaVersion}`);
+        }
+      } catch (err) {
+        errors.push(`Invalid JSON in ${fileName}: ${err.message}`);
       }
     }
   }
@@ -288,6 +334,81 @@ v2 数据结构引入了版本化数据目录和每个实体独立的Schema版�
 `;
 }
 
+function createV3Readme() {
+  return `# v3 数据目录
+
+版本: 3.0
+创建时间: ${new Date().toISOString()}
+
+## 概述
+
+v3 数据结构为核心实体引入统一的状态历史追溯字段（statusHistory），实现完整的状态变更可追溯。
+
+## 实体文件
+
+| 文件 | 实体 | Schema版本 | 状态历史 |
+|------|------|------------|----------|
+| cylinders.json | cylinders | 3.0 | ✓ |
+| customers.json | customers | 3.0 | ✗ |
+| rentalOrders.json | orders | 3.0 | ✓ |
+| inspectionTasks.json | tasks | 3.0 | ✓ |
+| operationLogs.json | logs | 3.0 | ✗ |
+| inventoryChecks.json | checks | 3.0 | ✓ |
+| complianceReports.json | reports | 3.0 | ✗ |
+| idempotency.json | records | 3.0 | ✗ |
+| users.json | users | 3.0 | ✗ |
+| tokens.json | tokens | 3.0 | ✗ |
+
+## statusHistory 结构
+
+每个 statusHistory 条目包含：
+
+\`\`\`json
+{
+  "id": "sh-xxx",
+  "fromStatus": "old_status",
+  "toStatus": "new_status",
+  "at": "ISO8601 timestamp",
+  "note": "变更说明",
+  "operator": "操作人",
+  "eventId": "关联事件ID",
+  "extra": {}
+}
+\`\`\`
+
+## 数据结构变更
+
+- 钢瓶(cylinders)：新增 statusHistory，从 events 回填历史状态
+- 订单(rentalOrders)：新增 statusHistory，从 returnHistory 和创建时间回填
+- 检验任务(inspectionTasks)：新增 statusHistory，从时间轴字段和 postponements 回填
+- 盘点单(inventoryChecks)：新增 statusHistory，从状态时间字段回填
+- 所有实体 _schemaVersion 更新为 3.0
+
+## 注意事项
+
+- 旧字段别名（如 status_history → statusHistory）在读取时自动兼容
+- API 响应保持向后兼容，新增字段默认返回
+- 数据迁移时会自动创建备份到 \`../backups/\` 目录
+`;
+}
+
+async function createEmptyV3Entity(v3Dir, entity, fileName) {
+  const dataKey = getDataKey(entity);
+  const isArrayStorage = isArrayStorageEntity(entity);
+  const v3Data = {
+    [dataKey]: [],
+    _schemaVersion: "3.0",
+    _meta: {
+      createdAt: new Date().toISOString(),
+      initialized: true,
+      entity,
+      sourceFile: fileName,
+      storageType: isArrayStorage ? "array" : "object"
+    }
+  };
+  await writeFile(join(v3Dir, fileName), JSON.stringify(v3Data, null, 2), "utf8");
+}
+
 async function rollbackV2ToV1(context) {
   const { backupDir } = context;
   const backupMetaPath = join(backupDir, "backup-meta.json");
@@ -335,26 +456,182 @@ async function rollbackV2ToV1(context) {
   return { restoredFiles };
 }
 
-async function verifyMigration(fromVersion, toVersion, result) {
-  const errors = [];
+async function migrateV2ToV3(context) {
+  const { backupDir } = context;
   const v2Dir = join(dataDir, "v2");
+  const v3Dir = join(dataDir, "v3");
+  await ensureDir(v3Dir);
+  
+  const migratedFiles = [];
+  const entitiesWithStatusHistory = ["cylinders", "rentalOrders", "inspectionTasks", "inventoryChecks"];
   
   for (const entity of Object.keys(ENTITY_FILES)) {
     const fileName = ENTITY_FILES[entity];
-    const filePath = join(v2Dir, fileName);
+    const v2Path = join(v2Dir, fileName);
+    
+    if (!(await fileExists(v2Path))) {
+      console.warn(`[Migration] V2 file not found: ${fileName}, creating empty v3 file`);
+      await createEmptyV3Entity(v3Dir, entity, fileName);
+      migratedFiles.push(fileName);
+      continue;
+    }
+    
+    const v2Data = await loadJsonFile(v2Path);
+    const dataKey = getDataKey(entity);
+    const isArrayStorage = isArrayStorageEntity(entity);
+    
+    let collection = [];
+    if (isArrayStorage && Array.isArray(v2Data)) {
+      collection = v2Data;
+    } else if (isArrayStorage && v2Data[dataKey]) {
+      collection = v2Data[dataKey];
+    } else {
+      collection = v2Data[dataKey] || v2Data[entity] || [];
+    }
+    
+    let transformedCollection = collection;
+    if (entitiesWithStatusHistory.includes(entity)) {
+      transformedCollection = collection.map(item => transformV2ToV3Item(item, entity));
+    }
+    
+    const v3Data = {
+      [dataKey]: transformedCollection,
+      _schemaVersion: "3.0",
+      _meta: {
+        ...(v2Data._meta || {}),
+        createdAt: v2Data._meta?.createdAt || new Date().toISOString(),
+        migratedAt: new Date().toISOString(),
+        migratedFrom: "v2",
+        entity,
+        sourceFile: fileName,
+        storageType: isArrayStorage ? "array" : "object"
+      }
+    };
+    
+    const v3Path = join(v3Dir, fileName);
+    await writeFile(v3Path, JSON.stringify(v3Data, null, 2), "utf8");
+    migratedFiles.push(fileName);
+  }
+  
+  const readme = createV3Readme();
+  await writeFile(join(v3Dir, "README.md"), readme, "utf8");
+  migratedFiles.push("README.md");
+  
+  return {
+    migratedFiles,
+    targetDir: v3Dir
+  };
+}
+
+async function rollbackV3ToV2(context) {
+  const { backupDir } = context;
+  const backupMetaPath = join(backupDir, "backup-meta.json");
+  
+  if (!(await fileExists(backupMetaPath))) {
+    throw new Error(`Backup meta not found in ${backupDir}`);
+  }
+  
+  const backupMeta = await loadJsonFile(backupMetaPath);
+  const v2Dir = join(dataDir, "v2");
+  await ensureDir(v2Dir);
+  
+  const restoredFiles = [];
+  const entitiesWithStatusHistory = ["cylinders", "rentalOrders", "inspectionTasks", "inventoryChecks"];
+  
+  for (const file of backupMeta.files) {
+    if (file === "README.md") continue;
+    const backupPath = join(backupDir, file);
+    const targetPath = join(v2Dir, file);
+    
+    if (await fileExists(backupPath)) {
+      try {
+        const backupData = await loadJsonFile(backupPath);
+        const entity = Object.keys(ENTITY_FILES).find(e => ENTITY_FILES[e] === file);
+        const dataKey = entity ? getDataKey(entity) : null;
+        const isArrayStorage = entity ? isArrayStorageEntity(entity) : false;
+        
+        let resultData = backupData;
+        
+        if (entity && entitiesWithStatusHistory.includes(entity) && dataKey) {
+          let collection = isArrayStorage && Array.isArray(backupData)
+            ? backupData
+            : (backupData[dataKey] || backupData[entity] || []);
+          
+          const transformedCollection = collection.map(item => transformV3ToV2Item(item, entity));
+          
+          resultData = {
+            ...backupData,
+            [dataKey]: transformedCollection,
+            _schemaVersion: "2.0",
+            _meta: {
+              ...(backupData._meta || {}),
+              migratedAt: new Date().toISOString(),
+              migratedFrom: "v3",
+              rollback: true
+            }
+          };
+        } else if (dataKey && backupData._schemaVersion === "3.0") {
+          resultData = {
+            ...backupData,
+            _schemaVersion: "2.0",
+            _meta: {
+              ...(backupData._meta || {}),
+              migratedAt: new Date().toISOString(),
+              migratedFrom: "v3",
+              rollback: true
+            }
+          };
+        }
+        
+        await writeFile(targetPath, JSON.stringify(resultData, null, 2), "utf8");
+        restoredFiles.push(file);
+      } catch (err) {
+        console.warn(`[Migration] Failed to process ${file} during rollback: ${err.message}`);
+      }
+    }
+  }
+  
+  const v3Dir = join(dataDir, "v3");
+  if (await fileExists(v3Dir)) {
+    await rm(v3Dir, { recursive: true, force: true });
+  }
+  
+  return { restoredFiles };
+}
+
+async function verifyMigration(fromVersion, toVersion, result) {
+  const errors = [];
+  const targetDir = toVersion >= 3 ? join(dataDir, "v3") : join(dataDir, "v2");
+  const expectedSchemaVersion = toVersion >= 3 ? "3.0" : "2.0";
+  const entitiesWithStatusHistory = ["cylinders", "rentalOrders", "inspectionTasks", "inventoryChecks"];
+  
+  for (const entity of Object.keys(ENTITY_FILES)) {
+    const fileName = ENTITY_FILES[entity];
+    const filePath = join(targetDir, fileName);
     
     if (!(await fileExists(filePath))) {
-      errors.push(`Missing v2 file: ${fileName}`);
+      errors.push(`Missing v${toVersion} file: ${fileName}`);
       continue;
     }
     
     try {
       const data = await loadJsonFile(filePath);
-      if (!data._schemaVersion || data._schemaVersion !== "2.0") {
-        errors.push(`Invalid schema version in ${fileName}`);
+      if (!data._schemaVersion || data._schemaVersion !== expectedSchemaVersion) {
+        errors.push(`Invalid schema version in ${fileName}: expected ${expectedSchemaVersion}, got ${data._schemaVersion}`);
       }
       if (!data._meta) {
         errors.push(`Missing _meta in ${fileName}`);
+      }
+      
+      if (toVersion >= 3 && entitiesWithStatusHistory.includes(entity)) {
+        const dataKey = getDataKey(entity);
+        const collection = data[dataKey] || data[entity] || [];
+        for (let i = 0; i < collection.length; i++) {
+          const item = collection[i];
+          if (!Array.isArray(item.statusHistory)) {
+            errors.push(`Missing statusHistory in ${fileName} item ${i} (id: ${item.id})`);
+          }
+        }
       }
     } catch (err) {
       errors.push(`Failed to validate ${fileName}: ${err.message}`);
@@ -392,14 +669,18 @@ async function runUpgrade(fromVersion, toVersion, meta, options = {}) {
   console.log(`[Migration] Backup directory: ${backupDir}`);
   
   try {
-    const validationErrors = await validateV1Data();
+    const sourceDir = fromVersion >= 2 ? join(dataDir, `v${fromVersion}`) : dataDir;
+    const sourceFiles = fromVersion >= 2 ? V2_FILES : [...V1_FILES, "tokens.json.bak"];
+    
+    const validationErrors = fromVersion === 1
+      ? await validateV1Data()
+      : await validateV2AndAboveData(fromVersion);
     if (validationErrors.length > 0) {
       throw new Error(`Data validation failed: ${validationErrors.join(", ")}`);
     }
     console.log(`[Migration] Data validation passed`);
     
-    const filesToBackup = [...V1_FILES, "tokens.json.bak"];
-    const backedUpFiles = await backupFiles(dataDir, backupDir, filesToBackup);
+    const backedUpFiles = await backupFiles(sourceDir, backupDir, sourceFiles);
     await createBackupMeta(backupDir, fromVersion, toVersion, backedUpFiles);
     console.log(`[Migration] Backup created: ${backedUpFiles.length} files`);
     
@@ -613,6 +894,9 @@ export async function getMigrationStatus() {
 }
 
 export function getDataDirForVersion(version) {
+  if (version >= 3) {
+    return join(dataDir, "v3");
+  }
   if (version >= 2) {
     return join(dataDir, "v2");
   }
