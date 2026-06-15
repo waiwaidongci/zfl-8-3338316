@@ -31,9 +31,64 @@ export async function handleCylinders(req, res, url) {
   if (req.method === "GET" && url.pathname === "/cylinders") {
     const status = url.searchParams.get("status");
     const gasType = url.searchParams.get("gasType");
+    const location = url.searchParams.get("location");
+    const customer = url.searchParams.get("customer");
+    const inspectionDueBefore = url.searchParams.get("inspectionDueBefore");
+    const keyword = url.searchParams.get("keyword");
+    const pagination = url.searchParams.get("pagination");
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(url.searchParams.get("pageSize") || "20", 10);
+
     let cylinders = await loadCylinders();
+
     if (status) cylinders = cylinders.filter((item) => item.status === status);
     if (gasType) cylinders = cylinders.filter((item) => item.gasType === gasType);
+    if (location) cylinders = cylinders.filter((item) => item.location === location);
+    if (customer !== null && customer !== undefined) {
+      if (customer === "") {
+        cylinders = cylinders.filter((item) => !item.customer);
+      } else {
+        cylinders = cylinders.filter((item) => item.customer === customer);
+      }
+    }
+    if (inspectionDueBefore) {
+      const cutoffDate = new Date(inspectionDueBefore);
+      cylinders = cylinders.filter((item) => {
+        if (!item.inspectionDue) return false;
+        return new Date(item.inspectionDue) <= cutoffDate;
+      });
+    }
+    if (keyword) {
+      const kw = keyword.toLowerCase();
+      cylinders = cylinders.filter((item) => {
+        const searchableFields = [
+          item.id,
+          item.gasType,
+          item.capacity,
+          item.location,
+          item.customer
+        ].filter(Boolean).map((v) => String(v).toLowerCase());
+        return searchableFields.some((field) => field.includes(kw));
+      });
+    }
+
+    const total = cylinders.length;
+
+    if (pagination) {
+      const validPage = Math.max(1, page);
+      const validPageSize = Math.max(1, Math.min(100, pageSize));
+      const totalPages = Math.ceil(total / validPageSize);
+      const start = (validPage - 1) * validPageSize;
+      const items = cylinders.slice(start, start + validPageSize);
+      return send(res, 200, {
+        items,
+        total,
+        page: validPage,
+        pageSize: validPageSize,
+        totalPages
+      });
+    }
+
     return send(res, 200, cylinders);
   }
 
