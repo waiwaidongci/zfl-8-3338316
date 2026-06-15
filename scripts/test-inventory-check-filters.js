@@ -1,17 +1,27 @@
 import http from "node:http";
+import { existsSync } from "node:fs";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
 
-const { withMultiJsonTx, loadJson } = await import(join(projectRoot, "store/common.js"));
+const { withMultiJsonTx } = await import(join(projectRoot, "store/common.js"));
 const { SEED: CYLINDERS_SEED } = await import(join(projectRoot, "store/cylinders.js"));
 const { SEED: CHECKS_SEED } = await import(join(projectRoot, "store/inventoryChecks.js"));
 const { SEED: LOGS_SEED } = await import(join(projectRoot, "store/operationLog.js"));
 const { SEED: IDEM_SEED } = await import(join(projectRoot, "store/idempotency.js"));
 
 const BASE = `http://localhost:${process.env.PORT || 3008}`;
+const DATA_DIR = join(projectRoot, "data", "v2");
+const DATA_FILES_TO_RESTORE = [
+  "cylinders.json",
+  "inventoryChecks.json",
+  "operationLogs.json",
+  "idempotency.json",
+  "tokens.json"
+];
 
 function request(method, path, options = {}) {
   return new Promise((resolve, reject) => {
@@ -47,6 +57,28 @@ function assert(condition, label) {
   } else {
     failed++;
     console.log(`  ❌ ${label}`);
+  }
+}
+
+async function snapshotDataFiles() {
+  const snapshot = new Map();
+  for (const filename of DATA_FILES_TO_RESTORE) {
+    for (const suffix of ["", ".bak"]) {
+      const filePath = join(DATA_DIR, `${filename}${suffix}`);
+      snapshot.set(filePath, existsSync(filePath) ? await readFile(filePath) : null);
+    }
+  }
+  return snapshot;
+}
+
+async function restoreDataFiles(snapshot) {
+  await mkdir(DATA_DIR, { recursive: true });
+  for (const [filePath, content] of snapshot.entries()) {
+    if (content === null) {
+      await rm(filePath, { force: true });
+    } else {
+      await writeFile(filePath, content);
+    }
   }
 }
 
@@ -142,6 +174,7 @@ async function run() {
   const TS = Date.now();
   const createdCylinders = [];
   const createdChecks = [];
+  const dataSnapshot = await snapshotDataFiles();
 
   try {
     console.log("🚀 盘点单列表筛选验证脚本");
@@ -304,7 +337,12 @@ async function run() {
       process.exit(1);
     }
   } finally {
-    await cleanupTestData(TS, createdCylinders, createdChecks);
+    try {
+      await cleanupTestData(TS, createdCylinders, createdChecks);
+    } finally {
+      await restoreDataFiles(dataSnapshot);
+      console.log("✅ 数据文件已恢复到脚本运行前状态\n");
+    }
   }
 }
 
