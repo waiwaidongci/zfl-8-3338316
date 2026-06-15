@@ -48,10 +48,11 @@
   ],
   "_schemaVersion": "2.0",
   "_meta": {
-    "createdAt": "2026-06-15T02:00:58.611Z",
-    "migratedAt": "2026-06-15T02:00:58.611Z",
+    "createdAt": "2026-06-15T02:22:32.175Z",
+    "migratedAt": "2026-06-15T02:22:32.175Z",
     "migratedFrom": "v1",
     "entity": "cylinders",
-    "sourceFile": "cylinders.json"
+    "sourceFile": "cylinders.json",
+    "storageType": "object"
   }
 }

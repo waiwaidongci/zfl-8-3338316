@@ -187,19 +187,34 @@ async function migrateV1ToV2(context) {
   };
 }
 
+const ARRAY_STORAGE_ENTITIES = ["users", "tokens"];
+
+function isArrayStorageEntity(entity) {
+  return ARRAY_STORAGE_ENTITIES.includes(entity);
+}
+
 function transformToV2Schema(v1Data, entity, sourceFile) {
   const now = new Date().toISOString();
   const dataKey = getDataKey(entity);
+  const isArrayStorage = isArrayStorageEntity(entity);
+  
+  let collection = [];
+  if (Array.isArray(v1Data)) {
+    collection = v1Data;
+  } else {
+    collection = v1Data[dataKey] || v1Data[entity] || [];
+  }
   
   return {
-    [dataKey]: v1Data[dataKey] || v1Data[entity] || [],
+    [dataKey]: collection,
     _schemaVersion: "2.0",
     _meta: {
       createdAt: now,
       migratedAt: now,
       migratedFrom: "v1",
       entity,
-      sourceFile
+      sourceFile,
+      storageType: isArrayStorage ? "array" : "object"
     }
   };
 }
@@ -289,6 +304,24 @@ async function rollbackV2ToV1(context) {
     if (await fileExists(backupPath)) {
       await copyFile(backupPath, targetPath);
       restoredFiles.push(file);
+    }
+  }
+  
+  for (const entity of ARRAY_STORAGE_ENTITIES) {
+    const fileName = `${entity}.json`;
+    const targetPath = join(dataDir, fileName);
+    const v2Path = join(dataDir, "v2", fileName);
+    
+    if (await fileExists(v2Path) && !restoredFiles.includes(fileName)) {
+      try {
+        const v2Data = await loadJsonFile(v2Path);
+        const dataKey = getDataKey(entity);
+        const collection = v2Data[dataKey] || v2Data[entity] || [];
+        await writeFile(targetPath, JSON.stringify(collection, null, 2), "utf8");
+        restoredFiles.push(fileName);
+      } catch (err) {
+        console.warn(`[Migration] Failed to convert ${fileName} for rollback: ${err.message}`);
+      }
     }
   }
   

@@ -4,7 +4,7 @@ import { dirname, join, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { detectCurrentVersion, getDataDirForVersion, getDataKey } from "./migration.js";
-import { normalizeItemForAPI, getEntityFromFilename } from "./compatibility.js";
+import { normalizeItemForAPI, getEntityFromFilename, getSchema } from "./compatibility.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = join(__dirname, "..");
@@ -267,17 +267,33 @@ async function addVersionMeta(data, filename) {
     return data;
   }
   
-  if (data._schemaVersion) {
+  const entity = getEntityFromFilename(filename);
+  const schema = entity ? getSchema(entity) : null;
+  const isArrayStorage = schema?.storageType === "array";
+  
+  if (!isArrayStorage && data._schemaVersion) {
     return data;
   }
   
-  const entity = filename.replace(".json", "");
+  if (isArrayStorage && Array.isArray(data)) {
+    return {
+      _schemaVersion: "2.0",
+      _meta: {
+        createdAt: new Date().toISOString(),
+        entity,
+        sourceFile: filename,
+        storageType: "array"
+      },
+      [schema.dataKey]: data
+    };
+  }
+  
   return {
     ...data,
     _schemaVersion: "2.0",
     _meta: {
       createdAt: new Date().toISOString(),
-      entity,
+      entity: entity || filename.replace(".json", ""),
       sourceFile: filename
     }
   };
@@ -285,9 +301,15 @@ async function addVersionMeta(data, filename) {
 
 function normalizeForCompatibility(data, filename) {
   const entity = getEntityFromFilename(filename);
+  const schema = entity ? getSchema(entity) : null;
+  const isArrayStorage = schema?.storageType === "array";
+  
+  if (isArrayStorage && Array.isArray(data)) {
+    return data.map(item => normalizeItemForAPI(item, entity));
+  }
   
   if (!data._schemaVersion) {
-    if (entity) {
+    if (entity && !isArrayStorage) {
       const dataKey = getDataKey(entity);
       const collection = data[dataKey] || data[entity] || [];
       if (Array.isArray(collection)) {
@@ -301,6 +323,15 @@ function normalizeForCompatibility(data, filename) {
   }
   
   const { _schemaVersion, _meta, ...rest } = data;
+  
+  if (entity && isArrayStorage) {
+    const dataKey = getDataKey(entity);
+    const collection = rest[dataKey] || rest[entity] || [];
+    if (Array.isArray(collection)) {
+      return collection.map(item => normalizeItemForAPI(item, entity));
+    }
+    return [];
+  }
   
   if (entity) {
     const dataKey = getDataKey(entity);

@@ -159,6 +159,7 @@ export const V2_SCHEMAS = {
     schemaVersion: "2.0",
     entity: "users",
     dataKey: "users",
+    storageType: "array",
     requiredFields: ["id", "username"],
     defaultFields: {
       role: "user",
@@ -174,6 +175,7 @@ export const V2_SCHEMAS = {
     schemaVersion: "2.0",
     entity: "tokens",
     dataKey: "tokens",
+    storageType: "array",
     requiredFields: ["token", "userId"],
     defaultFields: {
       createdAt: null,
