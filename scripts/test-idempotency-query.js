@@ -1,4 +1,43 @@
 import http from "node:http";
+import { mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = join(__dirname, "..");
+const dataDir = join(projectRoot, "data", "v3");
+const dataFilesToRestore = [
+  "idempotency.json",
+  "operationLogs.json",
+  "tokens.json"
+];
+
+async function snapshotDataFiles() {
+  const snapshot = new Map();
+  for (const fileName of dataFilesToRestore) {
+    for (const suffix of ["", ".bak"]) {
+      const filePath = join(dataDir, `${fileName}${suffix}`);
+      try {
+        snapshot.set(filePath, await readFile(filePath));
+      } catch (err) {
+        if (err.code !== "ENOENT") throw err;
+        snapshot.set(filePath, null);
+      }
+    }
+  }
+  return snapshot;
+}
+
+async function restoreDataFiles(snapshot) {
+  for (const [filePath, content] of snapshot.entries()) {
+    if (content === null) {
+      await rm(filePath, { force: true });
+    } else {
+      await mkdir(dirname(filePath), { recursive: true });
+      await writeFile(filePath, content);
+    }
+  }
+}
 
 function request(method, path, options = {}) {
   return new Promise((resolve, reject) => {
@@ -363,7 +402,13 @@ async function main() {
   }
 }
 
-main().catch((err) => {
+const dataSnapshot = await snapshotDataFiles();
+
+try {
+  await main();
+} catch (err) {
   console.error("测试执行出错:", err);
-  process.exit(1);
-});
+  process.exitCode = 1;
+} finally {
+  await restoreDataFiles(dataSnapshot);
+}
