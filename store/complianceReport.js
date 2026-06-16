@@ -47,12 +47,15 @@ export async function loadReports() {
 }
 
 export async function saveReports(reports) {
+  normalizeReportsMetadata(reports);
   await saveJson(FILE, { reports });
 }
 
 export async function withReportsTx(mutator) {
   return withJsonTx(FILE, SEED, async (db) => {
-    return mutator(db.reports);
+    const result = await mutator(db.reports);
+    normalizeReportsMetadata(db.reports);
+    return result;
   });
 }
 
@@ -170,6 +173,27 @@ async function updateReport(id, updates) {
 async function findReportById(id) {
   const reports = await loadReports();
   return findReport(reports, id);
+}
+
+function getReportSummary(report) {
+  return report?.summary || report?.result?.summary || null;
+}
+
+function normalizeReportMetadata(report) {
+  if (!report || typeof report !== "object") return report;
+  const summary = getReportSummary(report);
+  if (summary) {
+    report.summary = summary;
+  }
+  if ("result" in report) {
+    delete report.result;
+  }
+  return report;
+}
+
+function normalizeReportsMetadata(reports) {
+  if (!Array.isArray(reports)) return reports;
+  return reports.map(normalizeReportMetadata);
 }
 
 function buildCylinderTraceability(cylinder, ordersMap, tasksMap, checksMap, opLogsByTarget, startAt, endAt) {
@@ -704,11 +728,14 @@ async function executeReportTask(reportId, params, retryCount = 0) {
     }
 
     const finalData = await readPhaseData(reportId, "finalize");
-    await updateReport(reportId, {
-      status: "completed",
-      completedAt: new Date().toISOString(),
-      result: finalData,
-      progress: { step: PHASES.length, total: PHASES.length, message: "完成" }
+    await withReportsTx(async (reports) => {
+      const r = findReport(reports, reportId);
+      if (!r) return;
+      r.status = "completed";
+      r.completedAt = new Date().toISOString();
+      r.summary = finalData?.summary || null;
+      delete r.result;
+      r.progress = { step: PHASES.length, total: PHASES.length, message: "完成" };
     });
   } catch (err) {
     const report = await findReportById(reportId);
@@ -846,13 +873,11 @@ export async function getReport(reportId, { includeResult = false } = {}) {
   if (!report) return null;
 
   if (includeResult) {
-    if (report.status === "completed" && !report.result) {
-      const finalData = await readPhaseData(reportId, "finalize");
-      if (finalData) {
-        report.result = finalData;
-      }
+    let result = report.result || null;
+    if (report.status === "completed") {
+      result = await readPhaseData(reportId, "finalize") || result;
     }
-    return report;
+    return { ...stripResult(report), result };
   }
 
   return stripResult(report);
@@ -887,7 +912,7 @@ export async function listReports(filters = {}) {
     const hasHighRisk = filters.hasHighRisk === "true" || filters.hasHighRisk === true;
     reports = reports.filter((r) => {
       if (r.status !== "completed") return false;
-      const highRiskCount = r.result?.summary?.highRiskCount ?? 0;
+      const highRiskCount = getReportSummary(r)?.highRiskCount ?? 0;
       return hasHighRisk ? highRiskCount > 0 : highRiskCount === 0;
     });
   }
@@ -895,7 +920,7 @@ export async function listReports(filters = {}) {
     const hasDiscrepancy = filters.hasDiscrepancy === "true" || filters.hasDiscrepancy === true;
     reports = reports.filter((r) => {
       if (r.status !== "completed") return false;
-      const discrepancyCount = r.result?.summary?.discrepancyCount ?? 0;
+      const discrepancyCount = getReportSummary(r)?.discrepancyCount ?? 0;
       return hasDiscrepancy ? discrepancyCount > 0 : discrepancyCount === 0;
     });
   }

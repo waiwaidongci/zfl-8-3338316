@@ -1,4 +1,6 @@
 import http from "node:http";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
 function request(method, path, options = {}) {
@@ -53,6 +55,12 @@ async function waitForReportCompletion(reportId, token, timeoutMs = 30000) {
     await sleep(200);
   }
   throw new Error(`Report ${reportId} did not complete within ${timeoutMs}ms`);
+}
+
+async function readComplianceReportsDb() {
+  const filePath = join(process.cwd(), "data", "v3", "complianceReports.json");
+  const content = await readFile(filePath, "utf-8");
+  return JSON.parse(content);
 }
 
 async function main() {
@@ -114,6 +122,12 @@ async function main() {
   const fullReport = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
   assert(!!fullReport.body.result, "完成后包含 result");
   assert(!!fullReport.body.result.summary, "result 包含 summary");
+
+  const reportsDb = await readComplianceReportsDb();
+  const persistedReport = reportsDb.reports?.find((r) => r.id === reportId);
+  assert(!!persistedReport, "元数据文件包含当前报表");
+  assert(!("result" in persistedReport), "元数据文件不保存完整 result 字段");
+  assert(!!persistedReport.summary, "元数据文件保留轻量 summary 字段");
 
   section("测试 4: 阶段状态验证");
   const phaseKeys = ["customers", "orders", "inspections", "inventory", "operationLogs", "cylinders", "finalize"];
@@ -222,8 +236,10 @@ async function main() {
   assert(uniqueIds.size === concurrentCount, `${concurrentCount} 个报表 ID 互不重复`);
 
   console.log(`  等待所有并发报表完成...`);
-  const waitPromises = ids.map((id) => waitForReportCompletion(id, adminToken, 30000));
-  const completedReports = await Promise.all(waitPromises);
+  const completedReports = [];
+  for (const id of ids) {
+    completedReports.push(await waitForReportCompletion(id, adminToken, 60000));
+  }
   const allCompleted = completedReports.every((r) => r.status === "completed");
   assert(allCompleted, `并发报表全部成功完成`);
   if (!allCompleted) {

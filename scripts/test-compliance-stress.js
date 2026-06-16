@@ -106,6 +106,12 @@ async function readPhaseDataFile(reportId, fileName) {
   }
 }
 
+async function readComplianceReportsDb() {
+  const filePath = join(process.cwd(), "data", "v3", "complianceReports.json");
+  const content = await readFile(filePath, "utf-8");
+  return JSON.parse(content);
+}
+
 async function main() {
   console.log("合规报表分阶段快照 - 压力与回归测试（完整版）");
   console.log("==================================================");
@@ -178,6 +184,12 @@ async function main() {
   const fullReport = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
   assert(!!fullReport.body.result, "完成后包含 result");
   assert(!!fullReport.body.result.summary, "result 包含 summary");
+
+  const reportsDb = await readComplianceReportsDb();
+  const persistedReport = reportsDb.reports?.find((r) => r.id === reportId);
+  assert(!!persistedReport, "元数据文件包含当前报表");
+  assert(!("result" in persistedReport), "元数据文件不保存完整 result 字段");
+  assert(!!persistedReport.summary, "元数据文件保留轻量 summary 字段");
 
   section("测试 4: 所有阶段完成状态验证");
   for (const key of phaseKeys) {
