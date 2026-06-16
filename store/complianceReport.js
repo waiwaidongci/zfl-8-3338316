@@ -1,17 +1,45 @@
-import { loadJson, saveJson, genId, withJsonTx } from "./common.js";
+import { loadJson, saveJson, genId, withJsonTx, getDataDir } from "./common.js";
 import { loadCylinders } from "./cylinders.js";
 import { loadCustomers } from "./customers.js";
 import { loadOrders } from "./rentalOrders.js";
 import { loadTasks } from "./inspectionTasks.js";
 import { loadChecks } from "./inventoryChecks.js";
 import { queryOperationLogs } from "./operationLog.js";
-import { normalizeItemForAPI } from "./compatibility.js";
+import { mkdir, readFile, writeFile, unlink, rm, access } from "node:fs/promises";
+import { join } from "node:path";
+import { createHash } from "node:crypto";
 
 const FILE = "complianceReports.json";
 export const SEED = { reports: [] };
 
-const TASK_TIMEOUT_MS = 10 * 60 * 1000;
+const TASK_TIMEOUT_MS = 30 * 60 * 1000;
 const MAX_RETRY_COUNT = 3;
+const PHASE_YIELD_MS = 10;
+const CYLINDER_BATCH_SIZE = 100;
+const OPLOG_PAGE_SIZE = 500;
+const PHASE_INTERNAL_FIELDS = ["_schemaVersion", "_meta", "_migratedFrom"];
+
+const PHASES = [
+  { key: "customers", label: "客户数据", depends: [] },
+  { key: "orders", label: "租瓶订单", depends: [] },
+  { key: "inspections", label: "检验任务", depends: [] },
+  { key: "inventory", label: "库存盘点", depends: [] },
+  { key: "operationLogs", label: "操作日志", depends: [] },
+  { key: "cylinders", label: "钢瓶追溯", depends: ["orders", "inspections", "inventory", "operationLogs"] },
+  { key: "finalize", label: "汇总统计", depends: ["customers", "cylinders", "orders", "inspections", "inventory", "operationLogs"] }
+];
+
+const PHASE_DATA_FILES = {
+  customers: "customers.json",
+  orders: "orders.json",
+  inspections: "inspections.json",
+  inventory: "inventory.json",
+  operationLogs: "operationLogs.json",
+  cylinders: "cylinders.json",
+  finalize: "summary.json"
+};
+
+const activeTaskControllers = new Map();
 
 export async function loadReports() {
   const db = await loadJson(FILE, SEED);
@@ -51,7 +79,100 @@ function stripCollectionInternal(collection) {
   return collection.map(stripInternalFields);
 }
 
-function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, startAt, endAt) {
+async function getReportDataDir(reportId) {
+  const baseDataDir = await getDataDir();
+  return join(baseDataDir, "compliance-reports", reportId);
+}
+
+async function ensureReportDataDir(reportId) {
+  const dir = await getReportDataDir(reportId);
+  await mkdir(dir, { recursive: true });
+  return dir;
+}
+
+async function writePhaseData(reportId, phaseKey, data) {
+  const dir = await ensureReportDataDir(reportId);
+  const fileName = PHASE_DATA_FILES[phaseKey];
+  const filePath = join(dir, fileName);
+  const content = JSON.stringify(data, null, 2);
+  await writeFile(filePath, content, "utf-8");
+}
+
+async function readPhaseData(reportId, phaseKey) {
+  const dir = await getReportDataDir(reportId);
+  const fileName = PHASE_DATA_FILES[phaseKey];
+  const filePath = join(dir, fileName);
+  try {
+    const content = await readFile(filePath, "utf-8");
+    return JSON.parse(content);
+  } catch {
+    return null;
+  }
+}
+
+async function phaseDataExists(reportId, phaseKey) {
+  const dir = await getReportDataDir(reportId);
+  const fileName = PHASE_DATA_FILES[phaseKey];
+  const filePath = join(dir, fileName);
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function deletePhaseData(reportId, phaseKey) {
+  const dir = await getReportDataDir(reportId);
+  const fileName = PHASE_DATA_FILES[phaseKey];
+  const filePath = join(dir, fileName);
+  try {
+    await unlink(filePath);
+  } catch {}
+}
+
+async function clearAllPhaseData(reportId) {
+  const dir = await getReportDataDir(reportId);
+  try {
+    await rm(dir, { recursive: true, force: true });
+  } catch {}
+}
+
+function computePhaseChecksum(phaseKey, params, dataVersion) {
+  const input = JSON.stringify({ phaseKey, params, dataVersion });
+  return createHash("sha256").update(input).digest("hex").slice(0, 16);
+}
+
+function createInitialPhases() {
+  const phases = {};
+  for (const phase of PHASES) {
+    phases[phase.key] = {
+      status: "pending",
+      startedAt: null,
+      completedAt: null,
+      itemCount: 0,
+      checksum: null,
+      error: null
+    };
+  }
+  return phases;
+}
+
+async function updateReport(id, updates) {
+  return withReportsTx(async (reports) => {
+    const report = findReport(reports, id);
+    if (!report) return null;
+    Object.assign(report, updates);
+    return report;
+  });
+}
+
+async function findReportById(id) {
+  const reports = await loadReports();
+  return findReport(reports, id);
+}
+
+function buildCylinderTraceability(cylinder, ordersMap, tasksMap, checksMap, opLogsByTarget, startAt, endAt) {
   const startTime = startAt ? new Date(startAt).getTime() : 0;
   const endTime = endAt ? new Date(endAt).getTime() : Infinity;
 
@@ -66,21 +187,21 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
       note: evt.note || null
     }));
 
-  const relatedOrders = orders.filter((o) => {
-    if (!o.cylinders || !o.cylinders.some((c) => c.id === cylinder.id)) return false;
-    const t = new Date(o.createdAt).getTime();
-    return t >= startTime && t <= endTime;
-  }).map((o) => ({
-    id: o.id,
-    customerName: o.customerName,
-    cylinderCount: o.cylinderCount,
-    createdAt: o.createdAt,
-    status: o.status
-  }));
+  const relatedOrders = (ordersMap.get(cylinder.id) || [])
+    .filter((o) => {
+      const t = new Date(o.createdAt).getTime();
+      return t >= startTime && t <= endTime;
+    })
+    .map((o) => ({
+      id: o.id,
+      customerName: o.customerName,
+      cylinderCount: o.cylinderCount,
+      createdAt: o.createdAt,
+      status: o.status
+    }));
 
-  const inspectionRisks = tasks
+  const inspectionRisks = (tasksMap.get(cylinder.id) || [])
     .filter((t) => {
-      if (t.cylinderId !== cylinder.id) return false;
       const timeField = t.inspectedAt || t.createdAt;
       const tVal = new Date(timeField).getTime();
       return tVal >= startTime && tVal <= endTime;
@@ -95,7 +216,7 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
     }));
 
   const inventoryDiscrepancies = [];
-  for (const check of checks) {
+  for (const check of checksMap.values()) {
     const timeField = check.completedAt || check.confirmedAt || check.createdAt;
     const tVal = new Date(timeField).getTime();
     if (!(tVal >= startTime && tVal <= endTime)) continue;
@@ -121,7 +242,7 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
     }
   }
 
-  const relatedOpLogs = opLogs.filter((l) => l.targetId === cylinder.id)
+  const relatedOpLogs = (opLogsByTarget.get(cylinder.id) || [])
     .map((l) => ({
       id: l.id,
       operationType: l.operationType,
@@ -160,47 +281,46 @@ function buildCylinderTraceability(cylinder, orders, tasks, checks, opLogs, star
   };
 }
 
-async function generateComplianceSnapshot(params) {
+async function executePhaseCustomers(reportId, params) {
   const { startAt, endAt } = params;
   const startTime = startAt ? new Date(startAt).getTime() : 0;
   const endTime = endAt ? new Date(endAt).getTime() : Infinity;
 
-  const cylinders = stripCollectionInternal(await loadCylinders());
   const customers = stripCollectionInternal(await loadCustomers());
-  const orders = stripCollectionInternal(await loadOrders());
-  const tasks = stripCollectionInternal(await loadTasks());
-  const checks = stripCollectionInternal(await loadChecks());
-
-  const opLogResult = await queryOperationLogs({
-    startAt: startAt || "",
-    endAt: endAt || "",
-    pageSize: "1000"
-  });
-  const opLogs = stripCollectionInternal(opLogResult.items || []);
-
   const customersInPeriod = customers.filter((c) => {
     const t = new Date(c.createdAt).getTime();
     return t >= startTime && t <= endTime;
   });
 
+  await writePhaseData(reportId, "customers", customersInPeriod);
+  return { itemCount: customersInPeriod.length };
+}
+
+async function executePhaseOrders(reportId, params) {
+  const { startAt, endAt } = params;
+  const startTime = startAt ? new Date(startAt).getTime() : 0;
+  const endTime = endAt ? new Date(endAt).getTime() : Infinity;
+
+  const orders = stripCollectionInternal(await loadOrders());
   const ordersInPeriod = orders.filter((o) => {
     const t = new Date(o.createdAt).getTime();
     return t >= startTime && t <= endTime;
   });
 
+  await writePhaseData(reportId, "orders", ordersInPeriod);
+  return { itemCount: ordersInPeriod.length };
+}
+
+async function executePhaseInspections(reportId, params) {
+  const { startAt, endAt } = params;
+  const startTime = startAt ? new Date(startAt).getTime() : 0;
+  const endTime = endAt ? new Date(endAt).getTime() : Infinity;
+
+  const tasks = stripCollectionInternal(await loadTasks());
   const tasksInPeriod = tasks.filter((t) => {
     const tCreated = new Date(t.createdAt).getTime();
     return tCreated >= startTime && tCreated <= endTime;
   });
-
-  const checksInPeriod = checks.filter((c) => {
-    const t = new Date(c.createdAt).getTime();
-    return t >= startTime && t <= endTime;
-  });
-
-  const cylinderTraceability = cylinders.map((c) =>
-    buildCylinderTraceability(c, orders, tasks, checks, opLogs, startAt, endAt)
-  );
 
   const allInspectionRisks = [];
   for (const t of tasksInPeriod) {
@@ -222,6 +342,24 @@ async function generateComplianceSnapshot(params) {
       });
     }
   }
+
+  await writePhaseData(reportId, "inspections", {
+    tasks: tasksInPeriod,
+    risks: allInspectionRisks
+  });
+  return { itemCount: tasksInPeriod.length };
+}
+
+async function executePhaseInventory(reportId, params) {
+  const { startAt, endAt } = params;
+  const startTime = startAt ? new Date(startAt).getTime() : 0;
+  const endTime = endAt ? new Date(endAt).getTime() : Infinity;
+
+  const checks = stripCollectionInternal(await loadChecks());
+  const checksInPeriod = checks.filter((c) => {
+    const t = new Date(c.createdAt).getTime();
+    return t >= startTime && t <= endTime;
+  });
 
   const allDiscrepancies = [];
   for (const check of checksInPeriod) {
@@ -247,111 +385,357 @@ async function generateComplianceSnapshot(params) {
     }
   }
 
-  const operatorSummary = {};
-  for (const log of opLogs) {
-    const op = log.operator || "unknown";
-    if (!operatorSummary[op]) {
-      operatorSummary[op] = { operator: op, operationCount: 0, failedCount: 0 };
-    }
-    operatorSummary[op].operationCount++;
-    if (log.status === "failed") operatorSummary[op].failedCount++;
-  }
-
-  return {
-    period: { startAt: startAt || null, endAt: endAt || null },
-    generatedAt: new Date().toISOString(),
-    summary: {
-      totalCustomers: customersInPeriod.length,
-      totalCylinders: cylinders.length,
-      totalOrders: ordersInPeriod.length,
-      totalInspectionTasks: tasksInPeriod.length,
-      totalInventoryChecks: checksInPeriod.length,
-      totalOperationLogs: opLogs.length,
-      highRiskCount: allInspectionRisks.filter((r) => r.risk === "high").length,
-      mediumRiskCount: allInspectionRisks.filter((r) => r.risk === "medium").length,
-      discrepancyCount: allDiscrepancies.length
-    },
-    customers: customersInPeriod,
-    cylinders: cylinderTraceability,
-    rentalOrders: ordersInPeriod,
-    inspections: tasksInPeriod.map((t) => stripInternalFields(t)),
-    inventoryChecks: checksInPeriod.map((c) => stripInternalFields(c)),
-    operationLogs: opLogs,
-    risks: allInspectionRisks,
-    discrepancies: allDiscrepancies,
-    operatorSummary: Object.values(operatorSummary)
-  };
+  await writePhaseData(reportId, "inventory", {
+    checks: checksInPeriod,
+    discrepancies: allDiscrepancies
+  });
+  return { itemCount: checksInPeriod.length };
 }
 
-const activeTaskControllers = new Map();
+async function executePhaseOperationLogs(reportId, params) {
+  const { startAt, endAt } = params;
+
+  const allLogs = [];
+  const operatorSummary = {};
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const opLogResult = await queryOperationLogs({
+      startAt: startAt || "",
+      endAt: endAt || "",
+      page: String(page),
+      pageSize: String(OPLOG_PAGE_SIZE)
+    });
+
+    const logs = stripCollectionInternal(opLogResult.items || []);
+    for (const log of logs) {
+      allLogs.push(log);
+      const op = log.operator || "unknown";
+      if (!operatorSummary[op]) {
+        operatorSummary[op] = { operator: op, operationCount: 0, failedCount: 0 };
+      }
+      operatorSummary[op].operationCount++;
+      if (log.status === "failed") operatorSummary[op].failedCount++;
+    }
+
+    hasMore = opLogResult.pagination?.hasNext || false;
+    page++;
+
+    if (hasMore) {
+      await new Promise((resolve) => setTimeout(resolve, PHASE_YIELD_MS));
+    }
+  }
+
+  await writePhaseData(reportId, "operationLogs", {
+    logs: allLogs,
+    operatorSummary: Object.values(operatorSummary)
+  });
+  return { itemCount: allLogs.length };
+}
+
+async function executePhaseCylinders(reportId, params) {
+  const { startAt, endAt } = params;
+
+  const cylinders = stripCollectionInternal(await loadCylinders());
+  const ordersData = await readPhaseData(reportId, "orders");
+  const inspectionsData = await readPhaseData(reportId, "inspections");
+  const inventoryData = await readPhaseData(reportId, "inventory");
+  const opLogsData = await readPhaseData(reportId, "operationLogs");
+
+  const orders = ordersData || [];
+  const tasks = inspectionsData?.tasks || [];
+  const checks = inventoryData?.checks || [];
+  const opLogs = opLogsData?.logs || [];
+
+  const ordersMap = new Map();
+  for (const order of orders) {
+    if (order.cylinders) {
+      for (const c of order.cylinders) {
+        if (!ordersMap.has(c.id)) ordersMap.set(c.id, []);
+        ordersMap.get(c.id).push(order);
+      }
+    }
+  }
+
+  const tasksMap = new Map();
+  for (const task of tasks) {
+    if (!tasksMap.has(task.cylinderId)) tasksMap.set(task.cylinderId, []);
+    tasksMap.get(task.cylinderId).push(task);
+  }
+
+  const checksMap = new Map();
+  for (const check of checks) {
+    checksMap.set(check.id, check);
+  }
+
+  const opLogsByTarget = new Map();
+  for (const log of opLogs) {
+    if (log.targetId) {
+      if (!opLogsByTarget.has(log.targetId)) opLogsByTarget.set(log.targetId, []);
+      opLogsByTarget.get(log.targetId).push(log);
+    }
+  }
+
+  const cylinderTraceability = [];
+  const total = cylinders.length;
+  for (let i = 0; i < total; i += CYLINDER_BATCH_SIZE) {
+    const batch = cylinders.slice(i, i + CYLINDER_BATCH_SIZE);
+    for (const cylinder of batch) {
+      cylinderTraceability.push(
+        buildCylinderTraceability(cylinder, ordersMap, tasksMap, checksMap, opLogsByTarget, startAt, endAt)
+      );
+    }
+
+    await withReportsTx(async (reports) => {
+      const report = findReport(reports, reportId);
+      if (report && report.phases?.cylinders) {
+        report.phases.cylinders.itemCount = Math.min(i + batch.length, total);
+      }
+      if (report) {
+        report.progress = {
+          step: 6,
+          total: PHASES.length,
+          message: `处理中: 钢瓶追溯 (${Math.min(i + batch.length, total)}/${total})`
+        };
+      }
+    });
+
+    if (i + CYLINDER_BATCH_SIZE < total) {
+      await new Promise((resolve) => setTimeout(resolve, PHASE_YIELD_MS));
+    }
+  }
+
+  await writePhaseData(reportId, "cylinders", cylinderTraceability);
+  return { itemCount: cylinderTraceability.length };
+}
+
+async function executePhaseFinalize(reportId, params) {
+  const { startAt, endAt } = params;
+
+  const customersData = await readPhaseData(reportId, "customers");
+  const cylindersData = await readPhaseData(reportId, "cylinders");
+  const ordersData = await readPhaseData(reportId, "orders");
+  const inspectionsData = await readPhaseData(reportId, "inspections");
+  const inventoryData = await readPhaseData(reportId, "inventory");
+  const opLogsData = await readPhaseData(reportId, "operationLogs");
+
+  const customers = customersData || [];
+  const cylinders = cylindersData || [];
+  const orders = ordersData || [];
+  const tasks = inspectionsData?.tasks || [];
+  const risks = inspectionsData?.risks || [];
+  const checks = inventoryData?.checks || [];
+  const discrepancies = inventoryData?.discrepancies || [];
+  const opLogs = opLogsData?.logs || [];
+  const operatorSummary = opLogsData?.operatorSummary || [];
+
+  const summary = {
+    totalCustomers: customers.length,
+    totalCylinders: cylinders.length,
+    totalOrders: orders.length,
+    totalInspectionTasks: tasks.length,
+    totalInventoryChecks: checks.length,
+    totalOperationLogs: opLogs.length,
+    highRiskCount: risks.filter((r) => r.risk === "high").length,
+    mediumRiskCount: risks.filter((r) => r.risk === "medium").length,
+    discrepancyCount: discrepancies.length
+  };
+
+  const result = {
+    period: { startAt: startAt || null, endAt: endAt || null },
+    generatedAt: new Date().toISOString(),
+    summary,
+    customers,
+    cylinders,
+    rentalOrders: orders,
+    inspections: tasks,
+    inventoryChecks: checks,
+    operationLogs: opLogs,
+    risks,
+    discrepancies,
+    operatorSummary
+  };
+
+  await writePhaseData(reportId, "finalize", result);
+  return { itemCount: 1, summary };
+}
+
+async function executePhase(reportId, phaseKey, params, dataVersion) {
+  const checksum = computePhaseChecksum(phaseKey, params, dataVersion);
+
+  await updateReport(reportId, {
+    currentPhase: phaseKey,
+    phaseProgress: {
+      current: PHASES.findIndex((p) => p.key === phaseKey) + 1,
+      total: PHASES.length
+    }
+  });
+
+  const phaseDef = PHASES.find((p) => p.key === phaseKey);
+  const phaseLabel = phaseDef?.label || phaseKey;
+
+  await withReportsTx(async (reports) => {
+    const report = findReport(reports, reportId);
+    if (report && report.phases?.[phaseKey]) {
+      report.phases[phaseKey].status = "processing";
+      report.phases[phaseKey].startedAt = new Date().toISOString();
+      report.phases[phaseKey].checksum = checksum;
+      report.phases[phaseKey].error = null;
+    }
+    if (report) {
+      report.progress = {
+        step: PHASES.findIndex((p) => p.key === phaseKey) + 1,
+        total: PHASES.length,
+        message: `处理中: ${phaseLabel}`
+      };
+    }
+  });
+
+  let result;
+  switch (phaseKey) {
+    case "customers":
+      result = await executePhaseCustomers(reportId, params);
+      break;
+    case "orders":
+      result = await executePhaseOrders(reportId, params);
+      break;
+    case "inspections":
+      result = await executePhaseInspections(reportId, params);
+      break;
+    case "inventory":
+      result = await executePhaseInventory(reportId, params);
+      break;
+    case "operationLogs":
+      result = await executePhaseOperationLogs(reportId, params);
+      break;
+    case "cylinders":
+      result = await executePhaseCylinders(reportId, params);
+      break;
+    case "finalize":
+      result = await executePhaseFinalize(reportId, params);
+      break;
+    default:
+      throw new Error(`unknown_phase: ${phaseKey}`);
+  }
+
+  await withReportsTx(async (reports) => {
+    const report = findReport(reports, reportId);
+    if (report && report.phases?.[phaseKey]) {
+      report.phases[phaseKey].status = "completed";
+      report.phases[phaseKey].completedAt = new Date().toISOString();
+      report.phases[phaseKey].itemCount = result.itemCount || 0;
+    }
+    if (report) {
+      report.progress = {
+        step: PHASES.findIndex((p) => p.key === phaseKey) + 1,
+        total: PHASES.length,
+        message: `已完成: ${phaseLabel}`
+      };
+    }
+  });
+
+  return result;
+}
+
+async function isPhaseCompleted(report, phaseKey) {
+  return report.phases?.[phaseKey]?.status === "completed";
+}
+
+async function canSkipPhase(report, phaseKey, params, dataVersion) {
+  const phaseState = report.phases?.[phaseKey];
+  if (!phaseState || phaseState.status !== "completed") return false;
+
+  const expectedChecksum = computePhaseChecksum(phaseKey, params, dataVersion);
+  return phaseState.checksum === expectedChecksum;
+}
 
 async function executeReportTask(reportId, params, retryCount = 0) {
   const report = await findReportById(reportId);
   if (!report) return;
 
-  if (report.status === "completed" || report.status === "processing" || report.status === "failed") {
-    return;
-  }
-
-  await updateReport(reportId, {
-    status: "processing",
-    startedAt: new Date().toISOString(),
-    progress: { step: 1, total: 3, message: "加载数据中" },
-    retryCount
-  });
+  if (report.status === "completed") return;
 
   const controller = { aborted: false };
   activeTaskControllers.set(reportId, controller);
 
   try {
-    await updateReport(reportId, {
-      progress: { step: 2, total: 3, message: "生成合规快照" }
-    });
+    const dataVersion = "v3";
 
-    if (controller.aborted) {
+    if (report.status !== "processing") {
       await updateReport(reportId, {
-        status: "failed",
-        error: "task_aborted",
-        progress: { step: 2, total: 3, message: "任务已中止" }
+        status: "processing",
+        startedAt: new Date().toISOString(),
+        retryCount
       });
-      return;
     }
 
-    const result = await generateComplianceSnapshot(params);
+    if (!report.phases) {
+      await withReportsTx(async (reports) => {
+        const r = findReport(reports, reportId);
+        if (r) {
+          r.phases = createInitialPhases();
+          r.currentPhase = null;
+          r.phaseProgress = { current: 0, total: PHASES.length };
+        }
+      });
+    }
 
-    await updateReport(reportId, {
-      progress: { step: 3, total: 3, message: "持久化结果" }
-    });
+    for (const phase of PHASES) {
+      if (controller.aborted) {
+        await updateReport(reportId, {
+          status: "failed",
+          error: "task_aborted",
+          progress: { step: 0, total: PHASES.length, message: "任务已中止" }
+        });
+        return;
+      }
 
+      const currentReport = await findReportById(reportId);
+      const canSkip = await canSkipPhase(currentReport, phase.key, params, dataVersion);
+
+      if (canSkip) {
+        continue;
+      }
+
+      await executePhase(reportId, phase.key, params, dataVersion);
+
+      await new Promise((resolve) => setTimeout(resolve, PHASE_YIELD_MS));
+    }
+
+    const finalData = await readPhaseData(reportId, "finalize");
     await updateReport(reportId, {
       status: "completed",
       completedAt: new Date().toISOString(),
-      result,
-      progress: { step: 3, total: 3, message: "完成" }
+      result: finalData,
+      progress: { step: PHASES.length, total: PHASES.length, message: "完成" }
     });
   } catch (err) {
+    const report = await findReportById(reportId);
+    const failedPhase = report?.currentPhase || "unknown";
+    const phaseIdx = PHASES.findIndex((p) => p.key === failedPhase);
+
+    await withReportsTx(async (reports) => {
+      const r = findReport(reports, reportId);
+      if (r && r.phases?.[failedPhase]) {
+        r.phases[failedPhase].status = "failed";
+        r.phases[failedPhase].error = err.message || "unknown_error";
+      }
+    });
+
     await updateReport(reportId, {
       status: "failed",
       error: err.message || "unknown_error",
-      progress: { step: 0, total: 3, message: `失败: ${err.message}` }
+      failedPhase,
+      progress: {
+        step: Math.max(0, phaseIdx),
+        total: PHASES.length,
+        message: `失败 [${failedPhase}]: ${err.message}`
+      }
     });
   } finally {
     activeTaskControllers.delete(reportId);
   }
-}
-
-async function findReportById(id) {
-  const reports = await loadReports();
-  return findReport(reports, id);
-}
-
-async function updateReport(id, updates) {
-  return withReportsTx(async (reports) => {
-    const report = findReport(reports, id);
-    if (!report) return null;
-    Object.assign(report, updates);
-    return report;
-  });
 }
 
 export async function createReportTask(params, requestedBy) {
@@ -364,9 +748,13 @@ export async function createReportTask(params, requestedBy) {
       endAt: params.endAt || null
     },
     requestedBy: requestedBy || null,
-    progress: { step: 0, total: 3, message: "等待处理" },
+    progress: { step: 0, total: PHASES.length, message: "等待处理" },
+    phases: createInitialPhases(),
+    currentPhase: null,
+    phaseProgress: { current: 0, total: PHASES.length },
     result: null,
     error: null,
+    failedPhase: null,
     createdAt: new Date().toISOString(),
     startedAt: null,
     completedAt: null,
@@ -402,12 +790,43 @@ export async function retryReport(reportId, requestedBy) {
   }
 
   const newRetryCount = report.retryCount + 1;
-  await updateReport(reportId, {
-    status: "pending",
-    error: null,
-    retryCount: newRetryCount,
-    lastRetriedAt: new Date().toISOString(),
-    progress: { step: 0, total: 3, message: "等待重试" }
+  const failedPhase = report.failedPhase;
+  const failedPhaseIdx = PHASES.findIndex((p) => p.key === failedPhase);
+
+  const phasesToReset = [];
+  for (let i = Math.max(0, failedPhaseIdx); i < PHASES.length; i++) {
+    phasesToReset.push(PHASES[i].key);
+  }
+
+  for (const phaseKey of phasesToReset) {
+    try {
+      await deletePhaseData(reportId, phaseKey);
+    } catch {}
+  }
+
+  await withReportsTx(async (reports) => {
+    const r = findReport(reports, reportId);
+    if (r) {
+      r.status = "pending";
+      r.error = null;
+      r.failedPhase = null;
+      r.retryCount = newRetryCount;
+      r.lastRetriedAt = new Date().toISOString();
+      r.progress = { step: 0, total: PHASES.length, message: "等待重试" };
+      r.currentPhase = null;
+      r.phaseProgress = { current: 0, total: PHASES.length };
+
+      for (const phaseKey of phasesToReset) {
+        if (r.phases?.[phaseKey]) {
+          r.phases[phaseKey].status = "pending";
+          r.phases[phaseKey].startedAt = null;
+          r.phases[phaseKey].completedAt = null;
+          r.phases[phaseKey].error = null;
+          r.phases[phaseKey].checksum = null;
+          r.phases[phaseKey].itemCount = 0;
+        }
+      }
+    }
   });
 
   setImmediate(() => executeReportTask(reportId, report.params, newRetryCount));
@@ -417,7 +836,17 @@ export async function retryReport(reportId, requestedBy) {
 }
 
 export async function getReport(reportId) {
-  return findReportById(reportId);
+  const report = await findReportById(reportId);
+  if (!report) return null;
+
+  if (report.status === "completed" && !report.result) {
+    const finalData = await readPhaseData(reportId, "finalize");
+    if (finalData) {
+      report.result = finalData;
+    }
+  }
+
+  return report;
 }
 
 export async function listReports(filters = {}) {
@@ -487,22 +916,45 @@ export async function listReports(filters = {}) {
 export async function recoverPendingReports() {
   const reports = await loadReports();
   const now = Date.now();
-  let recovered = 0;
+  let recoveredCount = 0;
+  let timeoutCount = 0;
+  let resumedCount = 0;
   const scheduledIds = new Set();
 
   for (const report of reports) {
     if (report.status === "processing") {
       const elapsed = now - new Date(report.startedAt || report.createdAt).getTime();
+
       if (elapsed > TASK_TIMEOUT_MS) {
         report.status = "failed";
         report.error = "task_timeout_on_restart";
-        report.progress = { step: 0, total: 3, message: "服务重启后恢复：任务超时" };
-        recovered++;
+        report.progress = { step: 0, total: PHASES.length, message: "服务重启后恢复：任务超时" };
+        if (report.currentPhase && report.phases?.[report.currentPhase]) {
+          report.phases[report.currentPhase].status = "failed";
+          report.phases[report.currentPhase].error = "task_timeout_on_restart";
+        }
+        try {
+          await deletePhaseData(report.id, report.currentPhase);
+        } catch {}
+        timeoutCount++;
+        recoveredCount++;
       } else {
         report.status = "pending";
-        report.progress = { step: 0, total: 3, message: "服务重启后恢复" };
+        report.progress = { step: 0, total: PHASES.length, message: "服务重启后恢复" };
+        if (report.currentPhase && report.phases?.[report.currentPhase]) {
+          const phaseState = report.phases[report.currentPhase];
+          if (phaseState.status === "processing") {
+            phaseState.status = "pending";
+            phaseState.startedAt = null;
+            phaseState.error = null;
+            try {
+              await deletePhaseData(report.id, report.currentPhase);
+            } catch {}
+          }
+        }
         scheduledIds.add(report.id);
-        recovered++;
+        resumedCount++;
+        recoveredCount++;
       }
     }
   }
@@ -510,20 +962,36 @@ export async function recoverPendingReports() {
   for (const report of reports) {
     if (report.status === "pending" && !scheduledIds.has(report.id) && !activeTaskControllers.has(report.id)) {
       scheduledIds.add(report.id);
-      recovered++;
+      recoveredCount++;
     }
   }
 
-  if (recovered > 0) {
+  if (recoveredCount > 0) {
     await saveReports(reports);
   }
 
   for (const id of scheduledIds) {
     const report = findReport(reports, id);
     if (report) {
-      setImmediate(() => executeReportTask(report.id, report.params, report.retryCount));
+      setImmediate(() => executeReportTask(report.id, report.params, report.retryCount || 0));
     }
   }
 
-  return recovered;
+  if (recoveredCount > 0) {
+    console.log(`[ComplianceReport] 恢复统计: 共 ${recoveredCount} 个 (超时失败: ${timeoutCount}, 断点续跑: ${resumedCount}, 待处理: ${scheduledIds.size - resumedCount})`);
+  }
+
+  return recoveredCount;
 }
+
+export async function getReportPhaseData(reportId, phaseKey) {
+  const report = await findReportById(reportId);
+  if (!report) return null;
+
+  if (!report.phases?.[phaseKey]) return null;
+  if (report.phases[phaseKey].status !== "completed") return null;
+
+  return readPhaseData(reportId, phaseKey);
+}
+
+export { PHASES, PHASE_DATA_FILES };

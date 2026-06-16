@@ -13,7 +13,7 @@ const baseDataDir = join(projectRoot, "data");
 let currentDataVersion = null;
 let cachedDataDir = null;
 
-async function getDataDir() {
+export async function getDataDir() {
   if (cachedDataDir) return cachedDataDir;
   try {
     currentDataVersion = await detectCurrentVersion();

@@ -716,16 +716,51 @@ POST /cylinders/:id/actions
 
 ### 概述
 
-合规追溯报表模块支持生成指定时间范围内的钢瓶全生命周期合规追溯报告，涵盖客户、订单、检验、盘点、操作日志等多维度数据。报表采用异步生成方式，支持列表查询与多维度筛选。
+合规追溯报表模块支持生成指定时间范围内的钢瓶全生命周期合规追溯报告，涵盖客户、订单、检验、盘点、操作日志等多维度数据。报表采用**分阶段异步生成**方式，支持断点续跑、服务重启恢复、幂等重试，避免大数据量下的阻塞和内存溢出。
+
+### 分阶段快照架构
+
+报表生成采用 7 个阶段的流水线式处理，每个阶段完成后持久化进度，服务重启后可从最后完成阶段继续：
+
+| 阶段顺序 | 阶段 key | 说明 | 依赖 | 处理方式 |
+|---------|----------|------|------|----------|
+| 1 | `customers` | 客户数据筛选 | 无 | 全量筛选 |
+| 2 | `orders` | 租瓶订单筛选 | 无 | 全量筛选 |
+| 3 | `inspections` | 检验任务筛选与风险计算 | 无 | 全量筛选+聚合 |
+| 4 | `inventory` | 库存盘点筛选与差异计算 | 无 | 全量筛选+聚合 |
+| 5 | `operationLogs` | 操作日志筛选与操作人汇总 | 无 | 分页增量加载 |
+| 6 | `cylinders` | 钢瓶追溯信息构建 | orders, inspections, inventory, operationLogs | 分批处理 |
+| 7 | `finalize` | 汇总统计与最终结果组装 | 所有前置阶段 | 聚合组装 |
+
+每个阶段独立持久化数据文件，阶段间通过 `setTimeout` 让出事件循环，避免长时间阻塞。
+
+### 分批处理与增量加载
+
+为应对大数据量场景，核心阶段采用流式/分批处理：
+
+- **钢瓶追溯阶段**：按 100 个/批 的批次处理钢瓶数据，每批完成后更新进度并让出事件循环，避免单阶段阻塞事件循环。
+- **操作日志阶段**：按 500 条/页 的分页增量加载，逐步累加操作日志和操作人汇总，避免一次性加载全部日志到内存。
+- **阶段间让步**：每个阶段完成后暂停 10ms，允许其他请求和任务获得执行机会。
 
 ### 报表状态
 
 | 状态 | 说明 |
 |------|------|
 | `pending` | 等待处理 |
-| `processing` | 生成中 |
+| `processing` | 生成中（含当前阶段信息） |
 | `completed` | 已完成 |
-| `failed` | 生成失败 |
+| `failed` | 生成失败（含失败阶段信息） |
+
+### 阶段状态
+
+每个阶段在 `phases` 对象中有独立的状态跟踪：
+
+| 状态 | 说明 |
+|------|------|
+| `pending` | 待执行 |
+| `processing` | 执行中 |
+| `completed` | 已完成 |
+| `failed` | 执行失败 |
 
 ### API 接口
 
@@ -733,8 +768,8 @@ POST /cylinders/:id/actions
 |------|------|------|------|
 | `POST` | `/compliance-reports` | 创建合规追溯报表任务 | `query` |
 | `GET` | `/compliance-reports` | 查询报表列表（支持多维度筛选与分页） | `query` |
-| `GET` | `/compliance-reports/:id` | 获取报表详情 | `query` |
-| `POST` | `/compliance-reports/:id/retry` | 重试失败的报表 | `query` |
+| `GET` | `/compliance-reports/:id` | 获取报表详情（含阶段进度） | `query` |
+| `POST` | `/compliance-reports/:id/retry` | 重试失败的报表（从失败阶段续跑） | `query` |
 
 #### 报表列表筛选参数
 
@@ -771,20 +806,130 @@ POST /compliance-reports
 
 `startAt` 和 `endAt` 至少需提供一个。
 
+创建后立即返回报表任务对象（状态为 `pending`），后台异步分阶段执行。
+
+### 报表详情响应格式
+
+```json
+{
+  "id": "CR-xxx",
+  "status": "processing",
+  "params": { "startAt": "...", "endAt": "..." },
+  "requestedBy": "admin",
+  "progress": { "step": 4, "total": 7, "message": "处理中: 库存盘点" },
+  "currentPhase": "inventory",
+  "phaseProgress": { "current": 4, "total": 7 },
+  "phases": {
+    "customers": { "status": "completed", "startedAt": "...", "completedAt": "...", "itemCount": 150, "checksum": "abc123..." },
+    "orders": { "status": "completed", "startedAt": "...", "completedAt": "...", "itemCount": 320, "checksum": "def456..." },
+    "inspections": { "status": "completed", "startedAt": "...", "completedAt": "...", "itemCount": 80, "checksum": "ghi789..." },
+    "inventory": { "status": "processing", "startedAt": "...", "completedAt": null, "itemCount": 0, "checksum": "..." },
+    "operationLogs": { "status": "pending", ... },
+    "cylinders": { "status": "pending", ... },
+    "finalize": { "status": "pending", ... }
+  },
+  "result": null,
+  "error": null,
+  "failedPhase": null,
+  "createdAt": "...",
+  "startedAt": "...",
+  "completedAt": null,
+  "retryCount": 0,
+  "lastRetriedAt": null
+}
+```
+
+### 重试机制
+
+失败的报表可通过 `/compliance-reports/:id/retry` 接口重试：
+
+- **幂等保证**：已完成的阶段（checksum 匹配）直接跳过，不会重复生成数据
+- **断点续跑**：从失败的阶段重新执行，已完成阶段保留
+- **重试上限**：最多重试 3 次（含首次执行共 4 次尝试）
+- **数据清理**：重试时自动删除失败阶段的不完整数据文件
+
+### 服务启动恢复
+
+服务启动时自动扫描合规报表任务：
+
+1. **超时处理**：`processing` 状态且执行超过 30 分钟的任务标记为 `failed`
+2. **恢复执行**：`processing` 状态且未超时的任务重置为 `pending` 后重新调度
+3. **待处理调度**：所有 `pending` 状态的任务自动开始执行
+4. **阶段续跑**：恢复执行时自动跳过已完成的阶段（基于 checksum）
+
+### 幂等与操作日志联动
+
+- **创建报表**：支持 `Idempotency-Key` 请求头，重复请求直接返回已有任务
+- **重试报表**：同样支持幂等，同一幂等键的重试请求只执行一次
+- **操作日志**：创建和重试操作自动生成 `compliance.report.create` 和 `compliance.report.retry` 类型的操作日志
+- **日志关联**：操作日志与幂等记录互相关联，可通过 `idempotencyKey` 或 `operationLogId` 交叉查询
+
 ### 报表内容
 
 已完成的报表包含以下数据：
 
 - **period**：报表覆盖的时间周期
 - **summary**：汇总统计（钢瓶数、客户数、订单数、高风险数、差异数等）
+- **customers**：周期内新增的客户列表
 - **cylinders**：钢瓶追溯详情（状态变化、关联订单、检验风险、盘点差异等）
+- **rentalOrders**：周期内的租瓶订单列表
+- **inspections**：周期内的检验任务列表
+- **inventoryChecks**：周期内的库存盘点列表
+- **operationLogs**：周期内的操作日志列表
 - **risks**：全部检验风险列表
 - **discrepancies**：全部盘点差异列表
-- **operatorSummary**：操作人汇总
+- **operatorSummary**：操作人汇总统计
 
-### 数据文件
+### 数据文件结构
 
-报表数据保存在当前版本数据目录下的 `complianceReports.json`。
+报表数据采用"元数据 + 阶段数据文件"的分离存储结构：
+
+```
+data/v3/
+  complianceReports.json          # 报表元数据列表（状态、阶段进度等）
+  compliance-reports/
+    CR-xxx/                       # 单个报表的阶段数据目录
+      customers.json              # 客户数据阶段结果
+      orders.json                 # 订单数据阶段结果
+      inspections.json            # 检验数据阶段结果（含 risks）
+      inventory.json              # 盘点数据阶段结果（含 discrepancies）
+      operationLogs.json          # 操作日志阶段结果（含 operatorSummary）
+      cylinders.json              # 钢瓶追溯阶段结果
+      summary.json                # 最终汇总结果
+```
+
+### 性能与可扩展性设计
+
+- **分阶段执行**：大任务拆分为小阶段，每阶段让出事件循环，避免阻塞
+- **分批处理**：钢瓶追溯阶段按批次处理（默认 100 个/批），每批更新进度并让出事件循环
+- **增量式持久化**：每阶段完成后立即落盘，内存占用与单阶段数据量正相关
+- **分页加载**：操作日志阶段按页增量加载（默认 500 条/页），避免大数组一次性入内存
+- **断点续跑**：服务重启或任务失败后从最近完成阶段继续，不重复劳动
+- **幂等校验**：基于 phaseKey + params + dataVersion 的 SHA256 checksum 判定是否可跳过
+- **文件级隔离**：每个报表的数据独立目录，便于清理和归档
+- **并发安全**：基于文件锁和内存锁的事务机制，确保并发写入的数据一致性
+
+### 测试与回归
+
+项目提供两级测试脚本：
+
+```bash
+# 基础功能测试（20个测试用例）
+npm run test:compliance-report-phases
+
+# 压力与回归测试（30个测试用例，含并发、性能、数据文件验证）
+npm run test:compliance-stress
+```
+
+压力测试覆盖范围：
+- 基本功能兼容性（创建、列表、详情、重试）
+- 分阶段进度跟踪与验证
+- 数据文件结构与内容一致性
+- 幂等性与 checksum 验证
+- 10 并发报表压力测试
+- 列表/详情查询性能基准
+- 操作日志联动验证
+- 分批处理进度验证
 
 ## 迁移开发指南
 

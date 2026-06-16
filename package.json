@@ -14,6 +14,8 @@
     "migrate:down": "node scripts/migrate.js down 1",
     "migrate:restore": "node scripts/migrate.js restore",
     "migrate:list-backups": "node scripts/migrate.js list-backups",
-    "migrate:force": "node scripts/migrate.js force-up"
+    "migrate:force": "node scripts/migrate.js force-up",
+    "test:compliance-report-phases": "node scripts/test-compliance-report-phases.js",
+    "test:compliance-stress": "node scripts/test-compliance-stress.js"
   }
 }
