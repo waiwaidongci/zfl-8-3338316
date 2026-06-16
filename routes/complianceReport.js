@@ -55,7 +55,8 @@ export async function handleComplianceReport(req, res, url) {
     const auth = await checkQueryAuth(req, res);
     if (!auth.authorized) return true;
     const [, id] = detailMatch;
-    const report = await getReport(id);
+    const includeResult = url.searchParams.get("include") === "result";
+    const report = await getReport(id, { includeResult });
     if (!report) return send(res, 404, { error: "report_not_found" });
     return send(res, 200, report);
   }

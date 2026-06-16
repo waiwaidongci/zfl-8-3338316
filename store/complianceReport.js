@@ -835,18 +835,27 @@ export async function retryReport(reportId, requestedBy) {
   return updated;
 }
 
-export async function getReport(reportId) {
+function stripResult(report) {
+  if (!report) return report;
+  const { result, ...rest } = report;
+  return rest;
+}
+
+export async function getReport(reportId, { includeResult = false } = {}) {
   const report = await findReportById(reportId);
   if (!report) return null;
 
-  if (report.status === "completed" && !report.result) {
-    const finalData = await readPhaseData(reportId, "finalize");
-    if (finalData) {
-      report.result = finalData;
+  if (includeResult) {
+    if (report.status === "completed" && !report.result) {
+      const finalData = await readPhaseData(reportId, "finalize");
+      if (finalData) {
+        report.result = finalData;
+      }
     }
+    return report;
   }
 
-  return report;
+  return stripResult(report);
 }
 
 export async function listReports(filters = {}) {
@@ -898,7 +907,7 @@ export async function listReports(filters = {}) {
   const totalCount = reports.length;
   const totalPages = Math.ceil(totalCount / pageSize) || 1;
   const start = (page - 1) * pageSize;
-  const items = reports.slice(start, start + pageSize);
+  const items = reports.slice(start, start + pageSize).map(stripResult);
 
   return {
     items,

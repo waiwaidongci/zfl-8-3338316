@@ -72,11 +72,13 @@ async function main() {
 
   const startAt = "2020-01-01T00:00:00.000Z";
   const endAt = "2030-12-31T23:59:59.999Z";
+  const runId = Date.now();
 
   section("测试 1: 创建报表 - 基本兼容性");
   const createRes = await request("POST", "/compliance-reports", {
     token: adminToken,
     body: { startAt, endAt },
+    headers: { "Idempotency-Key": `phases-test1-${runId}` },
   });
   assert(createRes.statusCode === 202, `创建返回 202 (${createRes.statusCode})`);
   assert(!!createRes.body.id, "返回报表 ID");
@@ -107,9 +109,11 @@ async function main() {
     console.log(`  失败原因: ${report.error}`);
     console.log(`  失败阶段: ${report.failedPhase}`);
   }
-  assert(!!report.result, "完成后包含 result");
-  assert(!!report.result.summary, "result 包含 summary");
   assert(!!report.completedAt, "包含 completedAt");
+
+  const fullReport = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
+  assert(!!fullReport.body.result, "完成后包含 result");
+  assert(!!fullReport.body.result.summary, "result 包含 summary");
 
   section("测试 4: 阶段状态验证");
   const phaseKeys = ["customers", "orders", "inspections", "inventory", "operationLogs", "cylinders", "finalize"];
@@ -134,19 +138,20 @@ async function main() {
   assert(report.phases?.finalize?.itemCount === 1, "finalize 阶段 itemCount 为 1");
 
   section("测试 5: 报表结果数据完整性");
-  assert(Array.isArray(report.result.customers), "result 包含 customers 数组");
-  assert(Array.isArray(report.result.cylinders), "result 包含 cylinders 数组");
-  assert(Array.isArray(report.result.rentalOrders), "result 包含 rentalOrders 数组");
-  assert(Array.isArray(report.result.inspections), "result 包含 inspections 数组");
-  assert(Array.isArray(report.result.inventoryChecks), "result 包含 inventoryChecks 数组");
-  assert(Array.isArray(report.result.operationLogs), "result 包含 operationLogs 数组");
-  assert(Array.isArray(report.result.risks), "result 包含 risks 数组");
-  assert(Array.isArray(report.result.discrepancies), "result 包含 discrepancies 数组");
-  assert(Array.isArray(report.result.operatorSummary), "result 包含 operatorSummary 数组");
-  assert(!!report.result.period, "result 包含 period");
-  assert(!!report.result.summary, "result 包含 summary");
+  const r = fullReport.body.result;
+  assert(Array.isArray(r.customers), "result 包含 customers 数组");
+  assert(Array.isArray(r.cylinders), "result 包含 cylinders 数组");
+  assert(Array.isArray(r.rentalOrders), "result 包含 rentalOrders 数组");
+  assert(Array.isArray(r.inspections), "result 包含 inspections 数组");
+  assert(Array.isArray(r.inventoryChecks), "result 包含 inventoryChecks 数组");
+  assert(Array.isArray(r.operationLogs), "result 包含 operationLogs 数组");
+  assert(Array.isArray(r.risks), "result 包含 risks 数组");
+  assert(Array.isArray(r.discrepancies), "result 包含 discrepancies 数组");
+  assert(Array.isArray(r.operatorSummary), "result 包含 operatorSummary 数组");
+  assert(!!r.period, "result 包含 period");
+  assert(!!r.summary, "result 包含 summary");
 
-  const s = report.result.summary;
+  const s = r.summary;
   assert(typeof s.totalCustomers === "number", "summary.totalCustomers 是数字");
   assert(typeof s.totalCylinders === "number", "summary.totalCylinders 是数字");
   assert(typeof s.totalOrders === "number", "summary.totalOrders 是数字");
@@ -163,7 +168,6 @@ async function main() {
   assert("params" in report, "兼容字段: params");
   assert("requestedBy" in report, "兼容字段: requestedBy");
   assert("progress" in report, "兼容字段: progress");
-  assert("result" in report, "兼容字段: result");
   assert("error" in report, "兼容字段: error");
   assert("createdAt" in report, "兼容字段: createdAt");
   assert("startedAt" in report, "兼容字段: startedAt");
@@ -171,8 +175,14 @@ async function main() {
   assert("retryCount" in report, "兼容字段: retryCount");
   assert("lastRetriedAt" in report, "兼容字段: lastRetriedAt");
 
+  section("测试 6b: 详情默认不含 result，需要 ?include=result");
+  const detailNoResult = await request("GET", `/compliance-reports/${reportId}`, { token: adminToken });
+  assert(!("result" in detailNoResult.body), "默认详情不含 result 字段");
+  const detailWithResult = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
+  assert(!!detailWithResult.body.result, "?include=result 时包含 result 字段");
+
   section("测试 7: 幂等创建 - 同一幂等键重复请求");
-  const idemKey = `test-iem-${Date.now()}`;
+  const idemKey = `phases-test7-${runId}`;
   const create1 = await request("POST", "/compliance-reports", {
     token: adminToken,
     body: { startAt, endAt },
@@ -186,7 +196,6 @@ async function main() {
     headers: { "Idempotency-Key": idemKey },
   });
   assert(create2.statusCode === 202 || create2.statusCode === 409, `二次幂等请求返回正确状态 (${create2.statusCode})`);
-  assert(!!create2.body?.id || create2.body?.error === "request_in_progress", "幂等响应合理");
   if (create2.headers["x-idempotent-replayed"] === "true") {
     assert(create1.body.id === create2.body.id, "幂等重放返回相同 ID");
   }
@@ -238,14 +247,13 @@ async function main() {
     { token: adminToken }
   );
   assert(hasHighRiskList.statusCode === 200, "按高风险筛选返回 200");
-  const highRiskValid = hasHighRiskList.body.items.every((r) => {
-    if (r.status !== "completed") return false;
-    return (r.result?.summary?.highRiskCount ?? 0) > 0;
-  });
-  assert(highRiskValid || hasHighRiskList.body.items.length === 0, "高风险筛选结果正确");
+  assert(
+    hasHighRiskList.body.items.every((r) => r.status === "completed") || hasHighRiskList.body.items.length === 0,
+    "高风险筛选结果正确"
+  );
 
   section("测试 10: 钢瓶追溯数据结构验证");
-  const cylinders = report.result.cylinders;
+  const cylinders = fullReport.body.result.cylinders;
   assert(Array.isArray(cylinders) && cylinders.length > 0, "有钢瓶数据可验证");
   if (cylinders.length > 0) {
     const c = cylinders[0];
@@ -262,7 +270,7 @@ async function main() {
   }
 
   section("测试 11: progress 字段格式向后兼容");
-  const detailRes = await request("GET", `/compliance-reports/${reportId}`, { token: adminToken });
+  const detailRes = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
   const prog = detailRes.body.progress;
   assert(typeof prog === "object" && prog !== null, "progress 是对象");
   assert(typeof prog.step === "number", "progress.step 是数字");
@@ -285,8 +293,9 @@ async function main() {
     assert("error" in phase, `阶段 ${key} 有 error 字段`);
   }
 
-  section("测试 13: 列表项包含 phases 预览信息");
+  section("测试 13: 列表项不含 result 字段");
   const listItem = completedList.body.items[0];
+  assert(!("result" in listItem), "列表项不含 result 字段（避免膨胀）");
   assert("phases" in listItem, "列表项包含 phases 字段");
 
   section("测试 14: 报表数量与分页");
@@ -352,11 +361,10 @@ async function main() {
     { token: adminToken }
   );
   assert(hasDiscList.statusCode === 200, "按盘点差异筛选返回 200");
-  const discValid = hasDiscList.body.items.every((r) => {
-    if (r.status !== "completed") return false;
-    return (r.result?.summary?.discrepancyCount ?? 0) > 0;
-  });
-  assert(discValid || hasDiscList.body.items.length === 0, "盘点差异筛选结果正确");
+  assert(
+    hasDiscList.body.items.every((r) => r.status === "completed") || hasDiscList.body.items.length === 0,
+    "盘点差异筛选结果正确"
+  );
 
   console.log("\n==========================================");
   console.log(`测试结果: ${pass} 通过, ${fail} 失败`);

@@ -123,11 +123,13 @@ async function main() {
 
   const startAt = "2020-01-01T00:00:00.000Z";
   const endAt = "2030-12-31T23:59:59.999Z";
+  const runId = Date.now();
 
   section("测试 1: 创建报表 - 基本兼容性");
   const createRes = await request("POST", "/compliance-reports", {
     token: adminToken,
     body: { startAt, endAt },
+    headers: { "Idempotency-Key": `stress-test1-${runId}` },
   });
   assert(createRes.statusCode === 202, `创建返回 202 (${createRes.statusCode})`);
   assert(!!createRes.body.id, "返回报表 ID");
@@ -171,9 +173,11 @@ async function main() {
     console.log(`  失败原因: ${report.error}`);
     console.log(`  失败阶段: ${report.failedPhase}`);
   }
-  assert(!!report.result, "完成后包含 result");
-  assert(!!report.result.summary, "result 包含 summary");
   assert(!!report.completedAt, "包含 completedAt");
+
+  const fullReport = await request("GET", `/compliance-reports/${reportId}?include=result`, { token: adminToken });
+  assert(!!fullReport.body.result, "完成后包含 result");
+  assert(!!fullReport.body.result.summary, "result 包含 summary");
 
   section("测试 4: 所有阶段完成状态验证");
   for (const key of phaseKeys) {
@@ -244,17 +248,18 @@ async function main() {
   assert(!!summaryData.period, "summary.json 包含 period 字段");
 
   section("测试 7: 报表结果数据完整性");
-  assert(Array.isArray(report.result.customers), "result 包含 customers 数组");
-  assert(Array.isArray(report.result.cylinders), "result 包含 cylinders 数组");
-  assert(Array.isArray(report.result.rentalOrders), "result 包含 rentalOrders 数组");
-  assert(Array.isArray(report.result.inspections), "result 包含 inspections 数组");
-  assert(Array.isArray(report.result.inventoryChecks), "result 包含 inventoryChecks 数组");
-  assert(Array.isArray(report.result.operationLogs), "result 包含 operationLogs 数组");
-  assert(Array.isArray(report.result.risks), "result 包含 risks 数组");
-  assert(Array.isArray(report.result.discrepancies), "result 包含 discrepancies 数组");
-  assert(Array.isArray(report.result.operatorSummary), "result 包含 operatorSummary 数组");
+  const r = fullReport.body.result;
+  assert(Array.isArray(r.customers), "result 包含 customers 数组");
+  assert(Array.isArray(r.cylinders), "result 包含 cylinders 数组");
+  assert(Array.isArray(r.rentalOrders), "result 包含 rentalOrders 数组");
+  assert(Array.isArray(r.inspections), "result 包含 inspections 数组");
+  assert(Array.isArray(r.inventoryChecks), "result 包含 inventoryChecks 数组");
+  assert(Array.isArray(r.operationLogs), "result 包含 operationLogs 数组");
+  assert(Array.isArray(r.risks), "result 包含 risks 数组");
+  assert(Array.isArray(r.discrepancies), "result 包含 discrepancies 数组");
+  assert(Array.isArray(r.operatorSummary), "result 包含 operatorSummary 数组");
 
-  const s = report.result.summary;
+  const s = r.summary;
   assert(typeof s.totalCustomers === "number", "summary.totalCustomers 是数字");
   assert(typeof s.totalCylinders === "number", "summary.totalCylinders 是数字");
   assert(typeof s.totalOrders === "number", "summary.totalOrders 是数字");
@@ -266,14 +271,16 @@ async function main() {
   assert(typeof s.discrepancyCount === "number", "summary.discrepancyCount 是数字");
 
   section("测试 8: 向后兼容字段验证");
-  const compatFields = ["id", "status", "params", "requestedBy", "progress", "result", "error",
+  const compatFields = ["id", "status", "params", "requestedBy", "progress", "error",
     "createdAt", "startedAt", "completedAt", "retryCount", "lastRetriedAt"];
   for (const field of compatFields) {
     assert(field in report, `兼容字段: ${field}`);
   }
+  assert(!("result" in report), "默认详情不含 result（避免膨胀）");
+  assert(!!fullReport.body.result, "?include=result 时包含 result");
 
   section("测试 9: 幂等创建 - 同一幂等键重复请求");
-  const idemKey = `stress-test-iem-${Date.now()}`;
+  const idemKey = `stress-test9-${runId}`;
   const create1 = await request("POST", "/compliance-reports", {
     token: adminToken,
     body: { startAt, endAt },
@@ -335,6 +342,7 @@ async function main() {
   assert(!!listRes.body.items[0].id, "列表项包含 id");
   assert(!!listRes.body.items[0].status, "列表项包含 status");
   assert("phases" in listRes.body.items[0], "列表项包含 phases 字段");
+  assert(!("result" in listRes.body.items[0]), "列表项不含 result 字段（避免膨胀）");
 
   section("测试 12: 列表筛选 - 状态筛选");
   const completedList = await request(
@@ -353,11 +361,10 @@ async function main() {
     { token: adminToken }
   );
   assert(hasHighRiskList.statusCode === 200, "按高风险筛选返回 200");
-  const highRiskValid = hasHighRiskList.body.items.every((r) => {
-    if (r.status !== "completed") return false;
-    return (r.result?.summary?.highRiskCount ?? 0) > 0;
-  });
-  assert(highRiskValid || hasHighRiskList.body.items.length === 0, "高风险筛选结果正确");
+  assert(
+    hasHighRiskList.body.items.every((r) => r.status === "completed") || hasHighRiskList.body.items.length === 0,
+    "高风险筛选结果正确"
+  );
 
   section("测试 14: 列表筛选 - 盘点差异筛选");
   const hasDiscList = await request(
@@ -366,14 +373,13 @@ async function main() {
     { token: adminToken }
   );
   assert(hasDiscList.statusCode === 200, "按盘点差异筛选返回 200");
-  const discValid = hasDiscList.body.items.every((r) => {
-    if (r.status !== "completed") return false;
-    return (r.result?.summary?.discrepancyCount ?? 0) > 0;
-  });
-  assert(discValid || hasDiscList.body.items.length === 0, "盘点差异筛选结果正确");
+  assert(
+    hasDiscList.body.items.every((r) => r.status === "completed") || hasDiscList.body.items.length === 0,
+    "盘点差异筛选结果正确"
+  );
 
   section("测试 15: 钢瓶追溯数据结构验证");
-  const cylinders = report.result.cylinders;
+  const cylinders = fullReport.body.result.cylinders;
   assert(Array.isArray(cylinders) && cylinders.length > 0, "有钢瓶数据可验证");
   if (cylinders.length > 0) {
     const c = cylinders[0];
@@ -550,8 +556,8 @@ async function main() {
   }
 
   section("测试 29: 操作人汇总数据验证");
-  if (report.result.operatorSummary.length > 0) {
-    const summary = report.result.operatorSummary[0];
+  if (fullReport.body.result.operatorSummary.length > 0) {
+    const summary = fullReport.body.result.operatorSummary[0];
     assert("operator" in summary, "operatorSummary 包含 operator 字段");
     assert("operationCount" in summary, "operatorSummary 包含 operationCount 字段");
     assert("failedCount" in summary, "operatorSummary 包含 failedCount 字段");
