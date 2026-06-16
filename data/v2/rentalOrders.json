@@ -3,7 +3,7 @@
   "_schemaVersion": "2.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.175Z",
-    "migratedAt": "2026-06-15T16:13:24.833Z",
+    "migratedAt": "2026-06-15T16:33:11.922Z",
     "migratedFrom": "v3",
     "entity": "rentalOrders",
     "sourceFile": "rentalOrders.json",

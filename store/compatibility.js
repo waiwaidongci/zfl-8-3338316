@@ -715,18 +715,28 @@ function buildStatusHistoryFromExistingData(item, entity) {
         );
         for (const evt of sortedEvents) {
           const mappedStatus = CYLINDER_EVENT_TO_STATUS[evt.type];
-          if (mappedStatus && mappedStatus !== prevStatus) {
+          const isInfoOnlyEvent = mappedStatus === null || mappedStatus === undefined;
+          const isStateChange = mappedStatus && mappedStatus !== prevStatus;
+          const isInspectPostpone = evt.type === "inspect_postpone";
+          const shouldRecord = isStateChange || isInfoOnlyEvent || isInspectPostpone;
+          
+          if (shouldRecord) {
+            const effectiveToStatus = mappedStatus || prevStatus || item.status || "in_stock";
+            const effectiveFromStatus = isInfoOnlyEvent || isInspectPostpone ? effectiveToStatus : prevStatus;
+            
             history.push({
               id: makeStatusHistoryId(),
-              fromStatus: prevStatus,
-              toStatus: mappedStatus,
+              fromStatus: effectiveFromStatus,
+              toStatus: effectiveToStatus,
               at: evt.at || now,
               note: evt.note || evt.type,
               eventId: evt.id || null,
               operator: null,
               extra: { eventType: evt.type }
             });
-            prevStatus = mappedStatus;
+            if (mappedStatus && mappedStatus !== prevStatus) {
+              prevStatus = mappedStatus;
+            }
           }
         }
       }
@@ -794,19 +804,20 @@ function buildStatusHistoryFromExistingData(item, entity) {
     }
     case "inspectionTasks": {
       const timeline = [];
-      if (item.createdAt) timeline.push({ status: "pending", at: item.createdAt, note: "任务创建" });
-      if (item.sentAt) timeline.push({ status: "sent", at: item.sentAt, note: "任务送检" });
-      if (item.inspectedAt && item.result?.passed === true) timeline.push({ status: "passed", at: item.inspectedAt, note: "检验合格" });
-      if (item.inspectedAt && item.result?.passed === false) timeline.push({ status: "failed", at: item.inspectedAt, note: "检验不合格" });
-      if (item.restockedAt) timeline.push({ status: "restocked", at: item.restockedAt, note: "任务回库" });
+      if (item.createdAt) timeline.push({ status: "pending", at: item.createdAt, note: "任务创建", type: "state" });
+      if (item.sentAt) timeline.push({ status: "sent", at: item.sentAt, note: "任务送检", type: "state" });
+      if (item.inspectedAt && item.result?.passed === true) timeline.push({ status: "passed", at: item.inspectedAt, note: "检验合格", type: "state" });
+      if (item.inspectedAt && item.result?.passed === false) timeline.push({ status: "failed", at: item.inspectedAt, note: "检验不合格", type: "state" });
+      if (item.restockedAt) timeline.push({ status: "restocked", at: item.restockedAt, note: "任务回库", type: "state" });
       
       if (Array.isArray(item.postponements)) {
         for (const p of item.postponements) {
           timeline.push({
             status: item.status || "pending",
             at: p.postponedAt || now,
-            note: `延期：${p.reason || ""}`,
-            extra: { postponementId: p.id }
+            note: `延期：${p.reason || ""}（${p.oldInspectionDue}→${p.newInspectionDue}）`,
+            type: "info",
+            extra: { postponementId: p.id, oldInspectionDue: p.oldInspectionDue, newInspectionDue: p.newInspectionDue }
           });
         }
       }
@@ -814,10 +825,13 @@ function buildStatusHistoryFromExistingData(item, entity) {
       if (Array.isArray(item.statusHistory) && item.statusHistory.length > 0) {
         for (const entry of item.statusHistory) {
           timeline.push({
-            status: entry.status,
+            status: entry.toStatus || entry.status,
+            prevStatus: entry.fromStatus,
             at: entry.at || now,
             note: entry.note,
-            fromExisting: true
+            type: entry.fromStatus === entry.toStatus ? "info" : "state",
+            fromExisting: true,
+            extra: entry.extra
           });
         }
       }
@@ -826,10 +840,12 @@ function buildStatusHistoryFromExistingData(item, entity) {
       
       let prevStatus = null;
       for (const t of timeline) {
-        if (t.status !== prevStatus || t.fromExisting) {
+        const isStateChange = t.type !== "info" && t.status !== prevStatus;
+        const isInfoRecord = t.type === "info";
+        if (isStateChange || isInfoRecord || t.fromExisting) {
           history.push({
             id: makeStatusHistoryId(),
-            fromStatus: prevStatus,
+            fromStatus: t.prevStatus !== undefined ? t.prevStatus : prevStatus,
             toStatus: t.status,
             at: t.at,
             note: t.note || null,
@@ -837,7 +853,9 @@ function buildStatusHistoryFromExistingData(item, entity) {
             eventId: null,
             extra: { ...(t.extra || {}), backfilled: !t.fromExisting }
           });
-          prevStatus = t.status;
+          if (t.type !== "info") {
+            prevStatus = t.status;
+          }
         }
       }
 

@@ -228,16 +228,17 @@ export function applyInspectResult(task, cylinder, input) {
     extra: { cylinderId: cylinder.id, passed: input.passed }
   });
 
-  if (!input.passed) {
-    addStatusHistory(cylinder, {
-      fromStatus: fromCylinderStatus,
-      toStatus: "scrapped",
-      at: now,
-      note: `检验不合格报废，任务${task.id}`,
-      operator: input.inspector || null,
-      eventId: cylinderEvt.id
-    });
-  }
+  addStatusHistory(cylinder, {
+    fromStatus: fromCylinderStatus,
+    toStatus: input.passed ? fromCylinderStatus : "scrapped",
+    at: now,
+    note: input.passed
+      ? `检验合格，任务${task.id}`
+      : `检验不合格报废，任务${task.id}`,
+    operator: input.inspector || null,
+    eventId: cylinderEvt.id,
+    extra: { taskId: task.id, passed: input.passed }
+  });
 }
 
 export function applyRestock(task, cylinder, input) {
@@ -360,6 +361,15 @@ export function applyPostpone(task, cylinder, input) {
   });
 
   cylinder.inspectionDue = newDue;
+  addStatusHistory(cylinder, {
+    fromStatus: cylinder.status,
+    toStatus: cylinder.status,
+    at: now,
+    note: `检验延期，任务${task.id}，原因：${input.reason}，新到检日期：${newDue}`,
+    operator: input.operator || null,
+    eventId: null,
+    extra: { taskId: task.id, postponementId: postponement.id, oldInspectionDue, newInspectionDue: newDue }
+  });
   const evt = makeEvent("inspect_postpone", `检验延期，任务${task.id}，原因：${input.reason}，新到检日期：${newDue}`);
   cylinder.events.push(evt);
 }

@@ -55,7 +55,7 @@
   "_schemaVersion": "2.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.174Z",
-    "migratedAt": "2026-06-15T16:13:24.832Z",
+    "migratedAt": "2026-06-15T16:33:11.921Z",
     "migratedFrom": "v3",
     "entity": "cylinders",
     "sourceFile": "cylinders.json",

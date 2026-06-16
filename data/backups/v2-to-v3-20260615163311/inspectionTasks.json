@@ -1,12 +1,12 @@
 {
-  "checks": [],
+  "tasks": [],
   "_schemaVersion": "2.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.177Z",
-    "migratedAt": "2026-06-15T16:33:11.924Z",
+    "migratedAt": "2026-06-15T16:33:11.925Z",
     "migratedFrom": "v3",
-    "entity": "inventoryChecks",
-    "sourceFile": "inventoryChecks.json",
+    "entity": "inspectionTasks",
+    "sourceFile": "inspectionTasks.json",
     "storageType": "object",
     "rollback": true
   }

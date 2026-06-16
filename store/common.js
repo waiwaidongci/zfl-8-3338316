@@ -269,17 +269,21 @@ async function addVersionMeta(data, filename) {
     return data;
   }
   
+  const schemaVersionStr = version >= 3 ? "3.0" : "2.0";
   const entity = getEntityFromFilename(filename);
-  const schema = entity ? getSchema(entity) : null;
+  const schema = entity ? getSchema(entity, version) : null;
   const isArrayStorage = schema?.storageType === "array";
   
   if (!isArrayStorage && data._schemaVersion) {
+    if (version >= 3 && data._schemaVersion !== schemaVersionStr) {
+      return { ...data, _schemaVersion: schemaVersionStr };
+    }
     return data;
   }
   
   if (isArrayStorage && Array.isArray(data)) {
     return {
-      _schemaVersion: "2.0",
+      _schemaVersion: schemaVersionStr,
       _meta: {
         createdAt: new Date().toISOString(),
         entity,
@@ -292,7 +296,7 @@ async function addVersionMeta(data, filename) {
   
   return {
     ...data,
-    _schemaVersion: "2.0",
+    _schemaVersion: schemaVersionStr,
     _meta: {
       createdAt: new Date().toISOString(),
       entity: entity || filename.replace(".json", ""),

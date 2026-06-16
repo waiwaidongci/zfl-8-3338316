@@ -4,25 +4,25 @@
     {
       "version": 2,
       "description": "版本化目录结构 - 实体独立存储与Schema版本管理",
-      "executedAt": "2026-05-16T16:13:24.818Z",
+      "executedAt": "2026-05-16T16:33:11.898Z",
       "backupName": "v1-to-v2-test"
     },
     {
       "version": 3,
       "description": "状态历史追溯 - 钢瓶/订单/检验任务/盘点单统一statusHistory字段",
-      "executedAt": "2026-06-15T16:13:24.830Z",
-      "backupName": "v2-to-v3-20260615161324"
+      "executedAt": "2026-06-15T16:33:11.917Z",
+      "backupName": "v2-to-v3-20260615163311"
     },
     {
       "version": 3,
       "description": "状态历史追溯 - 钢瓶/订单/检验任务/盘点单统一statusHistory字段",
-      "executedAt": "2026-06-15T16:13:24.842Z",
-      "backupName": "v2-to-v3-20260615161324"
+      "executedAt": "2026-06-15T16:33:11.935Z",
+      "backupName": "v2-to-v3-20260615163311"
     }
   ],
-  "createdAt": "2026-05-16T16:13:24.818Z",
-  "lastMigration": "2026-06-15T16:13:24.842Z",
-  "lastRestore": "2026-06-15T16:13:24.836Z",
-  "restoredFrom": "v2-to-v3-20260615161324",
+  "createdAt": "2026-05-16T16:33:11.898Z",
+  "lastMigration": "2026-06-15T16:33:11.935Z",
+  "lastRestore": "2026-06-15T16:33:11.927Z",
+  "restoredFrom": "v2-to-v3-20260615163311",
   "lastRestoreReason": "manual_rollback"
 }

@@ -33,11 +33,11 @@
       "createdAt": "2026-06-15T02:22:32.173Z"
     }
   ],
-  "_schemaVersion": "3.0",
+  "_schemaVersion": "2.0",
   "_meta": {
     "createdAt": "2026-06-15T02:22:32.178Z",
-    "migratedAt": "2026-06-16T01:42:53.268Z",
-    "migratedFrom": "v2",
+    "migratedAt": "2026-06-15T02:22:32.178Z",
+    "migratedFrom": "v1",
     "entity": "users",
     "sourceFile": "users.json",
     "storageType": "array"
