@@ -163,6 +163,8 @@ export function applyComplete(check, cylinders, operator) {
 }
 
 export function applyConfirm(check, cylinders, operator, options = {}) {
+  validateTransition(check, "confirmed");
+
   if (!check.differences) {
     const err = new Error("differences_not_computed");
     err.statusCode = 400;
