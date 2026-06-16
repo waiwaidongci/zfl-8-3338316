@@ -492,6 +492,9 @@ export function normalizeStatusHistoryEntry(entry) {
   if (!entry || typeof entry !== "object") return null;
   const { defaultFields } = STATUS_HISTORY_ENTRY_SCHEMA;
   const normalized = { ...entry };
+  if (normalized.status === undefined && normalized.toStatus !== undefined) {
+    normalized.status = normalized.toStatus;
+  }
   for (const [field, defaultValue] of Object.entries(defaultFields)) {
     if (normalized[field] === undefined) {
       normalized[field] = typeof defaultValue === "object" && defaultValue !== null
@@ -508,6 +511,18 @@ export function normalizeStatusHistory(history) {
     .map(normalizeStatusHistoryEntry)
     .filter(Boolean)
     .sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+}
+
+function normalizeStatusHistoryForEntity(history, entity) {
+  const normalized = normalizeStatusHistory(history);
+  if (entity !== "inspectionTasks") return normalized;
+  return normalized.sort((a, b) => {
+    const aIsPostpone = a.extra?.postponementId || a.note?.includes("延期检验") || a.note?.startsWith("延期：");
+    const bIsPostpone = b.extra?.postponementId || b.note?.includes("延期检验") || b.note?.startsWith("延期：");
+    if (aIsPostpone && !bIsPostpone) return -1;
+    if (!aIsPostpone && bIsPostpone) return 1;
+    return new Date(a.at).getTime() - new Date(b.at).getTime();
+  });
 }
 
 export function makeStatusHistoryId() {
@@ -578,7 +593,7 @@ export function normalizeItemForAPI(item, entity, version = null) {
   normalized = applyDefaultFields(normalized, schema.defaultFields);
   
   if (schema.hasStatusHistory && Array.isArray(normalized.statusHistory)) {
-    normalized.statusHistory = normalizeStatusHistory(normalized.statusHistory);
+    normalized.statusHistory = normalizeStatusHistoryForEntity(normalized.statusHistory, entity);
   }
   
   normalized = stripReservedFields(normalized, schema.reservedFields);
@@ -760,7 +775,7 @@ function buildStatusHistoryFromExistingData(item, entity) {
         history.push({
           id: makeStatusHistoryId(),
           fromStatus: null,
-          toStatus: item.status || "completed",
+          toStatus: "completed",
           at: item.createdAt || now,
           note: "订单创建",
           operator: null,
@@ -772,8 +787,11 @@ function buildStatusHistoryFromExistingData(item, entity) {
         const sortedReturns = [...item.returnHistory].sort(
           (a, b) => new Date(a.returnedAt).getTime() - new Date(b.returnedAt).getTime()
         );
+        const totalCount = item.cylinders?.length || item.cylinderCount || 0;
+        let cumulativeReturned = 0;
         for (const ret of sortedReturns) {
-          const returnStatus = ret.cylinders?.length >= (item.cylinders?.length || 0)
+          cumulativeReturned += Array.isArray(ret.cylinders) ? ret.cylinders.length : 0;
+          const returnStatus = totalCount > 0 && cumulativeReturned >= totalCount
             ? "fully_returned"
             : "partially_returned";
           history.push({
@@ -813,7 +831,7 @@ function buildStatusHistoryFromExistingData(item, entity) {
       if (Array.isArray(item.postponements)) {
         for (const p of item.postponements) {
           timeline.push({
-            status: item.status || "pending",
+            status: null,
             at: p.postponedAt || now,
             note: `延期：${p.reason || ""}（${p.oldInspectionDue}→${p.newInspectionDue}）`,
             type: "info",
@@ -840,13 +858,14 @@ function buildStatusHistoryFromExistingData(item, entity) {
       
       let prevStatus = null;
       for (const t of timeline) {
-        const isStateChange = t.type !== "info" && t.status !== prevStatus;
+        const effectiveStatus = t.status || prevStatus || item.status || "pending";
+        const isStateChange = t.type !== "info" && effectiveStatus !== prevStatus;
         const isInfoRecord = t.type === "info";
         if (isStateChange || isInfoRecord || t.fromExisting) {
           history.push({
             id: makeStatusHistoryId(),
             fromStatus: t.prevStatus !== undefined ? t.prevStatus : prevStatus,
-            toStatus: t.status,
+            toStatus: effectiveStatus,
             at: t.at,
             note: t.note || null,
             operator: null,
@@ -854,7 +873,7 @@ function buildStatusHistoryFromExistingData(item, entity) {
             extra: { ...(t.extra || {}), backfilled: !t.fromExisting }
           });
           if (t.type !== "info") {
-            prevStatus = t.status;
+            prevStatus = effectiveStatus;
           }
         }
       }

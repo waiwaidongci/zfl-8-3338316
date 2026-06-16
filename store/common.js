@@ -209,7 +209,6 @@ export async function withJsonTx(filename, fallback, mutator) {
     const result = await mutator(db);
     const cloneForWrite = JSON.parse(JSON.stringify(db));
     await saveJson(filename, cloneForWrite);
-    jsonCache.set(filename, db);
     return result;
   } finally {
     releaseSortedTxLocks(acquired);
@@ -228,7 +227,6 @@ export async function withMultiJsonTx(fileEntries, mutator) {
     for (const { filename } of fileEntries) {
       const cloneForWrite = JSON.parse(JSON.stringify(dbs[filename]));
       await saveJson(filename, cloneForWrite);
-      jsonCache.set(filename, dbs[filename]);
     }
     return result;
   } finally {
