@@ -17,6 +17,8 @@
     "migrate:force": "node scripts/migrate.js force-up",
     "test:compliance-report-phases": "node scripts/test-compliance-report-phases.js",
     "test:compliance-stress": "node scripts/test-compliance-stress.js",
-    "test:idempotency-query": "node scripts/test-idempotency-query.js"
+    "test:idempotency-query": "node scripts/test-idempotency-query.js",
+    "test:regression": "node scripts/regression.js",
+    "test:regression:single": "node scripts/regression.js"
   }
 }

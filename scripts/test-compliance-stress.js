@@ -3,12 +3,12 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { readdir, readFile, access } from "node:fs/promises";
 import { join } from "node:path";
 
-const BASE_URL = "http://localhost:3008";
+const BASE = `http://localhost:${process.env.PORT || 3008}`;
 const DATA_DIR = join(process.cwd(), "data", "v3", "compliance-reports");
 
 function request(method, path, options = {}) {
   return new Promise((resolve, reject) => {
-    const url = new URL(path, BASE_URL);
+    const url = new URL(path, BASE);
     const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
     if (options.token) headers["Authorization"] = `Bearer ${options.token}`;
     const bodyData = options.body ? JSON.stringify(options.body) : undefined;

@@ -931,6 +931,154 @@ npm run test:compliance-stress
 - 操作日志联动验证
 - 分批处理进度验证
 
+## 本地回归测试
+
+### 概述
+
+项目提供统一的回归测试入口 `scripts/regression.js`，一条命令即可按顺序执行所有测试套件。测试过程中自动启动临时服务、等待端口可用、执行全部测试、最后自动关闭服务并返回正确退出码。
+
+测试过程**不会污染开发数据**：运行前自动备份 `data/` 目录到系统临时目录，测试结束后自动恢复原始数据。即使测试中途失败或被中断，也能保证开发数据不受影响。
+
+### 快速开始
+
+```bash
+# 运行完整回归测试
+npm run test:regression
+
+# 运行单个测试套件
+npm run test:regression:single order-return
+```
+
+### 测试套件列表
+
+| 序号 | 测试套件 key | 名称 | 说明 | 是否需要服务 |
+|------|-------------|------|------|-------------|
+| 1 | `permission-matrix` | 权限矩阵 | 验证权限矩阵接口的查询、过滤、与角色数据一致性 | 是 |
+| 2 | `idempotency-query` | 幂等查询 | 验证幂等记录查询接口的筛选、分页、脱敏 | 是 |
+| 3 | `order-return` | 订单归还 | 验证租瓶订单归还的完整流程与幂等性 | 是 |
+| 4 | `inspection-postpone` | 检验延期 | 验证检验任务延期功能与状态历史 | 是 |
+| 5 | `inventory-check-filters` | 盘点筛选 | 验证盘点单列表的多维度筛选 | 是 |
+| 6 | `inventory-check-surplus` | 盘盈 | 验证库存盘点的盘盈处理与迁移 | 是 |
+| 7 | `compliance-report-phases` | 合规报表阶段 | 验证合规报表的分阶段生成与进度跟踪 | 是 |
+| 8 | `migration-v3` | 迁移相关 | 验证 v2→v3 数据迁移的正确性与回滚 | 否 |
+
+### 运行单个测试套件
+
+```bash
+# 通过 key 运行
+node scripts/regression.js order-return
+
+# 通过脚本名运行
+node scripts/regression.js test-order-return.js
+
+# 列出所有可用测试套件
+node scripts/regression.js --list
+```
+
+### 环境变量
+
+| 变量 | 默认值 | 说明 |
+|------|--------|------|
+| `TEST_PORT` | `3099` | 测试服务器监听的端口 |
+| `PORT` | - | 单个测试脚本连接的端口（回归脚本自动设置） |
+
+```bash
+# 使用自定义端口运行回归测试
+TEST_PORT=3100 npm run test:regression
+```
+
+### 退出码
+
+| 退出码 | 含义 |
+|--------|------|
+| `0` | 所有测试套件均通过 |
+| `1` | 至少一个测试套件失败，或执行过程中发生致命错误 |
+
+### 数据安全机制
+
+回归测试采用**全局备份-恢复**机制保护开发数据：
+
+1. **测试前**：将整个 `data/` 目录复制到系统临时目录（`/tmp/zfl-regression-data-xxxxx/`）
+2. **测试中**：所有测试读写的是当前 `data/` 目录（测试数据）
+3. **测试后**：用备份目录覆盖 `data/`，恢复原始开发数据
+4. **异常保护**：SIGINT 中断、进程崩溃等场景也会触发数据恢复
+
+> **注意**：如果进程被 `SIGKILL` 强制终止，数据可能无法自动恢复。此时可从 `data/backups/` 目录手动恢复，或使用 `npm run migrate:restore` 命令。
+
+### 失败排查指南
+
+当回归测试失败时，按以下步骤排查：
+
+#### 1. 查看失败的测试套件
+
+回归测试结束后会打印汇总报告，标记每个套件的通过/失败状态：
+
+```
+  ❌ 失败  订单归还 (order-return)
+```
+
+根据失败的套件名称定位具体问题。
+
+#### 2. 重跑单个失败套件
+
+```bash
+# 只运行失败的那个套件，加快排查速度
+npm run test:regression:single order-return
+```
+
+#### 3. 检查常见问题
+
+**服务器启动失败**
+- 检查端口是否被占用：`lsof -i :3099`
+- 指定其他端口：`TEST_PORT=3100 npm run test:regression`
+- 查看服务器启动日志（回归脚本会打印启动输出）
+
+**数据恢复失败**
+- 检查 `data/` 目录是否有写入权限
+- 手动从最近备份恢复：`npm run migrate:restore`
+- 检查 `data/backups/` 目录中的备份文件
+
+**测试断言失败**
+- 查看测试输出中的 `❌` 标记行，定位具体失败的断言
+- 如果是数据相关问题，检查测试数据是否被之前的测试污染
+- 单个测试套件有自己的快照机制，可查看其内部恢复是否正常
+
+**超时问题**
+- 合规报表测试可能因数据量大而超时
+- 检查机器性能，或增加测试超时时间
+- 确认服务器正常启动（查看是否有 `[服务] 服务器已就绪` 日志）
+
+#### 4. 手动启动服务调试
+
+如果需要在浏览器或其他工具中调试测试接口：
+
+```bash
+# 1. 先备份数据
+cp -r data data-backup
+
+# 2. 启动测试用服务器
+PORT=3099 npm start
+
+# 3. 单独运行测试脚本
+PORT=3099 node scripts/test-order-return.js
+
+# 4. 调试完成后恢复数据
+rm -rf data && mv data-backup data
+```
+
+#### 5. 查看测试脚本源码
+
+所有测试脚本位于 `scripts/` 目录下，文件名以 `test-` 开头：
+
+- 权限矩阵：`scripts/test-permission-matrix.js`
+- 幂等查询：`scripts/test-idempotency-query.js`
+- 订单归还：`scripts/test-order-return.js`
+- 检验延期：`scripts/test-inspection-postpone.js`
+- 盘点筛选：`scripts/test-inventory-check-filters.js`
+- 盘盈：`scripts/test-inventory-check-surplus.js`
+- 合规报表阶段：`scripts/test-compliance-report-phases.js`
+- 迁移：`scripts/test-migration-v3.js`
+
 ## 迁移开发指南
 
 ### 添加新的迁移脚本

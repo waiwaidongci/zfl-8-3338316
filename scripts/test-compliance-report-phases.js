@@ -3,9 +3,11 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 
+const BASE = `http://localhost:${process.env.PORT || 3008}`;
+
 function request(method, path, options = {}) {
   return new Promise((resolve, reject) => {
-    const url = new URL(path, "http://localhost:3008");
+    const url = new URL(path, BASE);
     const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
     if (options.token) headers["Authorization"] = `Bearer ${options.token}`;
     const bodyData = options.body ? JSON.stringify(options.body) : undefined;
