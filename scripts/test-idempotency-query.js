@@ -155,7 +155,7 @@ async function main() {
   const queryPast = await request("GET", `/idempotency-records?endAt=${now}`, { token: adminToken });
   assert(queryPast.statusCode === 200, "截止时间查询成功");
 
-  console.log("\n=== 测试 12: 敏感字段脱敏 ===");
+  console.log("\n=== 测试 12: 敏感字段脱敏 - password & secret ===");
   const ts2 = Date.now();
   const sensitiveRes = await request("POST", "/cylinders", {
     token: adminToken,
@@ -174,6 +174,147 @@ async function main() {
     assert(reqBody.secret === "******", `secret 字段已脱敏 (${reqBody.secret})`);
     assert(reqBody.password === "******", `password 字段已脱敏 (${reqBody.password})`);
     assert(reqBody.gasType !== "******", `gasType 未被脱敏 (${reqBody.gasType})`);
+  }
+
+  console.log("\n=== 测试 12-1: 敏感字段脱敏 - token & authorization ===");
+  const ts3 = Date.now();
+  const tokenSensitiveRes = await request("POST", "/cylinders", {
+    token: adminToken,
+    headers: { "Idempotency-Key": `test-idem-token-${ts3}` },
+    body: {
+      gasType: "高纯氧",
+      capacity: "40L",
+      location: "三号仓",
+      token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
+      authorization: "Bearer sk-live-xxxxxxxxxxxx",
+      apiKey: "api-key-12345",
+      accessToken: "access-token-abc",
+      refreshToken: "refresh-token-def",
+      creditCard: "4111-1111-1111-1111",
+      normalField: "keep-this-value"
+    },
+  });
+  const idemKey3 = tokenSensitiveRes.body.idempotencyKey || `test-idem-token-${ts3}`;
+  assert([200, 201, 400].includes(tokenSensitiveRes.statusCode), "创建含token类敏感字段请求完成");
+
+  const tokenQuery = await request("GET", `/idempotency-records?key=${idemKey3}`, { token: adminToken });
+  assert(tokenQuery.statusCode === 200, "查询含token类敏感字段记录成功");
+  const tokenRecord = tokenQuery.body.items.find((r) => r.key === idemKey3);
+  assert(tokenRecord, "找到含token类敏感字段的记录");
+  if (tokenRecord && tokenRecord.operationLog && tokenRecord.operationLog.requestBody) {
+    const reqBody = tokenRecord.operationLog.requestBody;
+    assert(reqBody.token === "******", `token 字段已脱敏 (${reqBody.token})`);
+    assert(reqBody.authorization === "******", `authorization 字段已脱敏 (${reqBody.authorization})`);
+    assert(reqBody.apiKey === "******", `apiKey 字段已脱敏 (${reqBody.apiKey})`);
+    assert(reqBody.accessToken === "******", `accessToken 字段已脱敏 (${reqBody.accessToken})`);
+    assert(reqBody.refreshToken === "******", `refreshToken 字段已脱敏 (${reqBody.refreshToken})`);
+    assert(reqBody.creditCard === "******", `creditCard 字段已脱敏 (${reqBody.creditCard})`);
+    assert(reqBody.normalField === "keep-this-value", `普通字段未被脱敏 (${reqBody.normalField})`);
+    assert(reqBody.gasType !== "******", `gasType 未被脱敏 (${reqBody.gasType})`);
+  }
+
+  console.log("\n=== 测试 12-2: 敏感字段脱敏 - 嵌套对象中的敏感字段 ===");
+  const ts4 = Date.now();
+  const nestedSensitiveRes = await request("POST", "/cylinders", {
+    token: adminToken,
+    headers: { "Idempotency-Key": `test-idem-nested-${ts4}` },
+    body: {
+      gasType: "高纯氮",
+      capacity: "50L",
+      location: "四号仓",
+      metadata: {
+        api_key: "nested-api-key",
+        access_token: "nested-access-token",
+        refresh_token: "nested-refresh-token",
+        credit_card: "5500-0000-0000-0004",
+        inner: {
+          password: "nested-password",
+          secret: "nested-secret"
+        }
+      },
+      config: {
+        headers: {
+          Authorization: "Bearer nested-auth"
+        }
+      }
+    },
+  });
+  const idemKey4 = nestedSensitiveRes.body.idempotencyKey || `test-idem-nested-${ts4}`;
+  assert([200, 201, 400].includes(nestedSensitiveRes.statusCode), "创建含嵌套敏感字段请求完成");
+
+  const nestedQuery = await request("GET", `/idempotency-records?key=${idemKey4}`, { token: adminToken });
+  assert(nestedQuery.statusCode === 200, "查询含嵌套敏感字段记录成功");
+  const nestedRecord = nestedQuery.body.items.find((r) => r.key === idemKey4);
+  assert(nestedRecord, "找到含嵌套敏感字段的记录");
+  if (nestedRecord && nestedRecord.operationLog && nestedRecord.operationLog.requestBody) {
+    const reqBody = nestedRecord.operationLog.requestBody;
+    assert(reqBody.metadata.api_key === "******", `嵌套 api_key 字段已脱敏`);
+    assert(reqBody.metadata.access_token === "******", `嵌套 access_token 字段已脱敏`);
+    assert(reqBody.metadata.refresh_token === "******", `嵌套 refresh_token 字段已脱敏`);
+    assert(reqBody.metadata.credit_card === "******", `嵌套 credit_card 字段已脱敏`);
+    assert(reqBody.metadata.inner.password === "******", `深层嵌套 password 字段已脱敏`);
+    assert(reqBody.metadata.inner.secret === "******", `深层嵌套 secret 字段已脱敏`);
+    assert(reqBody.config.headers.Authorization === "******", `嵌套 Authorization 字段已脱敏`);
+    assert(reqBody.gasType === "高纯氮", `普通嵌套字段 gasType 未被脱敏`);
+  }
+
+  console.log("\n=== 测试 12-3: 敏感字段脱敏 - 响应体 response.body ===");
+  const ts5 = Date.now();
+  const cylinderWithTokenRes = await request("POST", "/cylinders", {
+    token: adminToken,
+    headers: { "Idempotency-Key": `test-idem-resp-${ts5}` },
+    body: {
+      gasType: "高纯氦",
+      capacity: "10L",
+      location: "五号仓",
+      token: "request-token-should-be-masked"
+    },
+  });
+  assert([200, 201, 400].includes(cylinderWithTokenRes.statusCode), "创建钢瓶请求完成（用于响应体脱敏测试）");
+  const idemKey5 = cylinderWithTokenRes.body.idempotencyKey || `test-idem-resp-${ts5}`;
+
+  const respQuery = await request("GET", `/idempotency-records?key=${idemKey5}`, { token: adminToken });
+  assert(respQuery.statusCode === 200, "查询含响应体的幂等记录成功");
+  const respRecord = respQuery.body.items.find((r) => r.key === idemKey5);
+  assert(respRecord, "找到含响应体的幂等记录");
+  if (respRecord && respRecord.response && respRecord.response.body) {
+    const respBody = respRecord.response.body;
+    const respBodyStr = JSON.stringify(respBody);
+    assert(!respBodyStr.includes("request-token-should-be-masked"), "响应体中不包含原始敏感值");
+    if (respBody.id) assert(typeof respBody.id === "string", "响应体 id 字段正常返回");
+    if (respBody.gasType) assert(respBody.gasType !== "******", "响应体普通字段未被脱敏");
+  }
+
+  console.log("\n=== 测试 12-4: 敏感字段脱敏 - 数组中嵌套敏感字段 ===");
+  const ts6 = Date.now();
+  const arraySensitiveRes = await request("POST", "/cylinders", {
+    token: adminToken,
+    headers: { "Idempotency-Key": `test-idem-array-${ts6}` },
+    body: {
+      gasType: "混合气体",
+      capacity: "20L",
+      location: "六号仓",
+      items: [
+        { id: 1, password: "array-pwd-1", name: "item1" },
+        { id: 2, secret: "array-secret-2", name: "item2" },
+        { id: 3, data: { apiKey: "nested-array-key" }, name: "item3" }
+      ]
+    },
+  });
+  const idemKey6 = arraySensitiveRes.body.idempotencyKey || `test-idem-array-${ts6}`;
+  assert([200, 201, 400].includes(arraySensitiveRes.statusCode), "创建含数组敏感字段请求完成");
+
+  const arrayQuery = await request("GET", `/idempotency-records?key=${idemKey6}`, { token: adminToken });
+  assert(arrayQuery.statusCode === 200, "查询含数组敏感字段记录成功");
+  const arrayRecord = arrayQuery.body.items.find((r) => r.key === idemKey6);
+  assert(arrayRecord, "找到含数组敏感字段的记录");
+  if (arrayRecord && arrayRecord.operationLog && arrayRecord.operationLog.requestBody) {
+    const reqBody = arrayRecord.operationLog.requestBody;
+    assert(Array.isArray(reqBody.items), "items 仍是数组");
+    assert(reqBody.items[0].password === "******", "数组第1项 password 已脱敏");
+    assert(reqBody.items[0].name === "item1", "数组第1项普通字段未脱敏");
+    assert(reqBody.items[1].secret === "******", "数组第2项 secret 已脱敏");
+    assert(reqBody.items[2].data.apiKey === "******", "数组嵌套对象 apiKey 已脱敏");
   }
 
   console.log("\n=== 测试 13: 根端点包含新接口 ===");
